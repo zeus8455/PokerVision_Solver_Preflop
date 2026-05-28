@@ -1,5 +1,17 @@
 # Version history
 
+## V2.2.0
+Snapshot Solver_Preflop runtime source multi-case check:
+- adds tools/run_v2_2_snapshot_solver_source_multicase_check.py
+- runs every snapshot Pending preflop Clear_JSON through:
+  Pending Clear_JSON -> Solver_Preflop bridge -> Solver action_decision
+  -> V2.1 legacy-compatible Action_Decision_JSON adapter
+  -> Action_Runtime_Plan_JSON
+- verifies selected_source=Solver_Preflop_Bridge for all cases
+- verifies runtime plans for fold/check cases are valid and dry-run only
+- verifies no full live UI, screen capture, YOLO, or real project mutation
+- adds test coverage for the multi-case runtime source path
+
 ## V2.1.0
 Snapshot Solver_Preflop runtime source dry-run ON:
 - sets V20_USE_SOLVER_PREFLOP_AS_RUNTIME_SOURCE = True in snapshot only
