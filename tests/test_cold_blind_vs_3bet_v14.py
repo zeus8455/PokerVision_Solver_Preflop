@@ -29,10 +29,13 @@ def test_table_01_snapshot_sb_blind_vs_open_and_3bet_classifies_as_cold_vs_3bet(
     assert decision.debug["to_call_bb"] == 8.5
     assert decision.debug["raise_levels"] == [3.0, 9.0]
 
-    # Still guarded until cold 4bet/overcall ranges are deliberately wired.
-    assert decision.status == "fallback"
-    assert decision.raw_action == "safe_fallback"
-    assert decision.click_sequence == ["Check", "Check/fold", "FOLD"]
+    # V1.5 wires cold_vs_3bet_or_higher into cold_4bet chart.
+    # T7o is not in call/4bet ranges, so it is a normal fold, not safe_fallback.
+    assert decision.status == "ok"
+    assert decision.raw_action == "fold"
+    assert decision.engine_action == "fold"
+    assert decision.click_sequence == ["FOLD"]
+    assert decision.debug["range_source"] == "cold_4bet.UTG|CO|SB"
 
 
 def test_synthetic_bb_blind_vs_open_and_3bet_classifies_as_cold_vs_3bet():
@@ -68,4 +71,11 @@ def test_synthetic_bb_blind_vs_open_and_3bet_classifies_as_cold_vs_3bet():
     assert decision.debug["three_bettor_pos"] == "CO"
     assert decision.debug["hero_commitment_bb"] == 1.0
     assert decision.debug["to_call_bb"] == 8.0
-    assert decision.status == "fallback"
+
+    # V1.5 uses cold_4bet chart for blind-only cold spots too.
+    # Js7c is not in a continue range, so the decision is a normal fold.
+    assert decision.status == "ok"
+    assert decision.raw_action == "fold"
+    assert decision.engine_action == "fold"
+    assert decision.click_sequence == ["FOLD"]
+    assert decision.debug["range_source"] == "cold_4bet.UTG|CO|BB"

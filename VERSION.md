@@ -1,5 +1,13 @@
 # Version history
 
+## V1.5.0
+Cold-vs-3bet range support:
+- wires cold_vs_3bet_or_higher into hero_preflop_ranges.json nodes.cold_4bet
+- uses exact key opener|threebettor|hero, e.g. UTG|CO|SB
+- returns fold/call/4bet from the cold_4bet chart instead of safe_fallback when the spot is supported
+- keeps missing opener/threebettor or missing chart key guarded
+- table_01_hand_21_preflop now returns fold instead of safe_fallback
+
 ## V1.4.0
 Cold blind vs 3bet classifier fix:
 - fixes SB/BB cold-facing multi-raise spots

@@ -250,6 +250,40 @@ def decide_preflop_action_from_ranges(
             source=source,
         )
 
+    if node == "cold_vs_3bet_or_higher":
+        if not spot.opener_pos or not spot.three_bettor_pos:
+            return RangeDecision(
+                action="safe_fallback",
+                source=f"cold_4bet.missing_positions.{spot.hero_position}",
+                fallback_used=True,
+                notes=["Cannot resolve cold_vs_3bet_or_higher without opener_pos and three_bettor_pos."],
+            )
+
+        action_map, source = _lookup_action_map(
+            nodes,
+            "cold_4bet",
+            spot.opener_pos,
+            spot.three_bettor_pos,
+            spot.hero_position,
+        )
+        if not action_map:
+            return RangeDecision(
+                action="safe_fallback",
+                source=source,
+                fallback_used=True,
+                notes=[
+                    "cold_vs_3bet_or_higher was classified, but no exact cold_4bet chart key exists.",
+                    f"missing_key={spot.opener_pos}|{spot.three_bettor_pos}|{spot.hero_position}",
+                ],
+            )
+
+        return _pick_from_action_map(
+            hand_class,
+            action_map,
+            default_action=_default_for(data, "cold_vs_3bet_or_higher", "fold"),
+            source=source,
+        )
+
     if node.startswith("fourbettor_vs_") and "5bet" in node:
         return RangeDecision(
             action="safe_fallback",
