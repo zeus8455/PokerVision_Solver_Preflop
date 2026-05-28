@@ -6,3 +6,5 @@ venv/
 .env
 
 tmp_solver_outputs/
+
+tmp_preintegration_outputs/
