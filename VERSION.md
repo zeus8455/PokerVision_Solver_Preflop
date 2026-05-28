@@ -1,5 +1,17 @@
 # Version history
 
+## V2.5.0
+Snapshot Solver_Preflop dry-run click-result publication check:
+- adds tools/run_v2_5_snapshot_click_result_publication_check.py
+- runs all snapshot Pending preflop Clear_JSON cases through:
+  Pending Clear_JSON -> Solver_Preflop bridge -> V2.1 adapter
+  -> Action_Runtime_Plan_JSON -> ClickExecutionGuard -> Click_Result_JSON file
+- verifies dry-run click_result_v09 is saved for every case
+- verifies saved click_result matches in-memory guard result
+- verifies physical click is never executed and forced real-click remains blocked
+- keeps full live UI, screen capture, YOLO, and real project mutation disabled
+- adds test coverage for click-result publication
+
 ## V2.4.0
 Snapshot Solver_Preflop click-guard eligibility check:
 - adds tools/run_v2_4_snapshot_click_guard_eligibility_check.py
@@ -13,16 +25,7 @@ Snapshot Solver_Preflop click-guard eligibility check:
 - adds test coverage for Solver_Preflop click-guard eligibility
 
 ## V2.3.0
-Snapshot Solver_Preflop runtime plan publication check:
-- adds tools/run_v2_3_snapshot_runtime_publication_check.py
-- verifies Solver-sourced Action_Runtime_Plan_JSON can be published to files
-- runs all snapshot Pending preflop Clear_JSON cases through:
-  Pending Clear_JSON -> Solver_Preflop bridge -> Solver action_decision
-  -> V2.1 legacy adapter -> Action_Runtime_Plan_JSON file publication
-- verifies saved runtime plan JSON files exist and match the in-memory contract
-- keeps dry_run=True and real_click_enabled=False
-- does not execute full live UI, screen capture, YOLO, or touch C:\PokerVisionFinalVersionNoSolver
-- adds test coverage for the publication path
+Snapshot Solver_Preflop runtime plan publication check.
 
 ## V2.2.0
 Snapshot Solver_Preflop runtime source multi-case check.
