@@ -1,17 +1,16 @@
 # Version history
 
+## V2.1.0
+Snapshot Solver_Preflop runtime source dry-run ON:
+- sets V20_USE_SOLVER_PREFLOP_AS_RUNTIME_SOURCE = True in snapshot only
+- keeps V20_SOLVER_PREFLOP_DRY_RUN_ONLY = True
+- adds V2.1 compatibility adapter from Solver_Preflop bridge action_decision to legacy V06 Action_Decision_JSON shape
+- runtime plan still uses existing Action_Runtime_Plan_JSON builder and guards
+- real C:\PokerVisionFinalVersionNoSolver is not touched
+- adds a runtime check proving Solver_Preflop bridge action_decision can feed Action_Runtime_Plan_JSON in snapshot dry-run mode
+
 ## V2.0.0
-Snapshot-only runtime source switch scaffold:
-- adds disabled-by-default snapshot toggles:
-  - V20_USE_SOLVER_PREFLOP_AS_RUNTIME_SOURCE = False
-  - V20_SOLVER_PREFLOP_DRY_RUN_ONLY = True
-- adds _select_v20_runtime_action_decision_state(...)
-- keeps old Action_Decision_JSON as runtime source by default
-- prepares build_and_save_action_decision_contract(...) to accept optional solver_preflop_bridge_contract
-- reorders pending-preview branch so Solver_Preflop bridge is built before Action_Decision contract and can be passed into the selector
-- embeds v20_runtime_source_selection into action_decision_contract and action_runtime_plan_contract
-- does not touch C:\PokerVisionFinalVersionNoSolver
-- does not enable real-click Solver runtime source
+Snapshot-only runtime source switch scaffold.
 
 ## V1.9.0
 Snapshot cycle bridge smoke.

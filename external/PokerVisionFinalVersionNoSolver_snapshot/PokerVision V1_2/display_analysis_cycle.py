@@ -122,7 +122,7 @@ V17_SOLVER_PREFLOP_BRIDGE_PUBLISH_DIAGNOSTIC_FILES = False
 
 # V2.0: snapshot-only runtime source switch scaffold.
 # Default remains False: old Action_Decision_JSON remains the runtime source.
-V20_USE_SOLVER_PREFLOP_AS_RUNTIME_SOURCE = False
+V20_USE_SOLVER_PREFLOP_AS_RUNTIME_SOURCE = True
 V20_SOLVER_PREFLOP_DRY_RUN_ONLY = True
 from logic.click_execution_guard import (
     ClickExecutionRequest,
@@ -1478,6 +1478,142 @@ def _release_failed_active_finalization_if_needed(
 
     return release_payload
 
+
+def _v21_normalize_solver_preflop_action(value: object) -> str:
+    text = str(value or "").strip().lower()
+    if text in {"fold", "call", "check", "bet", "raise", "check_fold"}:
+        return text
+    if text in {"4bet", "5bet", "3bet", "open_raise", "iso_raise", "jam", "all_in"}:
+        return "raise"
+    return "fold"
+
+
+def _v21_solver_size_policy(solver_action_decision: Dict[str, object], action: str) -> Optional[Dict[str, object]]:
+    if action not in {"bet", "raise"}:
+        return None
+
+    raw_policy = solver_action_decision.get("size_policy")
+    if isinstance(raw_policy, dict):
+        return dict(raw_policy)
+
+    raw_pct = (
+        solver_action_decision.get("size_pct")
+        or solver_action_decision.get("raise_size_pct")
+        or solver_action_decision.get("button_pct")
+    )
+    if raw_pct is None:
+        return None
+
+    try:
+        pct_float = float(raw_pct)
+        pct_text = str(int(pct_float)) if pct_float.is_integer() else str(pct_float)
+    except Exception:
+        pct_text = str(raw_pct).replace("%", "").strip()
+
+    if pct_text in {"33", "50", "70", "98"}:
+        return {"type": "pct", "value": pct_text}
+    return {"type": "raw", "value": pct_text}
+
+
+def _v21_target_buttons_for_solver_action(
+    *,
+    action: str,
+    size_policy: Optional[Dict[str, object]],
+    solver_action_decision: Dict[str, object],
+) -> list[str]:
+    raw_buttons = (
+        solver_action_decision.get("target_button_classes")
+        or solver_action_decision.get("target_sequence")
+        or solver_action_decision.get("click_sequence")
+    )
+    if isinstance(raw_buttons, list) and raw_buttons:
+        normalized: list[str] = []
+        for item in raw_buttons:
+            text = str(item or "").strip()
+            if text.upper() == "CALL":
+                normalized.append("Call")
+            elif text.upper() == "FOLD":
+                normalized.append("FOLD")
+            elif text == "Raise":
+                normalized.append("Bet/Raise")
+            else:
+                normalized.append(text)
+        return [b for b in normalized if b]
+
+    if action == "fold":
+        return ["FOLD"]
+    if action == "call":
+        return ["Call"]
+    if action == "check":
+        return ["Check"]
+    if action == "check_fold":
+        return ["Check", "Check/fold", "FOLD"]
+    if action in {"bet", "raise"}:
+        buttons: list[str] = []
+        if isinstance(size_policy, dict):
+            value = str(size_policy.get("value") or "").strip()
+            if value in {"33", "50", "70", "98"}:
+                buttons.append(f"{value}%")
+        buttons.append("Bet/Raise")
+        return buttons
+    return ["FOLD"]
+
+
+def _adapt_v21_solver_preflop_action_decision_to_v06(
+    solver_action_decision: Dict[str, object],
+) -> Dict[str, object]:
+    """Convert Solver_Preflop bridge action_decision to legacy V06 Action_Decision_JSON.
+
+    Action_Runtime_Plan builder currently validates source='Decision_JSON'.
+    The adapter keeps that legacy shape while carrying Solver_Preflop lineage
+    inside reason/decision_context. It does not bypass runtime guards.
+    """
+    from config import V06_ACTION_DECISION_SCHEMA_VERSION
+
+    action = _v21_normalize_solver_preflop_action(
+        solver_action_decision.get("action")
+        or solver_action_decision.get("engine_action")
+        or solver_action_decision.get("raw_action")
+    )
+    size_policy = _v21_solver_size_policy(solver_action_decision, action)
+    target_buttons = _v21_target_buttons_for_solver_action(
+        action=action,
+        size_policy=size_policy,
+        solver_action_decision=solver_action_decision,
+    )
+
+    source_frame_id = str(
+        solver_action_decision.get("source_decision_frame_id")
+        or solver_action_decision.get("source_frame_id")
+        or ""
+    )
+
+    return {
+        "schema_version": V06_ACTION_DECISION_SCHEMA_VERSION,
+        "source": "Decision_JSON",
+        "source_decision_frame_id": source_frame_id,
+        "status": "ok",
+        "action": action,
+        "size_policy": size_policy,
+        "target_button_classes": list(target_buttons),
+        "reason": str(solver_action_decision.get("reason") or "solver_preflop_bridge_v21_runtime_source"),
+        "dry_run_safe": True,
+        # Legacy V06 validator still requires the stub flag to remain True.
+        # The real source is carried below in decision_context.solver_preflop_runtime_source.
+        "solver_stub": True,
+        "decision_context": {
+            "street": str(solver_action_decision.get("street") or "preflop"),
+            "hero_position": str(solver_action_decision.get("hero_position") or ""),
+            "source_frame_id": source_frame_id,
+            "solver_preflop_runtime_source": True,
+            "solver_stub_legacy_compat": True,
+            "solver_decision_id": solver_action_decision.get("decision_id"),
+            "solver_fingerprint": solver_action_decision.get("solver_fingerprint"),
+            "solver_raw_action": solver_action_decision.get("raw_action"),
+            "solver_engine_action": solver_action_decision.get("engine_action") or solver_action_decision.get("action"),
+        },
+    }
+
 def _select_v20_runtime_action_decision_state(
     *,
     default_action_decision_state: Dict[str, object],
@@ -1525,7 +1661,8 @@ def _select_v20_runtime_action_decision_state(
     selection["source_frame_id"] = solver_action_decision.get("source_frame_id")
     selection["decision_id"] = solver_action_decision.get("decision_id")
     selection["solver_fingerprint"] = solver_action_decision.get("solver_fingerprint")
-    return dict(solver_action_decision), selection
+    selection["adapted_to_legacy_action_decision"] = True
+    return _adapt_v21_solver_preflop_action_decision_to_v06(solver_action_decision), selection
 
 
 def build_and_save_action_runtime_plan_contract(

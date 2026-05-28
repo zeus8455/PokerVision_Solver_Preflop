@@ -9,7 +9,7 @@ SNAPSHOT_DISPLAY = PROJECT_ROOT / "external" / "PokerVisionFinalVersionNoSolver_
 
 
 REQUIRED_SNIPPETS = {
-    "toggle_disabled": "V20_USE_SOLVER_PREFLOP_AS_RUNTIME_SOURCE = False",
+    "toggle_present": "V20_USE_SOLVER_PREFLOP_AS_RUNTIME_SOURCE = True",
     "dry_run_only": "V20_SOLVER_PREFLOP_DRY_RUN_ONLY = True",
     "selector": "def _select_v20_runtime_action_decision_state(",
     "optional_bridge_param": "solver_preflop_bridge_contract: Optional[Dict[str, object]] = None",
@@ -17,7 +17,6 @@ REQUIRED_SNIPPETS = {
     "runtime_plan_uses_selected_state": "action_decision_state=runtime_action_decision_state",
     "selection_embedded": '"v20_runtime_source_selection": dict(v20_runtime_source_selection)',
     "pending_passes_bridge": "solver_preflop_bridge_contract=solver_preflop_bridge_contract",
-    "old_source_reason": '"reason": "v20_switch_disabled"',
 }
 
 
