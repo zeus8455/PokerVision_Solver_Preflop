@@ -1,5 +1,15 @@
 # Version history
 
+## V1.7.0
+Solver_Preflop bridge diagnostic publication toggle:
+- adds a display_analysis_cycle.py toggle:
+  V17_SOLVER_PREFLOP_BRIDGE_PUBLISH_DIAGNOSTIC_FILES = False
+- wires pending-preview Solver_Preflop bridge call to that toggle
+- default behavior stays safe: no diagnostic files are published
+- adds tools/run_solver_preflop_bridge_publication_check.py
+- verifies direct bridge publication writes Solver_Preflop_Bridge_JSON/table_xx/*.solver_preflop_bridge_preview.json
+- adds static and runtime tests for the publication toggle
+
 ## V1.6.0
 Display-cycle bridge embedding check:
 - adds tools/run_display_cycle_bridge_embedding_check.py
@@ -11,12 +21,7 @@ Display-cycle bridge embedding check:
 - adds test coverage for the embedding check
 
 ## V1.5.0
-Cold-vs-3bet range support:
-- wires cold_vs_3bet_or_higher into hero_preflop_ranges.json nodes.cold_4bet
-- uses exact key opener|threebettor|hero, e.g. UTG|CO|SB
-- returns fold/call/4bet from the cold_4bet chart instead of safe_fallback when the spot is supported
-- keeps missing opener/threebettor or missing chart key guarded
-- table_01_hand_21_preflop now returns fold instead of safe_fallback
+Cold-vs-3bet range support.
 
 ## V1.4.0
 Cold blind vs 3bet classifier fix.

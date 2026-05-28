@@ -115,6 +115,10 @@ from logic.action_runtime_plan_builder import (
     validate_action_runtime_plan_contract,
 )
 from runtime.solver_preflop_dryrun_bridge import build_solver_preflop_dryrun_bridge_contract
+
+# V1.7: diagnostic-only Solver_Preflop bridge file publication toggle.
+# Default remains False: bridge result is embedded into state/contract only.
+V17_SOLVER_PREFLOP_BRIDGE_PUBLISH_DIAGNOSTIC_FILES = False
 from logic.click_execution_guard import (
     ClickExecutionRequest,
     ClickGuardConfig,
@@ -1805,7 +1809,7 @@ def save_dark_and_clear_table_frame_json(
                                 clear_state=clear_state_candidate,
                                 cycle_dir=cycle_dir,
                                 table_id=table_id,
-                                publish_files=False,
+                                publish_files=bool(V17_SOLVER_PREFLOP_BRIDGE_PUBLISH_DIAGNOSTIC_FILES),
                             )
                             if isinstance(action_decision_contract, dict):
                                 action_decision_contract["solver_preflop_bridge_contract"] = solver_preflop_bridge_contract
