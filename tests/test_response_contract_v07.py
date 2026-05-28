@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 from solver_preflop import solve_clear_json
+from solver_preflop.contracts import SOLVER_VERSION
 
 
 def _base():
@@ -15,7 +16,7 @@ def test_ok_response_contract_has_runtime_hint():
     payload = decision.to_json_dict()
 
     assert payload["solver"]["contract"] == "preflop_solver_response_v1"
-    assert payload["solver"]["version"] == "0.7.0"
+    assert payload["solver"]["version"] == SOLVER_VERSION
 
     assert payload["source"]["source_frame_id"] == "table_02_hand_29_preflop_01"
     assert payload["identity"]["solver_decision_id"] == decision.decision_id

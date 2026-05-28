@@ -1,5 +1,16 @@
 # Version history
 
+## V0.8.0
+CLI / file-output tools:
+- adds solver_preflop/output_files.py
+- tools/solve_clear_json.py can now write output files with --write-files
+- writes:
+  - *_SolverDecision_JSON.json
+  - *_SolverActionDecision_JSON.json
+  - *_SolverRuntimeHint_JSON.json
+- prints a compact file manifest when writing files
+- adds tests for output writer and CLI file creation
+
 ## V0.7.0
 Solver response contract hardening:
 - expands SolverDecision.to_json_dict() into an integration-ready contract
@@ -11,13 +22,7 @@ Solver response contract hardening:
 - adds tests for ok response and guarded fallback response
 
 ## V0.6.0
-All-in guard logic:
-- adds specific preflop all-in node classification
-- distinguishes open jam, blind vs open jam, opener vs 3bet jam, threebettor vs 4bet jam
-- detects incomplete all-in raise candidates from frame-local commitment levels
-- keeps all all-in nodes in safe fallback until dedicated all-in ranges are added
-- exposes all-in diagnostics in SolverDecision debug
-- updates all-in tests to validate guarded behavior
+All-in guard logic.
 
 ## V0.5.0
 Defensive ranges.
