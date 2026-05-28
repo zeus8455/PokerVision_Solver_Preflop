@@ -1,5 +1,14 @@
 # Version history
 
+## V0.3.0
+Preflop spot classifier expansion:
+- classifies SB first-in spot
+- classifies facing_open / blind_vs_open / limper_vs_iso
+- classifies opener_vs_small_3bet / opener_vs_normal_3bet / opener_vs_large_3bet
+- classifies threebettor_vs_small_4bet / normal / large
+- exposes commitment_by_pos, raise_levels, previous_raise_size, facing_raise_size, sizing_category in debug
+- preserves safe fallback for all-in and unsupported nodes
+
 ## V0.2.0
 Clear_JSON adapter hardening and synthetic preflop cases:
 - chips:false is treated as 0bb committed

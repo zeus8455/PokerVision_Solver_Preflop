@@ -29,29 +29,36 @@ def _build_identity(frame_id: str, node_type: str, hero_hand: list[str], hand_cl
     return fp, decision_id
 
 
+def _placeholder_action_for_node(node_type: str, to_call_bb: float) -> tuple[str, str]:
+    # V0.3 still focuses on state classification. Ranges arrive next.
+    if node_type.startswith("bb_option_vs_"):
+        return "check", "BB has a logical free option vs limp; range engine can later upgrade to iso_raise."
+    if node_type == "sb_first_in":
+        return "open_raise", "SB first-in placeholder action until SB range engine is added."
+    if node_type == "unopened":
+        return "open_raise", "Unopened preflop node; placeholder open until range engine is added."
+    if node_type.startswith("iso_vs_"):
+        return "iso_raise", "Facing limp node; placeholder iso policy until range engine is added."
+    if node_type in {"facing_open", "blind_vs_open", "limper_vs_iso"}:
+        return "call", "Facing one raise level; placeholder defend/call until range engine is added."
+    if node_type.startswith("opener_vs_small_3bet"):
+        return "call", "Small 3bet detected; placeholder keeps defending wider until range engine is added."
+    if node_type.startswith("opener_vs_") and "3bet" in node_type:
+        return "call", "Opener facing 3bet; placeholder call until range engine is added."
+    if node_type.startswith("threebettor_vs_") and "4bet" in node_type:
+        return "call", "Threebettor facing 4bet; placeholder call until range engine is added."
+    if node_type.startswith("fourbettor_vs_") and "5bet" in node_type:
+        return "call", "Fourbettor facing 5bet; placeholder call until range engine is added."
+    return "safe_fallback", "Unknown/all-in/unsupported preflop node in V0.3."
+
+
 def solve_clear_json(data: dict[str, Any]) -> SolverDecision:
     try:
         frame = parse_clear_json_preflop(data)
         spot = classify_preflop_spot(frame)
         hand_class = hand_to_class(frame.hero_cards)
 
-        # V0.2 placeholder strategy:
-        # The classifier/adapter are the main target. Range engine arrives in V0.3/V0.4.
-        if spot.node_type.startswith("bb_option_vs_"):
-            raw_action = "check"
-            reason = "BB has a logical free option vs limp; V0.2 has no iso range engine yet."
-        elif spot.node_type == "unopened":
-            raw_action = "open_raise"
-            reason = "Unopened preflop node; V0.2 placeholder opens until range engine is added."
-        elif spot.node_type.startswith("iso_vs_"):
-            raw_action = "iso_raise"
-            reason = "Facing limp node; V0.2 placeholder iso policy."
-        elif spot.node_type == "facing_open_or_raise":
-            raw_action = "call" if spot.to_call_bb > 0 else "check"
-            reason = "Coarse facing raise node; V0.2 placeholder until range engine is added."
-        else:
-            raw_action = "safe_fallback"
-            reason = "Unknown/all-in/unsupported preflop node in V0.2."
+        raw_action, reason = _placeholder_action_for_node(spot.node_type, spot.to_call_bb)
 
         if raw_action == "safe_fallback":
             click_sequence = list(SAFE_FALLBACK_SEQUENCE)
@@ -91,9 +98,19 @@ def solve_clear_json(data: dict[str, Any]) -> SolverDecision:
             debug={
                 "to_call_bb": spot.to_call_bb,
                 "max_commitment_bb": spot.max_commitment_bb,
+                "hero_commitment_bb": spot.hero_commitment_bb,
+                "commitment_by_pos": dict(spot.commitment_by_pos),
+                "raise_levels": list(spot.raise_levels),
                 "limpers": list(spot.limpers),
                 "all_in_players": list(spot.all_in_players),
                 "opener_pos": spot.opener_pos,
+                "three_bettor_pos": spot.three_bettor_pos,
+                "four_bettor_pos": spot.four_bettor_pos,
+                "last_aggressor_pos": spot.last_aggressor_pos,
+                "previous_raise_size_bb": spot.previous_raise_size_bb,
+                "facing_raise_size_bb": spot.facing_raise_size_bb,
+                "sizing_ratio": spot.sizing_ratio,
+                "sizing_category": spot.sizing_category,
             },
         )
     except Exception as exc:

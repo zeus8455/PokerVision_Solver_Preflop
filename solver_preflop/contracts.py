@@ -54,11 +54,19 @@ class PreflopSpot:
     hero_position: str
     to_call_bb: float
     max_commitment_bb: float
+    hero_commitment_bb: float = 0.0
     limpers: list[str] = field(default_factory=list)
     opener_pos: Optional[str] = None
     three_bettor_pos: Optional[str] = None
     four_bettor_pos: Optional[str] = None
+    last_aggressor_pos: Optional[str] = None
     all_in_players: list[str] = field(default_factory=list)
+    commitment_by_pos: dict[str, float] = field(default_factory=dict)
+    raise_levels: list[float] = field(default_factory=list)
+    previous_raise_size_bb: Optional[float] = None
+    facing_raise_size_bb: Optional[float] = None
+    sizing_ratio: Optional[float] = None
+    sizing_category: Optional[str] = None
     notes: list[str] = field(default_factory=list)
 
 
@@ -86,7 +94,7 @@ class SolverDecision:
         return {
             "solver": {
                 "name": "PokerVision_Solver_Preflop",
-                "version": "0.2.0",
+                "version": "0.3.0",
                 "street": self.street,
                 "status": self.status,
             },
