@@ -114,6 +114,7 @@ from logic.action_runtime_plan_builder import (
     build_action_runtime_plan_from_action_decision,
     validate_action_runtime_plan_contract,
 )
+from runtime.solver_preflop_dryrun_bridge import build_solver_preflop_dryrun_bridge_contract
 from logic.click_execution_guard import (
     ClickExecutionRequest,
     ClickGuardConfig,
@@ -1800,6 +1801,15 @@ def save_dark_and_clear_table_frame_json(
                                 table_id=table_id,
                                 publish_files=False,
                             )
+                            solver_preflop_bridge_contract = build_solver_preflop_dryrun_bridge_contract(
+                                clear_state=clear_state_candidate,
+                                cycle_dir=cycle_dir,
+                                table_id=table_id,
+                                publish_files=False,
+                            )
+                            if isinstance(action_decision_contract, dict):
+                                action_decision_contract["solver_preflop_bridge_contract"] = solver_preflop_bridge_contract
+                                state["solver_preflop_bridge_contract"] = solver_preflop_bridge_contract
                             if action_decision_contract.get("status") not in {"preview_not_saved_pending_only", "disabled"}:
                                 for message in action_decision_contract.get("validation", {}).get("errors", []) if isinstance(action_decision_contract.get("validation"), dict) else []:
                                     add_error(state, block="action_decision_contract", message=str(message))

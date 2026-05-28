@@ -1,29 +1,25 @@
 # Version history
 
+## V1.2.0
+PokerVision dry-run preflop solver bridge preview:
+- adds PokerVision snapshot runtime/solver_preflop_dryrun_bridge.py
+- adds apply tool that inserts a dry-run solver bridge preview into display_analysis_cycle.py after pending Action_Decision preview construction
+- does not change real-click runtime behavior
+- bridge runs only for preflop Clear_JSON candidates without click_result
+- bridge output is embedded into action_decision_contract as solver_preflop_bridge_contract
+- optional diagnostic file publication is disabled by default
+
+## V1.1.0
+Imported PokerVisionFinalVersionNoSolver source snapshot.
+
+## V1.0.1
+Ignored preintegration output files.
+
 ## V1.0.0
-Pre-integration stabilization:
-- marks the standalone preflop solver as integration-ready baseline
-- adds tools/run_preintegration_check.py
-- preintegration check validates:
-  - pytest suite
-  - CLI --write-files path
-  - PokerVisionBridge JSON creation
-  - required bridge/runtime guard fields
-- adds tests for V1.0 version and preintegration tool
-- updates README with current chain and usage
+Pre-integration stabilization.
 
 ## V0.9.0
-PokerVision integration bridge preview:
-- adds solver_preflop/pokervision_bridge.py
-- builds a PokerVision-facing bridge payload from SolverDecision
-- adds runtime_plan_candidate with button_sequence/target_buttons
-- output_files.py now writes:
-  - *_SolverDecision_JSON.json
-  - *_SolverActionDecision_JSON.json
-  - *_SolverRuntimeHint_JSON.json
-  - *_PokerVisionBridge_JSON.json
-- CLI --write-files now includes PokerVisionBridge JSON
-- adds tests for bridge payload and bridge file output
+PokerVision integration bridge preview.
 
 ## V0.8.1
 Ignored generated solver output files.
