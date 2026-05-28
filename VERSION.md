@@ -1,22 +1,17 @@
 # Version history
 
+## V1.4.0
+Cold blind vs 3bet classifier fix:
+- fixes SB/BB cold-facing multi-raise spots
+- SB with 0.5bb blind and BB with 1.0bb blind can now classify as cold_vs_3bet_or_higher
+- table_01_hand_21_preflop now becomes cold_vs_3bet_or_higher instead of multi_raise_unknown
+- keeps decision guarded as safe_fallback until cold 4bet/all-in ranges are intentionally wired
+
 ## V1.3.0
-Snapshot Clear_JSON bridge check:
-- adds tools/run_snapshot_clear_json_bridge_check.py
-- scans PokerVision NoSolver snapshot Clear_JSON files
-- runs preflop Clear_JSON files through runtime/solver_preflop_dryrun_bridge.py
-- reports per-file bridge status/action/click_sequence/decision_id
-- fails on bridge error status
-- adds test coverage for snapshot bridge check
+Snapshot Clear_JSON bridge check.
 
 ## V1.2.0
-PokerVision dry-run preflop solver bridge preview:
-- adds PokerVision snapshot runtime/solver_preflop_dryrun_bridge.py
-- adds apply tool that inserts a dry-run solver bridge preview into display_analysis_cycle.py after pending Action_Decision preview construction
-- does not change real-click runtime behavior
-- bridge runs only for preflop Clear_JSON candidates without click_result
-- bridge output is embedded into action_decision_contract as solver_preflop_bridge_contract
-- optional diagnostic file publication is disabled by default
+PokerVision dry-run preflop solver bridge preview.
 
 ## V1.1.0
 Imported PokerVisionFinalVersionNoSolver source snapshot.
