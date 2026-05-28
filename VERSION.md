@@ -1,5 +1,15 @@
 # Version history
 
+## V0.7.0
+Solver response contract hardening:
+- expands SolverDecision.to_json_dict() into an integration-ready contract
+- adds source_frame_id and solver_source metadata
+- adds action_runtime_hint for PokerVision click runtime bridge
+- adds safety block with safe_fallback_used and real_click_allowed_by_solver
+- adds input_summary and spot_debug sections
+- keeps old top-level source/hero/spot/decision/identity/debug keys compatible
+- adds tests for ok response and guarded fallback response
+
 ## V0.6.0
 All-in guard logic:
 - adds specific preflop all-in node classification
@@ -10,16 +20,7 @@ All-in guard logic:
 - updates all-in tests to validate guarded behavior
 
 ## V0.5.0
-Defensive ranges:
-- extends hero_preflop_ranges.json with VS_OPEN, VS_OPEN_CALLERS, OPENER_VS_3BET, THREEBETTER_VS_4BET, LIMPER_VS_ISO and COLD_4BET from the old Solver ranges.py hero profile
-- range_engine now resolves:
-  - facing_open
-  - blind_vs_open
-  - limper_vs_iso
-  - opener_vs_small_3bet / normal / large
-  - threebettor_vs_small_4bet / normal / large
-- adds small_3bet override: opener facing <=2.1x 3bet defends by call if chart would otherwise fold
-- updates legacy classifier tests so they validate classification, not old placeholder actions
+Defensive ranges.
 
 ## V0.4.0
 Ranges foundation.

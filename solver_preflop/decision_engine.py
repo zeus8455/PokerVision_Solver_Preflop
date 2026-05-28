@@ -19,14 +19,18 @@ def _hash_payload(prefix: str, payload: dict[str, Any]) -> str:
 
 def _build_identity(frame_id: str, node_type: str, hero_hand: list[str], hand_class: str, action: str) -> tuple[str, str]:
     payload = {
+        "source": "PokerVision_Solver_Preflop",
+        "contract": "decision_identity_v1",
         "frame_id": frame_id,
+        "source_frame_id": frame_id,
+        "street": "preflop",
         "node_type": node_type,
         "hero_hand": hero_hand,
         "hand_class": hand_class,
         "action": action,
     }
     fp = _hash_payload("solver_fingerprint_v1", payload)
-    decision_id = _hash_payload("decision_id_v1", payload)[:24]
+    decision_id = _hash_payload("solver_decision_id_v1", payload)[:24]
     return fp, decision_id
 
 
