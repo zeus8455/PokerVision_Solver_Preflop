@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from .contracts import SolverDecision
+from .pokervision_bridge import build_pokervision_bridge_payload
 
 
 @dataclass(slots=True, frozen=True)
@@ -15,6 +16,7 @@ class SolverOutputManifest:
     solver_decision_json: str
     solver_action_decision_json: str
     solver_runtime_hint_json: str
+    pokervision_bridge_json: str
 
     def to_json_dict(self) -> dict[str, Any]:
         return {
@@ -24,6 +26,7 @@ class SolverOutputManifest:
                 "solver_decision_json": self.solver_decision_json,
                 "solver_action_decision_json": self.solver_action_decision_json,
                 "solver_runtime_hint_json": self.solver_runtime_hint_json,
+                "pokervision_bridge_json": self.pokervision_bridge_json,
             },
         }
 
@@ -56,6 +59,7 @@ def build_solver_output_payloads(decision: SolverDecision) -> dict[str, dict[str
             "spot_debug": full_payload["spot_debug"],
             "warnings": full_payload["warnings"],
         },
+        "pokervision_bridge_json": build_pokervision_bridge_payload(decision),
     }
 
 
@@ -73,6 +77,7 @@ def write_solver_output_files(
         "solver_decision_json": out_dir / f"{stem}_SolverDecision_JSON.json",
         "solver_action_decision_json": out_dir / f"{stem}_SolverActionDecision_JSON.json",
         "solver_runtime_hint_json": out_dir / f"{stem}_SolverRuntimeHint_JSON.json",
+        "pokervision_bridge_json": out_dir / f"{stem}_PokerVisionBridge_JSON.json",
     }
 
     if not overwrite:
@@ -93,4 +98,5 @@ def write_solver_output_files(
         solver_decision_json=str(paths["solver_decision_json"]),
         solver_action_decision_json=str(paths["solver_action_decision_json"]),
         solver_runtime_hint_json=str(paths["solver_runtime_hint_json"]),
+        pokervision_bridge_json=str(paths["pokervision_bridge_json"]),
     )

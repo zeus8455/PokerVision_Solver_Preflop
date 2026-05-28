@@ -21,7 +21,7 @@ def _parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument(
         "--write-files",
         action="store_true",
-        help="Write SolverDecision/ActionDecision/RuntimeHint JSON files.",
+        help="Write SolverDecision/ActionDecision/RuntimeHint/PokerVisionBridge JSON files.",
     )
     parser.add_argument(
         "--out-dir",
