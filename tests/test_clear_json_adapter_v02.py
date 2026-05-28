@@ -1,4 +1,3 @@
-import copy
 import json
 from pathlib import Path
 
@@ -29,7 +28,7 @@ def test_all_in_true_requires_numeric_chips():
         parse_clear_json_preflop(data)
 
 
-def test_all_in_true_with_chips_is_valid_and_fallback_node():
+def test_all_in_true_with_chips_is_valid_and_guarded_fallback_node():
     data = _base()
     data["players"]["MP"]["all_in"] = True
     data["players"]["MP"]["chips"] = 7.5
@@ -37,8 +36,13 @@ def test_all_in_true_with_chips_is_valid_and_fallback_node():
     decision = solve_clear_json(data)
 
     assert decision.status == "fallback"
-    assert decision.node_type == "facing_allin_or_allin_present"
+    assert decision.node_type in {
+        "facing_open_jam",
+        "blind_vs_open_jam",
+        "facing_allin_or_allin_present",
+    }
     assert decision.click_sequence == ["Check", "Check/fold", "FOLD"]
+    assert decision.debug["all_in_players"] == ["MP"]
 
 
 def test_already_clicked_json_is_rejected_to_fallback():

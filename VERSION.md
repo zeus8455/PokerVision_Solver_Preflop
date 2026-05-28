@@ -1,5 +1,14 @@
 # Version history
 
+## V0.6.0
+All-in guard logic:
+- adds specific preflop all-in node classification
+- distinguishes open jam, blind vs open jam, opener vs 3bet jam, threebettor vs 4bet jam
+- detects incomplete all-in raise candidates from frame-local commitment levels
+- keeps all all-in nodes in safe fallback until dedicated all-in ranges are added
+- exposes all-in diagnostics in SolverDecision debug
+- updates all-in tests to validate guarded behavior
+
 ## V0.5.0
 Defensive ranges:
 - extends hero_preflop_ranges.json with VS_OPEN, VS_OPEN_CALLERS, OPENER_VS_3BET, THREEBETTER_VS_4BET, LIMPER_VS_ISO and COLD_4BET from the old Solver ranges.py hero profile
@@ -13,18 +22,7 @@ Defensive ranges:
 - updates legacy classifier tests so they validate classification, not old placeholder actions
 
 ## V0.4.0
-Ranges foundation:
-- adds JSON hero preflop ranges
-- adds range_parser.py for 169 hand-class expansion
-- adds range_loader.py
-- adds range_engine.py
-- decision engine now uses range lookup for:
-  - unopened/RFI
-  - SB first-in
-  - BB vs SB limp
-  - BB option vs non-blind limpers
-  - iso vs limp
-- keeps unsupported/all-in nodes guarded by safe fallback
+Ranges foundation.
 
 ## V0.3.0
 Preflop spot classifier expansion.

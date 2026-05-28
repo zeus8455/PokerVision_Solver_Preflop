@@ -23,6 +23,20 @@ ACTION_PRIORITY = (
 )
 
 
+ALL_IN_NODE_PREFIXES = (
+    "facing_open_jam",
+    "blind_vs_open_jam",
+    "opener_vs_3bet_jam",
+    "opener_vs_incomplete_3bet_allin",
+    "threebettor_vs_4bet_jam",
+    "threebettor_vs_incomplete_4bet_allin",
+    "cold_vs_allin_3bet_or_higher",
+    "facing_short_allin",
+    "hero_already_allin_no_decision",
+    "facing_allin_or_allin_present",
+)
+
+
 @dataclass(slots=True, frozen=True)
 class RangeDecision:
     action: str
@@ -66,12 +80,6 @@ def _lookup_action_map(node_maps: dict[str, Any], node_name: str, *key_parts: ob
 
 
 def _best_fallback_by_hero(node_maps: dict[str, Any], node_name: str, hero_pos: str, preferred_second: str | None = None) -> tuple[dict[str, str], str]:
-    """Small deterministic fallback for sparse charts.
-
-    This is intentionally conservative and transparent. It only exists to avoid
-    hard crashes when PokerVision frame reconstruction gives a valid relation
-    that is not explicitly present in the chart table.
-    """
     node = node_maps.get(node_name) or {}
     candidates: list[tuple[int, str, dict[str, str]]] = []
     for key, value in node.items():
@@ -95,6 +103,10 @@ def _default_for(data: dict[str, Any], name: str, fallback: str) -> str:
     return str((data.get("defaults") or {}).get(name) or fallback)
 
 
+def _is_all_in_node(node: str) -> bool:
+    return node.startswith(ALL_IN_NODE_PREFIXES)
+
+
 def decide_preflop_action_from_ranges(
     *,
     hand_class: str,
@@ -104,6 +116,17 @@ def decide_preflop_action_from_ranges(
     data = range_data or load_hero_ranges()
     nodes = data.get("nodes") or {}
     node = spot.node_type
+
+    if _is_all_in_node(node):
+        return RangeDecision(
+            action="safe_fallback",
+            source=f"allin_guard.{node}",
+            fallback_used=True,
+            notes=[
+                f"{node} classified, but all-in decision ranges are not wired in V0.6.",
+                "Safe fallback click sequence must be used.",
+            ],
+        )
 
     if node == "unopened":
         action_map = ((nodes.get("rfi") or {}).get(spot.hero_position) or {})
@@ -199,8 +222,6 @@ def decide_preflop_action_from_ranges(
         default_action = _default_for(data, "opener_vs_3bet", "fold")
         decision = _pick_from_action_map(hand_class, action_map, default_action=default_action, source=source)
 
-        # User-requested sizing nuance:
-        # if Hero opened 2bb and faces a tiny 4bb 3bet (<=2.1x), do not auto-fold.
         if node == "opener_vs_small_3bet" and decision.action == "fold":
             return RangeDecision(
                 action=_default_for(data, "small_3bet_override", "call"),
@@ -234,12 +255,12 @@ def decide_preflop_action_from_ranges(
             action="safe_fallback",
             source=f"unsupported.{node}",
             fallback_used=True,
-            notes=["V0.5 does not yet include 4bettor-vs-5bet non-jam ranges."],
+            notes=["V0.6 does not yet include 4bettor-vs-5bet non-jam ranges."],
         )
 
     return RangeDecision(
         action="safe_fallback",
         source=f"unsupported.{node}",
         fallback_used=True,
-        notes=[f"V0.5 range engine does not support node_type={node}."],
+        notes=[f"V0.6 range engine does not support node_type={node}."],
     )

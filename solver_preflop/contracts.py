@@ -67,6 +67,16 @@ class PreflopSpot:
     facing_raise_size_bb: Optional[float] = None
     sizing_ratio: Optional[float] = None
     sizing_category: Optional[str] = None
+
+    # V0.6 all-in diagnostics.
+    all_in_amount_bb: Optional[float] = None
+    all_in_actor_pos: Optional[str] = None
+    all_in_previous_level_bb: Optional[float] = None
+    all_in_raise_delta_bb: Optional[float] = None
+    all_in_min_full_raise_delta_bb: Optional[float] = None
+    all_in_is_full_raise: Optional[bool] = None
+    all_in_reopens_action: Optional[bool] = None
+
     notes: list[str] = field(default_factory=list)
 
 
@@ -94,7 +104,7 @@ class SolverDecision:
         return {
             "solver": {
                 "name": "PokerVision_Solver_Preflop",
-                "version": "0.3.0",
+                "version": "0.6.0",
                 "street": self.street,
                 "status": self.status,
             },
