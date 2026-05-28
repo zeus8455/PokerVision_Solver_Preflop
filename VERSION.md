@@ -1,5 +1,14 @@
 # Version history
 
+## V1.3.0
+Snapshot Clear_JSON bridge check:
+- adds tools/run_snapshot_clear_json_bridge_check.py
+- scans PokerVision NoSolver snapshot Clear_JSON files
+- runs preflop Clear_JSON files through runtime/solver_preflop_dryrun_bridge.py
+- reports per-file bridge status/action/click_sequence/decision_id
+- fails on bridge error status
+- adds test coverage for snapshot bridge check
+
 ## V1.2.0
 PokerVision dry-run preflop solver bridge preview:
 - adds PokerVision snapshot runtime/solver_preflop_dryrun_bridge.py
