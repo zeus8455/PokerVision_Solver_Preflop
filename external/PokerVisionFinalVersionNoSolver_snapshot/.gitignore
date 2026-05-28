@@ -1,0 +1,75 @@
+﻿# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs / debug
+*.log
+logs/
+debug/
+debug_outputs/
+
+# Generic temp folders
+temp/
+tmp/
+
+# Runtime/generated outputs
+outputs/
+**/outputs/
+**/current_cycle/
+**/failed_frame/
+**/ui_error_state/
+**/Test_Replay_Output/
+**/generated_json/
+**/generated_clear_json/
+**/generated_decision_json/
+**/generated_action_decision_json/
+**/generated_action_runtime_plan_json/
+
+# YOLO training artifacts
+AI_detect/**/train_batch*.jpg
+AI_detect/**/val_batch*.jpg
+AI_detect/**/confusion_matrix*.png
+AI_detect/**/BoxF1_curve.png
+AI_detect/**/BoxP_curve.png
+AI_detect/**/BoxPR_curve.png
+AI_detect/**/BoxR_curve.png
+AI_detect/**/results.png
+AI_detect/**/results.csv
+AI_detect/**/labels.jpg
+
+# YOLO non-primary weights
+AI_detect/**/weights/last.pt
+
+# Heavy/exported model formats
+*.onnx
+*.engine
+*.weights
+
+# Keep important runtime/model assets trackable:
+# - PokerVision V1_2/runtime/*.py
+# - AI_detect/**/weights/best.pt
+# - Data_death_card/*.json
+# - Script_Test_PokerVision_All_files/Test_image_6slot_display/*.png
+# - Word/*.docx
+
+# Local heavy/runtime assets not tracked in Git
+AI_detect/
+Script_Test_PokerVision_All_files/
+Word/

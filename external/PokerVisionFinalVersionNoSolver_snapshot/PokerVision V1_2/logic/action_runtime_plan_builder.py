@@ -1,0 +1,301 @@
+"""
+logic/action_runtime_plan_builder.py
+PokerVision V1.1.2 — Action_Decision_JSON -> Action_Runtime_Plan_JSON через Action_Button_Runtime_Policy.
+
+Назначение:
+- RuntimePlan больше не выбирает кнопки собственной старой логикой.
+- Все target_sequence / target_sequences берутся из logic.action_button_runtime_policy.
+- Первый controlled real-click этап разрешает только простые кнопки: fold/check/call/check_fold.
+- bet/raise/sizing branch сохраняется как заблокированная ветка до отдельного этапа.
+"""
+from __future__ import annotations
+
+from typing import Any, Dict, List
+
+try:
+    from config import (
+        V07_ACTION_RUNTIME_PLAN_SCHEMA_VERSION,
+        V07_RUNTIME_ACTION_SOURCE_REQUIRED,
+        V07_RUNTIME_PLAN_DRY_RUN_REQUIRED,
+        V09_REAL_CLICK_MASTER_ARMED,
+        V11_CLICK_DRY_RUN,
+        V11_REAL_MOUSE_CLICK_ENABLED,
+        V11_TRIGGER_UI_SERVICE_REAL_CLICK_ENABLED,
+        V12_LIVE_DATA_CAPTURE_NO_CLICK_MODE,
+    )
+except Exception:  # pragma: no cover - defensive fallback for isolated import checks
+    V07_ACTION_RUNTIME_PLAN_SCHEMA_VERSION = "action_runtime_plan_v1"
+    V07_RUNTIME_ACTION_SOURCE_REQUIRED = "Action_Decision_JSON"
+    V07_RUNTIME_PLAN_DRY_RUN_REQUIRED = True
+    V09_REAL_CLICK_MASTER_ARMED = False
+    V11_CLICK_DRY_RUN = True
+    V11_REAL_MOUSE_CLICK_ENABLED = False
+    V11_TRIGGER_UI_SERVICE_REAL_CLICK_ENABLED = False
+    V12_LIVE_DATA_CAPTURE_NO_CLICK_MODE = True
+
+from logic.action_decision_stub import validate_action_decision_contract
+from logic.action_button_runtime_policy import (
+    normalize_action,
+    resolve_action_button_runtime_policy,
+)
+
+_VALID_ACTIONS = {"fold", "call", "check", "bet", "raise", "check_fold", "bet_raise"}
+_VALID_PLAN_STATUS = {"ok", "blocked"}
+_POLICY_VERSION = "v1.1.1_action_button_runtime_policy"
+_PLAN_STAGE = "v1_1_simple_buttons_only"
+
+
+def _is_controlled_action_button_live_ready() -> bool:
+    """Return True when Action_Button runtime is explicitly allowed to build a live real-click plan.
+
+    V9 full-live mode may keep Trigger_UI service real-click enabled.
+    Service runtime readiness must not invalidate Action_Runtime_Plan_JSON for the Active/action-button branch.
+    """
+    return (
+        not bool(V12_LIVE_DATA_CAPTURE_NO_CLICK_MODE)
+        and bool(V09_REAL_CLICK_MASTER_ARMED)
+        and bool(V11_REAL_MOUSE_CLICK_ENABLED)
+        and not bool(V11_CLICK_DRY_RUN)
+    )
+
+
+def _runtime_plan_dry_run_required() -> bool:
+    return not _is_controlled_action_button_live_ready()
+
+
+def _runtime_plan_real_click_enabled() -> bool:
+    return _is_controlled_action_button_live_ready()
+
+
+def _normalize_button_list(value: Any) -> List[str]:
+    if not isinstance(value, list):
+        return []
+    out: List[str] = []
+    for item in value:
+        text = str(item or "").strip()
+        if text:
+            out.append(text)
+    return out
+
+
+def _normalize_sequence_list(value: Any) -> List[List[str]]:
+    if not isinstance(value, list):
+        return []
+    out: List[List[str]] = []
+    for item in value:
+        seq = _normalize_button_list(item)
+        if seq:
+            out.append(seq)
+    return out
+
+
+def _build_policy_result(action_decision: Dict[str, Any]) -> Dict[str, Any]:
+    """Resolve V1.1 action-button policy in plan-building mode.
+
+    No detector classes are passed here; Action_Button_Detector runs later.
+    Therefore selected_sequence means the primary planned sequence, not proof that
+    the button is already visible on screen.
+    """
+    return resolve_action_button_runtime_policy(
+        action=action_decision.get("action"),
+        size_policy=action_decision.get("size_policy"),
+        detected_classes=None,
+        real_click_enabled=bool(V11_REAL_MOUSE_CLICK_ENABLED),
+    )
+
+
+def build_action_runtime_plan_from_action_decision(action_decision: Dict[str, Any]) -> Dict[str, Any]:
+    """Build Action_Runtime_Plan_JSON from Action_Decision_JSON only.
+
+    V1.1.2 routing:
+        Action_Decision_JSON -> Action_Button_Runtime_Policy -> Action_Runtime_Plan_JSON.
+    """
+    validation = validate_action_decision_contract(action_decision)
+    if not isinstance(validation, dict) or not validation.get("ok"):
+        raise ValueError(
+            "Action_Decision_JSON is not valid enough to build Action_Runtime_Plan_JSON: "
+            f"{validation}"
+        )
+
+    action = normalize_action(action_decision.get("action"))
+    policy = _build_policy_result(action_decision)
+    policy_ok = bool(policy.get("ok"))
+
+    target_sequence = _normalize_button_list(policy.get("selected_sequence"))
+    target_sequences = _normalize_sequence_list(policy.get("target_sequences"))
+
+    plan_status = "ok" if policy_ok else "blocked"
+    blocked_reason = None if policy_ok else str(policy.get("blocked_reason") or "action_button_policy_blocked")
+
+    return {
+        "schema_version": V07_ACTION_RUNTIME_PLAN_SCHEMA_VERSION,
+        "source": V07_RUNTIME_ACTION_SOURCE_REQUIRED,
+        "source_action_decision_frame_id": str(action_decision.get("source_decision_frame_id") or ""),
+        "status": plan_status,
+        "planned_action": action,
+        "size_policy": action_decision.get("size_policy"),
+        "target_button_classes": list(target_sequence),
+        "target_sequence": list(target_sequence),
+        "target_sequences": [list(seq) for seq in target_sequences],
+        "runtime_branch": "action_button",
+        "dry_run_required": bool(_runtime_plan_dry_run_required()),
+        "dry_run": bool(V11_CLICK_DRY_RUN),
+        "real_click_enabled": bool(V11_REAL_MOUSE_CLICK_ENABLED),
+        "guards_required": [
+            "active_confirmed",
+            "slot_guard",
+            "no_repeat",
+            "button_availability",
+            "dry_run_or_real_click_flag",
+            "click_execution_guard",
+            "action_button_runtime_policy",
+        ],
+        "action_decision_reason": str(action_decision.get("reason") or ""),
+        "solver_stub": bool(action_decision.get("solver_stub", False)),
+        "policy_stage": _PLAN_STAGE,
+        "policy_version": str(policy.get("policy_version") or _POLICY_VERSION),
+        "raise_branch_enabled": False,
+        "action_button_policy": dict(policy),
+        "blocked_reason": blocked_reason,
+        "plan_note": (
+            "V1.1 Action_Runtime_Plan_JSON is built through "
+            "Action_Button_Runtime_Policy. First controlled real-click stage allows "
+            "only fold/check/call/check_fold simple button actions; bet/raise sizing "
+            "branch is disabled until a separate safety stage."
+        ),
+    }
+
+
+def validate_action_runtime_plan_contract(plan: Dict[str, Any]) -> Dict[str, Any]:
+    errors: List[str] = []
+    warnings: List[str] = []
+
+    if not isinstance(plan, dict):
+        return {"ok": False, "errors": ["Action_Runtime_Plan_JSON must be an object."], "warnings": []}
+
+    required = {
+        "schema_version",
+        "source",
+        "source_action_decision_frame_id",
+        "status",
+        "planned_action",
+        "size_policy",
+        "target_button_classes",
+        "target_sequence",
+        "target_sequences",
+        "runtime_branch",
+        "dry_run_required",
+        "dry_run",
+        "real_click_enabled",
+        "guards_required",
+        "action_decision_reason",
+        "solver_stub",
+        "policy_stage",
+        "policy_version",
+        "raise_branch_enabled",
+        "action_button_policy",
+        "blocked_reason",
+        "plan_note",
+    }
+    missing = sorted(required - set(plan.keys()))
+    if missing:
+        errors.append(f"Action_Runtime_Plan_JSON missing required keys: {missing}")
+
+    forbidden = {
+        "pipeline_meta",
+        "trigger_ui",
+        "table_structure",
+        "runtime_event",
+        "runtime_action",
+        "click_result",
+        "click_points",
+        "bbox",
+        "confidence",
+        "errors",
+        "warnings",
+        "clear_json",
+        "dark_json",
+        "mouse",
+    }
+    extra_forbidden = sorted(forbidden & set(plan.keys()))
+    if extra_forbidden:
+        errors.append(f"Action_Runtime_Plan_JSON has forbidden technical keys: {extra_forbidden}")
+
+    if plan.get("schema_version") != V07_ACTION_RUNTIME_PLAN_SCHEMA_VERSION:
+        errors.append(f"Action_Runtime_Plan_JSON.schema_version mismatch: {plan.get('schema_version')!r}")
+
+    if plan.get("source") != V07_RUNTIME_ACTION_SOURCE_REQUIRED:
+        errors.append(f"Action_Runtime_Plan_JSON.source must be {V07_RUNTIME_ACTION_SOURCE_REQUIRED!r}.")
+
+    status = str(plan.get("status") or "")
+    if status not in _VALID_PLAN_STATUS:
+        errors.append("Action_Runtime_Plan_JSON.status must be 'ok' or 'blocked'.")
+
+    if str(plan.get("planned_action") or "") not in _VALID_ACTIONS:
+        errors.append(f"Action_Runtime_Plan_JSON.planned_action is invalid: {plan.get('planned_action')!r}")
+
+    target_sequence = plan.get("target_sequence")
+    target_sequences = plan.get("target_sequences")
+
+    if status == "ok":
+        if not isinstance(target_sequence, list) or not target_sequence:
+            errors.append("Action_Runtime_Plan_JSON.target_sequence must be a non-empty list when status='ok'.")
+        if not isinstance(target_sequences, list) or not target_sequences:
+            errors.append("Action_Runtime_Plan_JSON.target_sequences must be a non-empty list of alternatives when status='ok'.")
+    else:
+        if plan.get("blocked_reason") in (None, ""):
+            errors.append("Blocked Action_Runtime_Plan_JSON must include blocked_reason.")
+
+    if isinstance(target_sequences, list):
+        for seq in target_sequences:
+            if not isinstance(seq, list) or not seq:
+                errors.append("Each Action_Runtime_Plan_JSON.target_sequences item must be a non-empty list.")
+                break
+    elif status == "ok":
+        errors.append("Action_Runtime_Plan_JSON.target_sequences must be a list.")
+
+    if plan.get("runtime_branch") != "action_button":
+        errors.append("Action_Runtime_Plan_JSON.runtime_branch must be 'action_button'.")
+
+    expected_dry_run_required = bool(_runtime_plan_dry_run_required())
+    expected_real_click_enabled = bool(_runtime_plan_real_click_enabled())
+
+    if plan.get("dry_run_required") is not expected_dry_run_required:
+        errors.append(
+            "Action_Runtime_Plan_JSON.dry_run_required does not match current runtime mode: "
+            f"expected={expected_dry_run_required!r}, got={plan.get('dry_run_required')!r}."
+        )
+
+    if plan.get("real_click_enabled") is not expected_real_click_enabled:
+        errors.append(
+            "Action_Runtime_Plan_JSON.real_click_enabled does not match current runtime mode: "
+            f"expected={expected_real_click_enabled!r}, got={plan.get('real_click_enabled')!r}."
+        )
+
+    if plan.get("dry_run") is not expected_dry_run_required:
+        errors.append(
+            "Action_Runtime_Plan_JSON.dry_run does not match current runtime mode: "
+            f"expected={expected_dry_run_required!r}, got={plan.get('dry_run')!r}."
+        )
+
+    if not isinstance(plan.get("guards_required"), list) or not plan.get("guards_required"):
+        errors.append("Action_Runtime_Plan_JSON.guards_required must be a non-empty list.")
+
+    if plan.get("policy_stage") != _PLAN_STAGE:
+        errors.append(f"Action_Runtime_Plan_JSON.policy_stage must be {_PLAN_STAGE!r}.")
+
+    if plan.get("raise_branch_enabled") is not False:
+        errors.append("Action_Runtime_Plan_JSON.raise_branch_enabled must be False in V1.1 simple-button stage.")
+
+    policy = plan.get("action_button_policy")
+    if not isinstance(policy, dict):
+        errors.append("Action_Runtime_Plan_JSON.action_button_policy must be an object.")
+    else:
+        if str(policy.get("policy_version") or "") != str(plan.get("policy_version") or ""):
+            errors.append("Action_Runtime_Plan_JSON.policy_version must mirror action_button_policy.policy_version.")
+        if status == "ok" and policy.get("ok") is not True:
+            errors.append("Action_Runtime_Plan_JSON status='ok' requires action_button_policy.ok=True.")
+        if status == "blocked" and policy.get("ok") is not False:
+            errors.append("Blocked Action_Runtime_Plan_JSON requires action_button_policy.ok=False.")
+
+    return {"ok": not errors, "errors": errors, "warnings": warnings}

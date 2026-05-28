@@ -1,0 +1,230 @@
+r"""
+main.py
+
+PokerVision Core V1.2 / V1.0 — live desktop runtime entry.
+
+Запуск:
+C:\Users\user\AppData\Local\Programs\Python\Python312\python.exe "C:\PokerVision\PokerVision V1.2\main.py"
+"""
+
+from __future__ import annotations
+
+import argparse
+import shutil
+import sys
+from pathlib import Path
+
+from config import (
+    ACTION_BUTTON_DETECTOR_ENABLED,
+    ACTION_BUTTON_MODEL_PATH,
+    CARD_DETECTION_ENABLED,
+    CARD_MODEL_PATH,
+    DIGIT_AMOUNTS_ENABLED,
+    DIGIT_MODEL_PATH,
+    OUTPUT_ROOT_DIR,
+    PLAYER_STATE_ENABLED,
+    PLAYER_STATE_MODEL_PATH,
+    PROJECT_ROOT,
+    PYTHON_EXE,
+    PYTHON_VERSION_TARGET,
+    RUNTIME_HAND_ID_PREFIX,
+    RUNTIME_HAND_NUMBER_MIN_WIDTH,
+    SCHEMA_VERSION,
+    TABLE_STRUCTURE_ENABLED,
+    TABLE_STRUCTURE_MODEL_PATH,
+    TRIGGER_UI_ENABLED,
+    TRIGGER_UI_MODEL_PATH,
+    UI_DISPLAY_CYCLE_OUTPUT_DIR,
+    V08_CLEAR_CURRENT_CYCLE_ON_MAIN_START,
+    V08_CLEAR_CURRENT_CYCLE_DIR_NAME,
+    V11_CLICK_DRY_RUN,
+    V11_REAL_MOUSE_CLICK_ENABLED,
+    V11_SOLVER_STUB_DEFAULT_ACTION,
+    V11_SOLVER_STUB_ENABLED,
+    V11_TRIGGER_UI_SERVICE_DRY_RUN,
+    V11_TRIGGER_UI_SERVICE_REAL_CLICK_ENABLED,
+    V12_BIG_POT_EXTRA_WAIT_SEC,
+    V12_BIG_POT_THRESHOLD_BB,
+    V12_LIVE_DATA_CAPTURE_NO_CLICK_MODE,
+    V03_TABLE_ACTION_TRANSACTION_GATE_ENABLED,
+    V03_TRANSACTION_DRY_RUN_COUNTS_AS_COMPLETED,
+    V03_TRANSACTION_RELEASE_ON_INACTIVE,
+    V04_PENDING_FINAL_CLEAR_JSON_ENABLED,
+    V04_CLEAR_JSON_PENDING_DIR_NAME,
+    V04_CLEAR_JSON_FINAL_DIR_NAME,
+    V04_FINAL_CLEAR_JSON_REQUIRES_CLICK_RESULT,
+    V05_DECISION_JSON_ENABLED,
+    V05_DECISION_JSON_DIR_NAME,
+    V06_ACTION_DECISION_ENABLED,
+    V06_ACTION_DECISION_DIR_NAME,
+    V06_ACTION_DECISION_STUB_DEFAULT_ACTION,
+    V07_ACTION_RUNTIME_PLAN_ENABLED,
+    V07_ACTION_RUNTIME_PLAN_DIR_NAME,
+    V07_RUNTIME_ACTION_SOURCE_REQUIRED,
+    V08_LIVE_HAND_CONTINUITY_ENABLED,
+    V08_INACTIVE_DOES_NOT_RESET_HAND,
+    V08_KEEP_LAST_HAND_ON_INVALID_HERO,
+    V09_CLICK_EXECUTION_GUARD_ENABLED,
+    V09_REAL_CLICK_MASTER_ARMED,
+    V09_REQUIRE_SLOT_BOUNDARY_GUARD,
+    V09_REQUIRE_NO_REPEAT_DECISION_GUARD,
+    V09_REQUIRE_BUTTON_AVAILABILITY_GUARD,
+    V09_REQUIRE_ACTION_RUNTIME_PLAN_SOURCE,
+    V09_ALLOW_DRY_RUN_COMPLETION,
+    V09_BLOCK_REAL_CLICK_WHEN_LIVE_CAPTURE_NO_CLICK,
+    V09_CLICK_CONFIRMATION_REPORT_ENABLED,
+    V09_POST_CLICK_COOLDOWN_SEC,
+    V10_REAL_CLICK_READINESS_VALIDATOR_ENABLED,
+    V10_REAL_CLICK_ABORT_ON_UNSAFE_CONFIG,
+    V10_REAL_CLICK_ALLOW_ACTION_BUTTON_ONLY,
+    V10_REAL_CLICK_REQUIRE_SERVICE_CLICKS_DISABLED,
+    V10_REAL_CLICK_REQUIRE_LIVE_NO_CLICK_DISABLED,
+    V10_REAL_CLICK_REQUIRE_MASTER_ARMED,
+    V10_REAL_CLICK_REQUIRE_MOUSE_REAL_ENABLED,
+    V10_REAL_CLICK_REQUIRE_MOUSE_DRY_RUN_DISABLED,
+    V12_LIVE_DESKTOP_MODE,
+    V12_REAL_SCAN_INTERVAL_MS,
+    V12_SAVE_ONLY_TRIGGERED_TABLES,
+    V12_SOLVER_WAIT_TIMEOUT_SEC,
+)
+import config as runtime_config
+from logic.real_click_readiness import format_readiness_for_console, validate_real_click_readiness
+from ui_display_launch import run_ui_display_launch
+
+
+def _safe_remove_current_cycle_dir() -> None:
+    """Remove live current_cycle output before a fresh main.py launch."""
+    if not V08_CLEAR_CURRENT_CYCLE_ON_MAIN_START:
+        print("[LIVE_OUTPUT_CLEANUP] skipped: V08_CLEAR_CURRENT_CYCLE_ON_MAIN_START=False")
+        return
+
+    current_cycle_dir = Path(UI_DISPLAY_CYCLE_OUTPUT_DIR) / str(V08_CLEAR_CURRENT_CYCLE_DIR_NAME)
+    output_root = Path(OUTPUT_ROOT_DIR).resolve(strict=False)
+    target = current_cycle_dir.resolve(strict=False)
+
+    try:
+        target.relative_to(output_root)
+    except ValueError as exc:
+        raise RuntimeError(
+            f"Refusing to delete output path outside OUTPUT_ROOT_DIR: target={target}, output_root={output_root}"
+        ) from exc
+
+    if current_cycle_dir.exists():
+        shutil.rmtree(current_cycle_dir)
+        print(f"[LIVE_OUTPUT_CLEANUP] removed stale output dir: {current_cycle_dir}")
+    else:
+        print(f"[LIVE_OUTPUT_CLEANUP] no stale output dir: {current_cycle_dir}")
+
+    current_cycle_dir.mkdir(parents=True, exist_ok=True)
+    print(f"[LIVE_OUTPUT_CLEANUP] ready clean output dir: {current_cycle_dir}")
+
+
+def print_startup_info() -> None:
+    print("=" * 96)
+    print("PokerVision Core V1.2 / V1.0 — Live Desktop Runtime / Controlled Click Readiness")
+    print("=" * 96)
+    print(f"[SCHEMA_VERSION] {SCHEMA_VERSION}")
+    print(f"[PROJECT_ROOT] {PROJECT_ROOT}")
+    print(f"[OUTPUT_ROOT_DIR] {OUTPUT_ROOT_DIR}")
+    print(f"[OUTPUT_DIR] {UI_DISPLAY_CYCLE_OUTPUT_DIR}")
+    print(f"[EXPECTED_PYTHON_EXE] {PYTHON_EXE}")
+    print(f"[EXPECTED_PYTHON_VERSION] {PYTHON_VERSION_TARGET}")
+    print(f"[CURRENT_PYTHON] {sys.executable}")
+    print(f"[CURRENT_PYTHON_VERSION] {sys.version.split()[0]}")
+    print(f"[V12_LIVE_DESKTOP_MODE] {V12_LIVE_DESKTOP_MODE}")
+    print(f"[V12_LIVE_DATA_CAPTURE_NO_CLICK_MODE] {V12_LIVE_DATA_CAPTURE_NO_CLICK_MODE}")
+    print(f"[V03_TABLE_ACTION_TRANSACTION_GATE_ENABLED] {V03_TABLE_ACTION_TRANSACTION_GATE_ENABLED}")
+    print(f"[V03_TRANSACTION_DRY_RUN_COUNTS_AS_COMPLETED] {V03_TRANSACTION_DRY_RUN_COUNTS_AS_COMPLETED}")
+    print(f"[V03_TRANSACTION_RELEASE_ON_INACTIVE] {V03_TRANSACTION_RELEASE_ON_INACTIVE}")
+    print(f"[V04_PENDING_FINAL_CLEAR_JSON_ENABLED] {V04_PENDING_FINAL_CLEAR_JSON_ENABLED}")
+    print(f"[V04_CLEAR_JSON_PENDING_DIR_NAME] {V04_CLEAR_JSON_PENDING_DIR_NAME}")
+    print(f"[V04_CLEAR_JSON_FINAL_DIR_NAME] {V04_CLEAR_JSON_FINAL_DIR_NAME}")
+    print(f"[V04_FINAL_CLEAR_JSON_REQUIRES_CLICK_RESULT] {V04_FINAL_CLEAR_JSON_REQUIRES_CLICK_RESULT}")
+    print(f"[V05_DECISION_JSON_ENABLED] {V05_DECISION_JSON_ENABLED}")
+    print(f"[V05_DECISION_JSON_DIR_NAME] {V05_DECISION_JSON_DIR_NAME}")
+    print(f"[V06_ACTION_DECISION_ENABLED] {V06_ACTION_DECISION_ENABLED}")
+    print(f"[V06_ACTION_DECISION_DIR_NAME] {V06_ACTION_DECISION_DIR_NAME}")
+    print(f"[V06_ACTION_DECISION_STUB_DEFAULT_ACTION] {V06_ACTION_DECISION_STUB_DEFAULT_ACTION}")
+    print(f"[V07_ACTION_RUNTIME_PLAN_ENABLED] {V07_ACTION_RUNTIME_PLAN_ENABLED}")
+    print(f"[V07_ACTION_RUNTIME_PLAN_DIR_NAME] {V07_ACTION_RUNTIME_PLAN_DIR_NAME}")
+    print(f"[V07_RUNTIME_ACTION_SOURCE_REQUIRED] {V07_RUNTIME_ACTION_SOURCE_REQUIRED}")
+    print(f"[V08_LIVE_HAND_CONTINUITY_ENABLED] {V08_LIVE_HAND_CONTINUITY_ENABLED}")
+    print(f"[V08_INACTIVE_DOES_NOT_RESET_HAND] {V08_INACTIVE_DOES_NOT_RESET_HAND}")
+    print(f"[V08_KEEP_LAST_HAND_ON_INVALID_HERO] {V08_KEEP_LAST_HAND_ON_INVALID_HERO}")
+    print(f"[V08_CLEAR_CURRENT_CYCLE_ON_MAIN_START] {V08_CLEAR_CURRENT_CYCLE_ON_MAIN_START}")
+    print(f"[V08_CLEAR_CURRENT_CYCLE_DIR_NAME] {V08_CLEAR_CURRENT_CYCLE_DIR_NAME}")
+    print(f"[V09_CLICK_EXECUTION_GUARD_ENABLED] {V09_CLICK_EXECUTION_GUARD_ENABLED}")
+    print(f"[V09_REAL_CLICK_MASTER_ARMED] {V09_REAL_CLICK_MASTER_ARMED}")
+    print(f"[V09_REQUIRE_SLOT_BOUNDARY_GUARD] {V09_REQUIRE_SLOT_BOUNDARY_GUARD}")
+    print(f"[V09_REQUIRE_NO_REPEAT_DECISION_GUARD] {V09_REQUIRE_NO_REPEAT_DECISION_GUARD}")
+    print(f"[V09_REQUIRE_BUTTON_AVAILABILITY_GUARD] {V09_REQUIRE_BUTTON_AVAILABILITY_GUARD}")
+    print(f"[V09_REQUIRE_ACTION_RUNTIME_PLAN_SOURCE] {V09_REQUIRE_ACTION_RUNTIME_PLAN_SOURCE}")
+    print(f"[V09_ALLOW_DRY_RUN_COMPLETION] {V09_ALLOW_DRY_RUN_COMPLETION}")
+    print(f"[V09_BLOCK_REAL_CLICK_WHEN_LIVE_CAPTURE_NO_CLICK] {V09_BLOCK_REAL_CLICK_WHEN_LIVE_CAPTURE_NO_CLICK}")
+    print(f"[V09_CLICK_CONFIRMATION_REPORT_ENABLED] {V09_CLICK_CONFIRMATION_REPORT_ENABLED}")
+    print(f"[V09_POST_CLICK_COOLDOWN_SEC] {V09_POST_CLICK_COOLDOWN_SEC}")
+    print(f"[V10_REAL_CLICK_READINESS_VALIDATOR_ENABLED] {V10_REAL_CLICK_READINESS_VALIDATOR_ENABLED}")
+    print(f"[V10_REAL_CLICK_ABORT_ON_UNSAFE_CONFIG] {V10_REAL_CLICK_ABORT_ON_UNSAFE_CONFIG}")
+    print(f"[V10_REAL_CLICK_ALLOW_ACTION_BUTTON_ONLY] {V10_REAL_CLICK_ALLOW_ACTION_BUTTON_ONLY}")
+    print(f"[V10_REAL_CLICK_REQUIRE_SERVICE_CLICKS_DISABLED] {V10_REAL_CLICK_REQUIRE_SERVICE_CLICKS_DISABLED}")
+    print(f"[V10_REAL_CLICK_REQUIRE_LIVE_NO_CLICK_DISABLED] {V10_REAL_CLICK_REQUIRE_LIVE_NO_CLICK_DISABLED}")
+    print(f"[V10_REAL_CLICK_REQUIRE_MASTER_ARMED] {V10_REAL_CLICK_REQUIRE_MASTER_ARMED}")
+    print(f"[V10_REAL_CLICK_REQUIRE_MOUSE_REAL_ENABLED] {V10_REAL_CLICK_REQUIRE_MOUSE_REAL_ENABLED}")
+    print(f"[V10_REAL_CLICK_REQUIRE_MOUSE_DRY_RUN_DISABLED] {V10_REAL_CLICK_REQUIRE_MOUSE_DRY_RUN_DISABLED}")
+    print(f"[V12_REAL_SCAN_INTERVAL_MS] {V12_REAL_SCAN_INTERVAL_MS}")
+    print(f"[V12_SAVE_ONLY_TRIGGERED_TABLES] {V12_SAVE_ONLY_TRIGGERED_TABLES}")
+    print(f"[RUNTIME_HAND_ID_FORMAT] {RUNTIME_HAND_ID_PREFIX}_N, min_width={RUNTIME_HAND_NUMBER_MIN_WIDTH}")
+    print(f"[TRIGGER_UI_ENABLED] {TRIGGER_UI_ENABLED} | {TRIGGER_UI_MODEL_PATH}")
+    print(f"[TABLE_STRUCTURE_ENABLED] {TABLE_STRUCTURE_ENABLED} | {TABLE_STRUCTURE_MODEL_PATH}")
+    print(f"[PLAYER_STATE_ENABLED] {PLAYER_STATE_ENABLED} | {PLAYER_STATE_MODEL_PATH}")
+    print(f"[DIGIT_AMOUNTS_ENABLED] {DIGIT_AMOUNTS_ENABLED} | {DIGIT_MODEL_PATH}")
+    print(f"[CARD_DETECTION_ENABLED] {CARD_DETECTION_ENABLED} | {CARD_MODEL_PATH}")
+    print(f"[SOLVER_STUB] enabled={V11_SOLVER_STUB_ENABLED}, default_action={V11_SOLVER_STUB_DEFAULT_ACTION}")
+    print(f"[SOLVER_TIMEOUT] first={V12_SOLVER_WAIT_TIMEOUT_SEC}s, big_pot>{V12_BIG_POT_THRESHOLD_BB}bb extra={V12_BIG_POT_EXTRA_WAIT_SEC}s")
+    print(f"[ACTION_BUTTON] enabled={ACTION_BUTTON_DETECTOR_ENABLED} | {ACTION_BUTTON_MODEL_PATH}")
+    print(f"[ACTION_REAL_CLICK] enabled={V11_REAL_MOUSE_CLICK_ENABLED}, dry_run={V11_CLICK_DRY_RUN}")
+    print(f"[SERVICE_REAL_CLICK] enabled={V11_TRIGGER_UI_SERVICE_REAL_CLICK_ENABLED}, dry_run={V11_TRIGGER_UI_SERVICE_DRY_RUN}")
+    if V12_LIVE_DATA_CAPTURE_NO_CLICK_MODE:
+        print("[LIVE_CAPTURE_GUARD] real mouse/service clicks are disabled; data capture only")
+        print("[V09_REAL_CLICK_GUARD] master armed is False; physical clicks remain impossible")
+    print("=" * 96)
+
+
+def _validate_real_click_readiness_or_abort() -> None:
+    result = validate_real_click_readiness(runtime_config)
+    for line in format_readiness_for_console(result):
+        print(line)
+    if result.abort_startup:
+        raise RuntimeError(
+            "Unsafe real-click configuration. Startup aborted by V10 RealClickReadinessValidator. "
+            f"errors={result.errors}"
+        )
+
+
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="PokerVision live desktop runtime.")
+    parser.add_argument(
+        "--startup-audit-only",
+        action="store_true",
+        help="Validate startup/readiness config, print banner, then exit without launching live UI.",
+    )
+    return parser.parse_args()
+
+
+def main() -> None:
+    args = _parse_args()
+
+    print_startup_info()
+    _validate_real_click_readiness_or_abort()
+
+    if args.startup_audit_only:
+        print("[V83_STARTUP_AUDIT_ONLY] enabled=True")
+        print("[V83_STARTUP_AUDIT_ONLY] live UI launch skipped")
+        return
+
+    _safe_remove_current_cycle_dir()
+    run_ui_display_launch()
+
+
+if __name__ == "__main__":
+    main()
