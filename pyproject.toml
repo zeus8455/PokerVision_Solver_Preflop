@@ -1,0 +1,9 @@
+[project]
+name = "pokervision-solver-preflop"
+version = "0.1.0"
+description = "Standalone preflop solver for PokerVision Clear_JSON"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

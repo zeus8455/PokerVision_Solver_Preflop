@@ -1,0 +1,45 @@
+{
+  "frame_id": "table_02_hand_29_preflop_01",
+  "board": {
+    "cards": [],
+    "street": "preflop"
+  },
+  "Total_pot": 2.5,
+  "players": {
+    "BB": {
+      "hero": true,
+      "cards": [
+        "J_spades",
+        "7_clubs"
+      ],
+      "stack": 39.0,
+      "fold": false,
+      "chips": 1.0
+    },
+    "UTG": {
+      "stack": 24.5,
+      "fold": false,
+      "chips": false
+    },
+    "MP": {
+      "stack": 28.0,
+      "fold": false,
+      "chips": 1.0
+    },
+    "CO": {
+      "stack": 30.0,
+      "fold": true,
+      "chips": false
+    },
+    "BTN": {
+      "stack": 111.5,
+      "fold": true,
+      "chips": false
+    },
+    "SB": {
+      "stack": 145.0,
+      "fold": true,
+      "chips": 0.5
+    }
+  }
+}
