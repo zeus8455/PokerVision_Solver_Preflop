@@ -7,6 +7,7 @@ from typing import Any
 from .cards import hand_to_class
 from .clear_json_adapter import parse_clear_json_preflop
 from .contracts import SolverDecision
+from .range_engine import decide_preflop_action_from_ranges
 from .sizing_policy import SAFE_FALLBACK_SEQUENCE, click_sequence_for_action, size_pct_for_action
 from .spot_classifier import classify_preflop_spot
 
@@ -29,27 +30,12 @@ def _build_identity(frame_id: str, node_type: str, hero_hand: list[str], hand_cl
     return fp, decision_id
 
 
-def _placeholder_action_for_node(node_type: str, to_call_bb: float) -> tuple[str, str]:
-    # V0.3 still focuses on state classification. Ranges arrive next.
-    if node_type.startswith("bb_option_vs_"):
-        return "check", "BB has a logical free option vs limp; range engine can later upgrade to iso_raise."
-    if node_type == "sb_first_in":
-        return "open_raise", "SB first-in placeholder action until SB range engine is added."
-    if node_type == "unopened":
-        return "open_raise", "Unopened preflop node; placeholder open until range engine is added."
-    if node_type.startswith("iso_vs_"):
-        return "iso_raise", "Facing limp node; placeholder iso policy until range engine is added."
-    if node_type in {"facing_open", "blind_vs_open", "limper_vs_iso"}:
-        return "call", "Facing one raise level; placeholder defend/call until range engine is added."
-    if node_type.startswith("opener_vs_small_3bet"):
-        return "call", "Small 3bet detected; placeholder keeps defending wider until range engine is added."
-    if node_type.startswith("opener_vs_") and "3bet" in node_type:
-        return "call", "Opener facing 3bet; placeholder call until range engine is added."
-    if node_type.startswith("threebettor_vs_") and "4bet" in node_type:
-        return "call", "Threebettor facing 4bet; placeholder call until range engine is added."
-    if node_type.startswith("fourbettor_vs_") and "5bet" in node_type:
-        return "call", "Fourbettor facing 5bet; placeholder call until range engine is added."
-    return "safe_fallback", "Unknown/all-in/unsupported preflop node in V0.3."
+def _engine_action(raw_action: str) -> str:
+    if raw_action in {"open_raise", "raise", "iso_raise", "3bet", "4bet", "5bet", "5bet_jam", "jam", "all_in"}:
+        return "raise"
+    if raw_action == "limp":
+        return "call"
+    return raw_action
 
 
 def solve_clear_json(data: dict[str, Any]) -> SolverDecision:
@@ -58,18 +44,25 @@ def solve_clear_json(data: dict[str, Any]) -> SolverDecision:
         spot = classify_preflop_spot(frame)
         hand_class = hand_to_class(frame.hero_cards)
 
-        raw_action, reason = _placeholder_action_for_node(spot.node_type, spot.to_call_bb)
+        range_decision = decide_preflop_action_from_ranges(hand_class=hand_class, spot=spot)
+        raw_action = range_decision.action
 
         if raw_action == "safe_fallback":
             click_sequence = list(SAFE_FALLBACK_SEQUENCE)
             engine_action = "safe_fallback"
             size_pct = None
             status = "fallback"
+            reason = f"Range engine unsupported node: {spot.node_type}"
         else:
             click_sequence = click_sequence_for_action(raw_action)
-            engine_action = "raise" if raw_action in {"open_raise", "iso_raise", "3bet", "4bet", "5bet", "jam", "all_in"} else raw_action
+            engine_action = _engine_action(raw_action)
             size_pct = size_pct_for_action(raw_action)
             status = "ok"
+            reason = (
+                f"range:{range_decision.source}:{raw_action}"
+                if not range_decision.fallback_used
+                else f"range:{range_decision.source}:default:{raw_action}"
+            )
 
         solver_fingerprint, decision_id = _build_identity(
             frame.frame_id,
@@ -94,7 +87,7 @@ def solve_clear_json(data: dict[str, Any]) -> SolverDecision:
             size_pct=size_pct,
             decision_id=decision_id,
             solver_fingerprint=solver_fingerprint,
-            warnings=list(frame.warnings) + list(spot.notes),
+            warnings=list(frame.warnings) + list(spot.notes) + list(range_decision.notes),
             debug={
                 "to_call_bb": spot.to_call_bb,
                 "max_commitment_bb": spot.max_commitment_bb,
@@ -111,6 +104,9 @@ def solve_clear_json(data: dict[str, Any]) -> SolverDecision:
                 "facing_raise_size_bb": spot.facing_raise_size_bb,
                 "sizing_ratio": spot.sizing_ratio,
                 "sizing_category": spot.sizing_category,
+                "range_source": range_decision.source,
+                "matched_range": range_decision.matched_range,
+                "range_fallback_used": range_decision.fallback_used,
             },
         )
     except Exception as exc:

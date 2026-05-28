@@ -7,11 +7,6 @@ def _is_close(a: float, b: float) -> bool:
     return abs(float(a) - float(b)) < 1e-9
 
 
-def _ordered_positions(players: list[NormalizedPlayer]) -> list[str]:
-    present = {p.position for p in players}
-    return [pos for pos in POSITIONS_6MAX if pos in present]
-
-
 def _positions_with_commitment(players: list[NormalizedPlayer], amount: float) -> list[str]:
     return [
         p.position
@@ -49,8 +44,6 @@ def classify_preflop_spot(frame: NormalizedPreflopFrame) -> PreflopSpot:
     raise_levels = sorted({p.committed_bb for p in active_players if p.committed_bb > 1.0})
     has_raise = bool(raise_levels)
 
-    # Limper definition:
-    # active non-blind player with exactly 1bb committed while no raise is present.
     limpers = [
         p.position
         for p in active_players
@@ -71,12 +64,27 @@ def classify_preflop_spot(frame: NormalizedPreflopFrame) -> PreflopSpot:
     if all_in_players:
         return PreflopSpot(
             node_type="facing_allin_or_allin_present",
-            notes=["V0.3 classifies all-in only as a guarded node."],
+            notes=["V0.4 classifies all-in only as a guarded node."],
             **common,
         )
 
-    # No raise yet: blinds/limps/unopened.
     if not has_raise:
+        sb = frame.players.get("SB")
+        if (
+            hero.position == "BB"
+            and sb is not None
+            and sb.active_in_hand
+            and _is_close(sb.committed_bb, 1.0)
+            and not limpers
+            and _is_close(to_call, 0.0)
+        ):
+            return PreflopSpot(
+                node_type="bb_vs_sb_limp",
+                limpers=["SB"],
+                notes=["Hero has logical preflop check option vs SB limp."],
+                **{k: v for k, v in common.items() if k != "limpers"},
+            )
+
         if hero.position == "BB" and limpers and _is_close(to_call, 0.0):
             return PreflopSpot(
                 node_type=f"bb_option_vs_{len(limpers)}_limper" if len(limpers) == 1 else "bb_option_vs_2plus_limpers",
@@ -105,11 +113,10 @@ def classify_preflop_spot(frame: NormalizedPreflopFrame) -> PreflopSpot:
 
         return PreflopSpot(
             node_type="unknown_no_raise_preflop_spot",
-            notes=["No raise exists, but V0.3 cannot classify this no-raise state."],
+            notes=["No raise exists, but V0.4 cannot classify this no-raise state."],
             **common,
         )
 
-    # One raise level: facing an open/iso.
     if len(raise_levels) == 1:
         open_size = raise_levels[0]
         aggressor_positions = _positions_with_commitment(active_players, open_size)
@@ -157,11 +164,10 @@ def classify_preflop_spot(frame: NormalizedPreflopFrame) -> PreflopSpot:
             opener_pos=opener_pos,
             last_aggressor_pos=opener_pos,
             facing_raise_size_bb=open_size,
-            notes=["Single raise exists, but V0.3 cannot classify hero relationship to it."],
+            notes=["Single raise exists, but V0.4 cannot classify hero relationship to it."],
             **common,
         )
 
-    # Two or more raise levels: infer opener-vs-3bet / 3bettor-vs-4bet / 4bettor-vs-5bet from commitments.
     if len(raise_levels) >= 2:
         first_raise = raise_levels[0]
         second_raise = raise_levels[1]
@@ -236,12 +242,12 @@ def classify_preflop_spot(frame: NormalizedPreflopFrame) -> PreflopSpot:
             four_bettor_pos=four_bettor_pos,
             last_aggressor_pos=last_aggressor_pos,
             facing_raise_size_bb=max_commitment,
-            notes=["Multiple raise levels exist, but V0.3 cannot classify hero relationship to them."],
+            notes=["Multiple raise levels exist, but V0.4 cannot classify hero relationship to them."],
             **common,
         )
 
     return PreflopSpot(
         node_type="unknown_preflop_spot",
-        notes=["V0.3 terminal fallback node."],
+        notes=["V0.4 terminal fallback node."],
         **common,
     )

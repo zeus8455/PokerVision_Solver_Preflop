@@ -1,5 +1,19 @@
 # Version history
 
+## V0.4.0
+Ranges foundation:
+- adds JSON hero preflop ranges
+- adds range_parser.py for 169 hand-class expansion
+- adds range_loader.py
+- adds range_engine.py
+- decision engine now uses range lookup for:
+  - unopened/RFI
+  - SB first-in
+  - BB vs SB limp
+  - BB option vs non-blind limpers
+  - iso vs limp
+- keeps unsupported/all-in nodes guarded by safe fallback
+
 ## V0.3.0
 Preflop spot classifier expansion:
 - classifies SB first-in spot
@@ -24,11 +38,4 @@ Clear_JSON adapter hardening and synthetic preflop cases:
 Removed Python cache artifacts from Git.
 
 ## V0.1.0
-Initial skeleton:
-- contracts
-- cards
-- Clear_JSON adapter
-- basic spot classifier
-- sizing policy
-- decision engine stub for BB option vs limp / unopened / fallback
-- CLI solve_clear_json.py
+Initial skeleton.

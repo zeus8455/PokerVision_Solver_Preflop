@@ -1,0 +1,58 @@
+{
+  "schema": "preflop_ranges_v1",
+  "profile": "hero",
+  "source": "Converted initial subset from old ranges.py",
+  "nodes": {
+    "rfi": {
+      "UTG": {
+        "open_raise": "22+ A5s+ KTs+ QTs+ J9s+ T8s+ 98s+ ATo+ KJo+ QJo+"
+      },
+      "MP": {
+        "open_raise": "22+ A2s+ K9s+ Q9s+ J8s+ T8s+ 97s+ A9o+ KTo+ QTo+"
+      },
+      "CO": {
+        "open_raise": "22+ A2s+ K8s+ Q7s+ J7s+ T7s+ 97s+ 86s+ 76s+ A8o+ KTo+ QTo+"
+      },
+      "BTN": {
+        "open_raise": "22+ A2s+ K5s+ Q6s+ J7s+ T6s+ 96s+ 85s+ 76s+ 65s+ A2o+ K8o+ Q8o+ J9o+ T9o+"
+      }
+    },
+    "sb_first_in": {
+      "SB": {
+        "open_raise": "88+ A7s+ KTs+ QJs+ JTs+ T9s+ A9o+ KJo+ QJo+",
+        "limp": "22+ A2s+ K2s-KQs Q2s-QJs J2s-JTs T2s-T9s 92s-98s 82s-87s 72s-76s 63s 53s 43s A2o+ K2o-KJo Q8o-QJo J8o-JTo T8o 98o"
+      }
+    },
+    "iso_raise": {
+      "UTG": {},
+      "MP": {
+        "iso_raise": "88+ AJs+ KQs AQo+"
+      },
+      "CO": {
+        "iso_raise": "77+ ATs+ KJs+ QJs JTs AJo+ KQo"
+      },
+      "BTN": {
+        "iso_raise": "66+ A8s+ KTs+ QTs+ JTs T9s 98s ATo+ KJo+ QJo"
+      },
+      "SB": {
+        "iso_raise": "77+ ATs+ KTs+ QTs+ JTs AJo+ KQo"
+      },
+      "BB": {
+        "iso_raise": "88+ AJs+ KQs AQo+"
+      }
+    },
+    "bb_vs_sb_limp": {
+      "BB": {
+        "iso_raise": "22+ A2s+ K5s+ Q8s+ J7s+ T7s+ 96s+ 86s+ 76s 65s A8o+ KTo+ QTo+ JTo",
+        "check": "A2o-A7o K2o-K9o Q5o-Q9o J7o-J9o T7o-T9o 98o 87o 76o K2s-K4s Q2s-Q7s J2s-J7s T2s-T7s 92s-96s 82s-86s 72s-75s 62s-64s 52s-54s 42s-43s 32s"
+      }
+    }
+  },
+  "defaults": {
+    "unopened": "fold",
+    "sb_first_in": "fold",
+    "iso_vs_limp": "fold",
+    "bb_option_vs_limp": "check",
+    "bb_vs_sb_limp": "check"
+  }
+}
