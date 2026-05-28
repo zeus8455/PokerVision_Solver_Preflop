@@ -35,24 +35,23 @@ def solve_clear_json(data: dict[str, Any]) -> SolverDecision:
         spot = classify_preflop_spot(frame)
         hand_class = hand_to_class(frame.hero_cards)
 
-        # V0.1 placeholder strategy:
-        # BB option vs limp: check unless later range engine upgrades to iso_raise.
-        # Unknown/all-in: safe fallback.
+        # V0.2 placeholder strategy:
+        # The classifier/adapter are the main target. Range engine arrives in V0.3/V0.4.
         if spot.node_type.startswith("bb_option_vs_"):
             raw_action = "check"
-            reason = "BB has a logical free option vs limp; V0.1 has no iso range engine yet."
+            reason = "BB has a logical free option vs limp; V0.2 has no iso range engine yet."
         elif spot.node_type == "unopened":
             raw_action = "open_raise"
-            reason = "Unopened preflop node; V0.1 placeholder opens until range engine is added."
+            reason = "Unopened preflop node; V0.2 placeholder opens until range engine is added."
         elif spot.node_type.startswith("iso_vs_"):
             raw_action = "iso_raise"
-            reason = "Facing limp node; V0.1 placeholder iso policy."
+            reason = "Facing limp node; V0.2 placeholder iso policy."
         elif spot.node_type == "facing_open_or_raise":
             raw_action = "call" if spot.to_call_bb > 0 else "check"
-            reason = "Coarse facing raise node; V0.1 placeholder until range engine is added."
+            reason = "Coarse facing raise node; V0.2 placeholder until range engine is added."
         else:
             raw_action = "safe_fallback"
-            reason = "Unknown or all-in preflop node in V0.1."
+            reason = "Unknown/all-in/unsupported preflop node in V0.2."
 
         if raw_action == "safe_fallback":
             click_sequence = list(SAFE_FALLBACK_SEQUENCE)
@@ -98,7 +97,7 @@ def solve_clear_json(data: dict[str, Any]) -> SolverDecision:
             },
         )
     except Exception as exc:
-        frame_id = str(data.get("frame_id") or "unknown_frame")
+        frame_id = str(data.get("frame_id") or "unknown_frame") if isinstance(data, dict) else "unknown_frame"
         return SolverDecision(
             status="fallback",
             street="preflop",

@@ -15,9 +15,14 @@ class NormalizedPlayer:
     stack_bb: float = 0.0
     committed_bb: float = 0.0
     folded: bool = False
+    sitout: bool = False
     all_in: bool = False
     active_in_hand: bool = True
     raw: dict[str, Any] = field(default_factory=dict)
+
+    @property
+    def can_act(self) -> bool:
+        return self.active_in_hand and not self.all_in
 
 
 @dataclass(slots=True, frozen=True)
@@ -33,6 +38,14 @@ class NormalizedPreflopFrame:
     @property
     def hero_player(self) -> NormalizedPlayer:
         return self.players[self.hero_position]
+
+    @property
+    def active_players(self) -> list[NormalizedPlayer]:
+        return [p for p in self.players.values() if p.active_in_hand]
+
+    @property
+    def active_positions(self) -> list[str]:
+        return [p.position for p in self.active_players]
 
 
 @dataclass(slots=True, frozen=True)
@@ -73,7 +86,7 @@ class SolverDecision:
         return {
             "solver": {
                 "name": "PokerVision_Solver_Preflop",
-                "version": "0.1.0",
+                "version": "0.2.0",
                 "street": self.street,
                 "status": self.status,
             },
