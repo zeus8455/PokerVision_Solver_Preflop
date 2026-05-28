@@ -10,6 +10,7 @@ from .range_parser import hand_in_range
 
 ACTION_PRIORITY = (
     "5bet_jam",
+    "5bet",
     "4bet",
     "3bet",
     "iso_raise",
@@ -29,6 +30,10 @@ class RangeDecision:
     matched_range: str | None = None
     fallback_used: bool = False
     notes: list[str] = field(default_factory=list)
+
+
+def _join_key(*parts: object) -> str:
+    return "|".join(str(p) for p in parts)
 
 
 def _pick_from_action_map(hand_class: str, action_map: dict[str, str], *, default_action: str, source: str) -> RangeDecision:
@@ -51,46 +56,43 @@ def _pick_from_action_map(hand_class: str, action_map: dict[str, str], *, defaul
     )
 
 
-def _placeholder_call_for_supported_future_node(node: str) -> RangeDecision | None:
-    """Preserve V0.3 behaviour for classified nodes whose ranges are not wired yet.
+def _lookup_action_map(node_maps: dict[str, Any], node_name: str, *key_parts: object) -> tuple[dict[str, str], str]:
+    node = node_maps.get(node_name) or {}
+    key = _join_key(*key_parts)
+    action_map = node.get(key)
+    if isinstance(action_map, dict):
+        return {str(k): str(v or "") for k, v in action_map.items()}, f"{node_name}.{key}"
+    return {}, f"{node_name}.{key}.missing"
 
-    V0.4 adds real ranges only for RFI/SB/limp/iso branches. Defensive raise
-    branches are classified, but their range tables arrive in later versions.
-    They must remain non-crashing and non-regressive for existing V0.3 tests.
+
+def _best_fallback_by_hero(node_maps: dict[str, Any], node_name: str, hero_pos: str, preferred_second: str | None = None) -> tuple[dict[str, str], str]:
+    """Small deterministic fallback for sparse charts.
+
+    This is intentionally conservative and transparent. It only exists to avoid
+    hard crashes when PokerVision frame reconstruction gives a valid relation
+    that is not explicitly present in the chart table.
     """
-    if node in {"facing_open", "blind_vs_open", "limper_vs_iso"}:
-        return RangeDecision(
-            action="call",
-            source=f"placeholder.{node}",
-            fallback_used=True,
-            notes=[f"{node} is classified, but range table is not wired in V0.4; preserving placeholder call."],
-        )
+    node = node_maps.get(node_name) or {}
+    candidates: list[tuple[int, str, dict[str, str]]] = []
+    for key, value in node.items():
+        parts = str(key).split("|")
+        if not isinstance(value, dict):
+            continue
+        if len(parts) >= 2 and parts[0] == hero_pos:
+            score = 0 if preferred_second is not None and len(parts) >= 2 and parts[1] == preferred_second else 10
+            candidates.append((score, key, {str(k): str(v or "") for k, v in value.items()}))
+        elif len(parts) >= 2 and parts[-1] == hero_pos:
+            score = 20
+            candidates.append((score, key, {str(k): str(v or "") for k, v in value.items()}))
+    if not candidates:
+        return {}, f"{node_name}.fallback_missing"
+    candidates.sort(key=lambda item: (item[0], item[1]))
+    _, key, action_map = candidates[0]
+    return action_map, f"{node_name}.fallback.{key}"
 
-    if node.startswith("opener_vs_") and "3bet" in node:
-        return RangeDecision(
-            action="call",
-            source=f"placeholder.{node}",
-            fallback_used=True,
-            notes=[f"{node} is classified, but 3bet-defense ranges are not wired in V0.4; preserving placeholder call."],
-        )
 
-    if node.startswith("threebettor_vs_") and "4bet" in node:
-        return RangeDecision(
-            action="call",
-            source=f"placeholder.{node}",
-            fallback_used=True,
-            notes=[f"{node} is classified, but 4bet-defense ranges are not wired in V0.4; preserving placeholder call."],
-        )
-
-    if node.startswith("fourbettor_vs_") and "5bet" in node:
-        return RangeDecision(
-            action="call",
-            source=f"placeholder.{node}",
-            fallback_used=True,
-            notes=[f"{node} is classified, but 5bet-defense ranges are not wired in V0.4; preserving placeholder call."],
-        )
-
-    return None
+def _default_for(data: dict[str, Any], name: str, fallback: str) -> str:
+    return str((data.get("defaults") or {}).get(name) or fallback)
 
 
 def decide_preflop_action_from_ranges(
@@ -101,8 +103,6 @@ def decide_preflop_action_from_ranges(
 ) -> RangeDecision:
     data = range_data or load_hero_ranges()
     nodes = data.get("nodes") or {}
-    defaults = data.get("defaults") or {}
-
     node = spot.node_type
 
     if node == "unopened":
@@ -110,7 +110,7 @@ def decide_preflop_action_from_ranges(
         return _pick_from_action_map(
             hand_class,
             action_map,
-            default_action=str(defaults.get("unopened") or "fold"),
+            default_action=_default_for(data, "unopened", "fold"),
             source=f"rfi.{spot.hero_position}",
         )
 
@@ -119,7 +119,7 @@ def decide_preflop_action_from_ranges(
         return _pick_from_action_map(
             hand_class,
             action_map,
-            default_action=str(defaults.get("sb_first_in") or "fold"),
+            default_action=_default_for(data, "sb_first_in", "fold"),
             source="sb_first_in.SB",
         )
 
@@ -128,7 +128,7 @@ def decide_preflop_action_from_ranges(
         return _pick_from_action_map(
             hand_class,
             action_map,
-            default_action=str(defaults.get("bb_vs_sb_limp") or "check"),
+            default_action=_default_for(data, "bb_vs_sb_limp", "check"),
             source="bb_vs_sb_limp.BB",
         )
 
@@ -137,7 +137,7 @@ def decide_preflop_action_from_ranges(
         return _pick_from_action_map(
             hand_class,
             action_map,
-            default_action=str(defaults.get("bb_option_vs_limp") or "check"),
+            default_action=_default_for(data, "bb_option_vs_limp", "check"),
             source="iso_raise.BB",
         )
 
@@ -146,17 +146,100 @@ def decide_preflop_action_from_ranges(
         return _pick_from_action_map(
             hand_class,
             action_map,
-            default_action=str(defaults.get("iso_vs_limp") or "fold"),
+            default_action=_default_for(data, "iso_vs_limp", "fold"),
             source=f"iso_raise.{spot.hero_position}",
         )
 
-    placeholder = _placeholder_call_for_supported_future_node(node)
-    if placeholder is not None:
-        return placeholder
+    if node in {"facing_open", "blind_vs_open"}:
+        if not spot.opener_pos:
+            return RangeDecision(
+                action="safe_fallback",
+                source=f"vs_open.missing_opener.{spot.hero_position}",
+                fallback_used=True,
+                notes=["Cannot resolve facing_open without opener_pos."],
+            )
+        action_map, source = _lookup_action_map(nodes, "vs_open", spot.opener_pos, spot.hero_position)
+        return _pick_from_action_map(
+            hand_class,
+            action_map,
+            default_action=_default_for(data, node, "fold"),
+            source=source,
+        )
+
+    if node == "limper_vs_iso":
+        if not spot.opener_pos:
+            return RangeDecision(
+                action="safe_fallback",
+                source=f"limper_vs_iso.missing_iso_raiser.{spot.hero_position}",
+                fallback_used=True,
+                notes=["Cannot resolve limper_vs_iso without opener_pos/iso_raiser."],
+            )
+        action_map, source = _lookup_action_map(nodes, "limper_vs_iso", spot.hero_position, spot.opener_pos)
+        if not action_map:
+            action_map, source = _best_fallback_by_hero(nodes, "limper_vs_iso", spot.hero_position, spot.opener_pos)
+        return _pick_from_action_map(
+            hand_class,
+            action_map,
+            default_action=_default_for(data, "limper_vs_iso", "fold"),
+            source=source,
+        )
+
+    if node.startswith("opener_vs_") and "3bet" in node:
+        if not spot.three_bettor_pos:
+            return RangeDecision(
+                action="safe_fallback",
+                source=f"opener_vs_3bet.missing_threebettor.{spot.hero_position}",
+                fallback_used=True,
+                notes=["Cannot resolve opener_vs_3bet without three_bettor_pos."],
+            )
+        action_map, source = _lookup_action_map(nodes, "opener_vs_3bet", spot.hero_position, spot.three_bettor_pos)
+        if not action_map:
+            action_map, source = _best_fallback_by_hero(nodes, "opener_vs_3bet", spot.hero_position, spot.three_bettor_pos)
+
+        default_action = _default_for(data, "opener_vs_3bet", "fold")
+        decision = _pick_from_action_map(hand_class, action_map, default_action=default_action, source=source)
+
+        # User-requested sizing nuance:
+        # if Hero opened 2bb and faces a tiny 4bb 3bet (<=2.1x), do not auto-fold.
+        if node == "opener_vs_small_3bet" and decision.action == "fold":
+            return RangeDecision(
+                action=_default_for(data, "small_3bet_override", "call"),
+                source=source + ".small_3bet_override",
+                matched_range=decision.matched_range,
+                fallback_used=True,
+                notes=decision.notes + ["Small 3bet override: defend by call instead of default fold."],
+            )
+        return decision
+
+    if node.startswith("threebettor_vs_") and "4bet" in node:
+        if not spot.four_bettor_pos:
+            return RangeDecision(
+                action="safe_fallback",
+                source=f"threebettor_vs_4bet.missing_fourbettor.{spot.hero_position}",
+                fallback_used=True,
+                notes=["Cannot resolve threebettor_vs_4bet without four_bettor_pos."],
+            )
+        action_map, source = _lookup_action_map(nodes, "threebettor_vs_4bet", spot.hero_position, spot.four_bettor_pos)
+        if not action_map:
+            action_map, source = _best_fallback_by_hero(nodes, "threebettor_vs_4bet", spot.hero_position, spot.four_bettor_pos)
+        return _pick_from_action_map(
+            hand_class,
+            action_map,
+            default_action=_default_for(data, "threebettor_vs_4bet", "fold"),
+            source=source,
+        )
+
+    if node.startswith("fourbettor_vs_") and "5bet" in node:
+        return RangeDecision(
+            action="safe_fallback",
+            source=f"unsupported.{node}",
+            fallback_used=True,
+            notes=["V0.5 does not yet include 4bettor-vs-5bet non-jam ranges."],
+        )
 
     return RangeDecision(
         action="safe_fallback",
         source=f"unsupported.{node}",
         fallback_used=True,
-        notes=[f"V0.4 range engine does not support node_type={node}."],
+        notes=[f"V0.5 range engine does not support node_type={node}."],
     )

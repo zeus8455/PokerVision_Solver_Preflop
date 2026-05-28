@@ -1,5 +1,17 @@
 # Version history
 
+## V0.5.0
+Defensive ranges:
+- extends hero_preflop_ranges.json with VS_OPEN, VS_OPEN_CALLERS, OPENER_VS_3BET, THREEBETTER_VS_4BET, LIMPER_VS_ISO and COLD_4BET from the old Solver ranges.py hero profile
+- range_engine now resolves:
+  - facing_open
+  - blind_vs_open
+  - limper_vs_iso
+  - opener_vs_small_3bet / normal / large
+  - threebettor_vs_small_4bet / normal / large
+- adds small_3bet override: opener facing <=2.1x 3bet defends by call if chart would otherwise fold
+- updates legacy classifier tests so they validate classification, not old placeholder actions
+
 ## V0.4.0
 Ranges foundation:
 - adds JSON hero preflop ranges
@@ -15,24 +27,10 @@ Ranges foundation:
 - keeps unsupported/all-in nodes guarded by safe fallback
 
 ## V0.3.0
-Preflop spot classifier expansion:
-- classifies SB first-in spot
-- classifies facing_open / blind_vs_open / limper_vs_iso
-- classifies opener_vs_small_3bet / opener_vs_normal_3bet / opener_vs_large_3bet
-- classifies threebettor_vs_small_4bet / normal / large
-- exposes commitment_by_pos, raise_levels, previous_raise_size, facing_raise_size, sizing_category in debug
-- preserves safe fallback for all-in and unsupported nodes
+Preflop spot classifier expansion.
 
 ## V0.2.0
-Clear_JSON adapter hardening and synthetic preflop cases:
-- chips:false is treated as 0bb committed
-- absent all_in is treated as False
-- all_in:true requires numeric chips
-- folded players remain parsed but inactive
-- sitout players, if present, are excluded from active hand state
-- already clicked Clear_JSON is rejected as solver input
-- hero validation tightened
-- synthetic tests added for Clear_JSON edge cases
+Clear_JSON adapter hardening and synthetic preflop cases.
 
 ## V0.1.1
 Removed Python cache artifacts from Git.

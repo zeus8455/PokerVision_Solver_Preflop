@@ -2,8 +2,6 @@ import json
 from pathlib import Path
 
 from solver_preflop import solve_clear_json
-from solver_preflop.clear_json_adapter import parse_clear_json_preflop
-from solver_preflop.spot_classifier import classify_preflop_spot
 
 
 def _base():
@@ -21,30 +19,14 @@ def _move_hero(data, pos, cards=("A_spades", "Q_hearts"), chips=False):
     data["players"][pos]["chips"] = chips
 
 
-def test_sb_first_in_classified():
-    data = _base()
-
+def _clear_non_blinds(data):
     for pos in ["UTG", "MP", "CO", "BTN"]:
         data["players"][pos]["fold"] = True
         data["players"][pos]["chips"] = False
 
-    data["players"]["BB"].pop("hero", None)
-    data["players"]["BB"].pop("cards", None)
-    data["players"]["BB"]["fold"] = False
-    data["players"]["BB"]["chips"] = 1.0
 
-    _move_hero(data, "SB", cards=("A_spades", "Q_hearts"), chips=0.5)
-
-    decision = solve_clear_json(data)
-
-    assert decision.node_type == "sb_first_in"
-    assert decision.raw_action == "open_raise"
-    assert decision.click_sequence == ["Raise"]
-
-
-def test_btn_facing_open_classified():
+def test_btn_vs_co_open_aqo_3bets():
     data = _base()
-
     data["players"]["UTG"]["fold"] = True
     data["players"]["UTG"]["chips"] = False
     data["players"]["MP"]["fold"] = True
@@ -57,36 +39,87 @@ def test_btn_facing_open_classified():
     data["players"]["BB"]["fold"] = False
     data["players"]["BB"]["chips"] = 1.0
 
-    _move_hero(data, "BTN", chips=False)
+    _move_hero(data, "BTN", cards=("A_spades", "Q_hearts"), chips=False)
 
-    frame = parse_clear_json_preflop(data)
-    spot = classify_preflop_spot(frame)
+    decision = solve_clear_json(data)
 
-    assert spot.node_type == "facing_open"
-    assert spot.opener_pos == "CO"
-    assert spot.to_call_bb == 2.5
+    assert decision.node_type == "facing_open"
+    assert decision.raw_action == "3bet"
+    assert decision.click_sequence == ["98%", "Raise"]
+    assert decision.debug["range_source"] == "vs_open.CO|BTN"
 
 
-def test_bb_blind_vs_open_classified():
+def test_btn_vs_co_open_76s_calls():
     data = _base()
-
     data["players"]["UTG"]["fold"] = True
     data["players"]["UTG"]["chips"] = False
     data["players"]["MP"]["fold"] = True
     data["players"]["MP"]["chips"] = False
-    data["players"]["CO"]["fold"] = True
-    data["players"]["CO"]["chips"] = False
-    data["players"]["BTN"]["fold"] = False
-    data["players"]["BTN"]["chips"] = 2.5
+    data["players"]["CO"]["fold"] = False
+    data["players"]["CO"]["chips"] = 2.5
+
+    data["players"]["BB"].pop("hero", None)
+    data["players"]["BB"].pop("cards", None)
+    data["players"]["BB"]["fold"] = False
+    data["players"]["BB"]["chips"] = 1.0
+
+    _move_hero(data, "BTN", cards=("7_spades", "6_spades"), chips=False)
 
     decision = solve_clear_json(data)
 
-    assert decision.node_type == "blind_vs_open"
-    assert decision.debug["to_call_bb"] == 1.5
-    assert decision.raw_action in {"fold", "call", "3bet"}
+    assert decision.node_type == "facing_open"
+    assert decision.raw_action == "call"
+    assert decision.click_sequence == ["CALL"]
 
 
-def test_limper_vs_iso_classified():
+def test_btn_vs_co_open_72o_folds():
+    data = _base()
+    data["players"]["UTG"]["fold"] = True
+    data["players"]["UTG"]["chips"] = False
+    data["players"]["MP"]["fold"] = True
+    data["players"]["MP"]["chips"] = False
+    data["players"]["CO"]["fold"] = False
+    data["players"]["CO"]["chips"] = 2.5
+
+    data["players"]["BB"].pop("hero", None)
+    data["players"]["BB"].pop("cards", None)
+    data["players"]["BB"]["fold"] = False
+    data["players"]["BB"]["chips"] = 1.0
+
+    _move_hero(data, "BTN", cards=("7_spades", "2_hearts"), chips=False)
+
+    decision = solve_clear_json(data)
+
+    assert decision.node_type == "facing_open"
+    assert decision.raw_action == "fold"
+    assert decision.click_sequence == ["FOLD"]
+
+
+def test_mp_limper_vs_btn_iso_qq_3bets():
+    data = _base()
+
+    data["players"]["BB"].pop("hero", None)
+    data["players"]["BB"].pop("cards", None)
+    data["players"]["BB"]["fold"] = False
+    data["players"]["BB"]["chips"] = 1.0
+
+    _move_hero(data, "MP", cards=("Q_spades", "Q_hearts"), chips=1.0)
+
+    data["players"]["UTG"]["fold"] = True
+    data["players"]["UTG"]["chips"] = False
+    data["players"]["CO"]["fold"] = True
+    data["players"]["CO"]["chips"] = False
+    data["players"]["BTN"]["fold"] = False
+    data["players"]["BTN"]["chips"] = 4.5
+
+    decision = solve_clear_json(data)
+
+    assert decision.node_type == "limper_vs_iso"
+    assert decision.raw_action == "3bet"
+    assert decision.click_sequence == ["98%", "Raise"]
+
+
+def test_mp_limper_vs_btn_iso_kqo_calls():
     data = _base()
 
     data["players"]["BB"].pop("hero", None)
@@ -106,11 +139,11 @@ def test_limper_vs_iso_classified():
     decision = solve_clear_json(data)
 
     assert decision.node_type == "limper_vs_iso"
-    assert decision.debug["to_call_bb"] == 3.5
-    assert decision.raw_action in {"fold", "call", "3bet"}
+    assert decision.raw_action == "call"
+    assert decision.click_sequence == ["CALL"]
 
 
-def test_opener_vs_small_3bet_classified():
+def test_co_opener_vs_small_3bet_ajo_calls_by_override():
     data = _base()
 
     for pos in ["UTG", "MP"]:
@@ -130,13 +163,11 @@ def test_opener_vs_small_3bet_classified():
     decision = solve_clear_json(data)
 
     assert decision.node_type == "opener_vs_small_3bet"
-    assert decision.debug["sizing_category"] == "small_3bet"
-    assert decision.debug["sizing_ratio"] == 2.0
-    assert decision.debug["to_call_bb"] == 2.0
-    assert decision.raw_action in {"call", "4bet"}
+    assert decision.raw_action == "call"
+    assert "small_3bet_override" in decision.debug["range_source"]
 
 
-def test_opener_vs_normal_3bet_classified():
+def test_co_opener_vs_normal_3bet_ajo_folds():
     data = _base()
 
     for pos in ["UTG", "MP", "BTN"]:
@@ -156,11 +187,35 @@ def test_opener_vs_normal_3bet_classified():
     decision = solve_clear_json(data)
 
     assert decision.node_type == "opener_vs_normal_3bet"
-    assert decision.debug["sizing_category"] == "normal_3bet"
-    assert round(decision.debug["sizing_ratio"], 2) == 3.2
+    assert decision.raw_action == "fold"
+    assert decision.click_sequence == ["FOLD"]
 
 
-def test_threebettor_vs_4bet_classified():
+def test_co_opener_vs_normal_3bet_aqs_4bets():
+    data = _base()
+
+    for pos in ["UTG", "MP", "BTN"]:
+        data["players"][pos]["fold"] = True
+        data["players"][pos]["chips"] = False
+
+    data["players"]["BB"].pop("hero", None)
+    data["players"]["BB"].pop("cards", None)
+    data["players"]["BB"]["fold"] = False
+    data["players"]["BB"]["chips"] = 1.0
+
+    _move_hero(data, "CO", cards=("A_spades", "Q_spades"), chips=2.5)
+
+    data["players"]["SB"]["fold"] = False
+    data["players"]["SB"]["chips"] = 8.0
+
+    decision = solve_clear_json(data)
+
+    assert decision.node_type == "opener_vs_normal_3bet"
+    assert decision.raw_action == "4bet"
+    assert decision.click_sequence == ["50%", "Raise"]
+
+
+def test_btn_threebettor_vs_sb_4bet_aks_5bet_jam():
     data = _base()
 
     for pos in ["UTG", "MP"]:
@@ -175,7 +230,7 @@ def test_threebettor_vs_4bet_classified():
     data["players"]["CO"]["fold"] = False
     data["players"]["CO"]["chips"] = 2.5
 
-    _move_hero(data, "BTN", cards=("A_spades", "K_hearts"), chips=8.0)
+    _move_hero(data, "BTN", cards=("A_spades", "K_spades"), chips=8.0)
 
     data["players"]["SB"]["fold"] = False
     data["players"]["SB"]["chips"] = 20.0
@@ -183,7 +238,5 @@ def test_threebettor_vs_4bet_classified():
     decision = solve_clear_json(data)
 
     assert decision.node_type == "threebettor_vs_normal_4bet"
-    assert decision.debug["sizing_category"] == "normal_4bet"
-    assert decision.debug["three_bettor_pos"] == "BTN"
-    assert decision.debug["four_bettor_pos"] == "SB"
-    assert decision.debug["to_call_bb"] == 12.0
+    assert decision.raw_action == "5bet_jam"
+    assert decision.click_sequence == ["98%", "Raise"]

@@ -1,58 +1,521 @@
 {
-  "schema": "preflop_ranges_v1",
-  "profile": "hero",
-  "source": "Converted initial subset from old ranges.py",
+  "defaults": {
+    "bb_option_vs_limp": "check",
+    "bb_vs_sb_limp": "check",
+    "blind_vs_open": "fold",
+    "cold_vs_3bet_or_higher": "fold",
+    "facing_open": "fold",
+    "iso_vs_limp": "fold",
+    "limper_vs_iso": "fold",
+    "opener_vs_3bet": "fold",
+    "sb_first_in": "fold",
+    "small_3bet_override": "call",
+    "threebettor_vs_4bet": "fold",
+    "unopened": "fold"
+  },
+  "key_format": {
+    "cold_4bet": "opener|three_bettor|hero",
+    "limper_vs_iso": "hero_limper|iso_raiser",
+    "opener_vs_3bet": "hero_opener|three_bettor",
+    "threebettor_vs_4bet": "hero_threebettor|four_bettor",
+    "vs_open": "opener|hero",
+    "vs_open_callers": "opener|hero|caller_count_bucket"
+  },
   "nodes": {
-    "rfi": {
-      "UTG": {
-        "open_raise": "22+ A5s+ KTs+ QTs+ J9s+ T8s+ 98s+ ATo+ KJo+ QJo+"
+    "bb_vs_sb_limp": {
+      "BB": {
+        "check": "A2o-A7o K2o-K9o Q5o-Q9o J7o-J9o T7o-T9o 98o 87o 76o K2s-K4s Q2s-Q7s J2s-J7s T2s-T7s 92s-96s 82s-86s 72s-75s 62s-64s 52s-54s 42s-43s 32s",
+        "iso_raise": "55+ A2s+ K8s+ Q8s+ J8s+ T8s+ 97s+ 87s A8o+ KTo+ QTo+ JTo"
+      }
+    },
+    "cold_4bet": {
+      "BTN|SB|BB": {
+        "4bet": "QQ+ AKs AKo A5s",
+        "call": "JJ AQs"
       },
-      "MP": {
-        "open_raise": "22+ A2s+ K9s+ Q9s+ J8s+ T8s+ 97s+ A9o+ KTo+ QTo+"
+      "CO|BTN|BB": {
+        "4bet": "QQ+ AKs AKo A5s",
+        "call": "JJ AQs"
       },
-      "CO": {
-        "open_raise": "22+ A2s+ K8s+ Q7s+ J7s+ T7s+ 97s+ 86s+ 76s+ A8o+ KTo+ QTo+"
+      "CO|BTN|SB": {
+        "4bet": "QQ+ AKs AKo A5s",
+        "call": "JJ AQs"
+      },
+      "CO|SB|BB": {
+        "4bet": "QQ+ AKs AKo A5s",
+        "call": "JJ AQs"
+      },
+      "MP|BTN|BB": {
+        "4bet": "QQ+ AKs AKo",
+        "call": "JJ AQs"
+      },
+      "MP|BTN|SB": {
+        "4bet": "QQ+ AKs AKo",
+        "call": "JJ AQs"
+      },
+      "MP|CO|BB": {
+        "4bet": "KK+ AKs AKo",
+        "call": "QQ"
+      },
+      "MP|CO|BTN": {
+        "4bet": "KK+ AKs AKo",
+        "call": "QQ"
+      },
+      "MP|CO|SB": {
+        "4bet": "KK+ AKs AKo",
+        "call": "QQ"
+      },
+      "MP|SB|BB": {
+        "4bet": "KK+ AKs AKo",
+        "call": "QQ"
+      },
+      "UTG|BTN|BB": {
+        "4bet": "QQ+ AKs AKo",
+        "call": "JJ AQs"
+      },
+      "UTG|BTN|SB": {
+        "4bet": "QQ+ AKs AKo",
+        "call": "JJ AQs"
+      },
+      "UTG|CO|BB": {
+        "4bet": "KK+ AKs AKo",
+        "call": "QQ"
+      },
+      "UTG|CO|BTN": {
+        "4bet": "KK+ AKs AKo",
+        "call": "QQ"
+      },
+      "UTG|CO|SB": {
+        "4bet": "KK+ AKs AKo",
+        "call": "QQ"
+      },
+      "UTG|MP|BB": {
+        "4bet": "KK+ AKs AKo",
+        "call": "QQ"
+      },
+      "UTG|MP|BTN": {
+        "4bet": "KK+ AKs AKo",
+        "call": "QQ"
+      },
+      "UTG|MP|CO": {
+        "4bet": "KK+ AKs AKo",
+        "call": "QQ"
+      },
+      "UTG|MP|SB": {
+        "4bet": "KK+ AKs AKo",
+        "call": "QQ"
+      },
+      "UTG|SB|BB": {
+        "4bet": "KK+ AKs AKo",
+        "call": "QQ"
+      }
+    },
+    "iso_raise": {
+      "BB": {
+        "iso_raise": "TT+ AJs+ KQs AQo+"
       },
       "BTN": {
+        "iso_raise": "66+ A8s+ K9s+ QTs+ JTs T9s 98s ATo+ KJo+ QJo"
+      },
+      "CO": {
+        "iso_raise": "77+ ATs+ KTs+ QJs JTs AJo+ KJo"
+      },
+      "MP": {
+        "iso_raise": "88+ AJs+ KJs AJo+ KQo"
+      },
+      "SB": {
+        "iso_raise": "TT+ ATs+ KQs+ QJs+ JTs AJo+ KQo"
+      },
+      "UTG": {}
+    },
+    "limper_vs_iso": {
+      "BTN|BB": {
+        "3bet": "QQ+ AQs+ AKo A5s-A4s",
+        "call": "22-JJ A2s-AJs K7s-KQs Q8s-QJs J8s-JTs T8s-T9s 97s+ 86s+ 75s+ 64s+ 54s A8o-AQo KTo-KQo QTo-QJo JTo"
+      },
+      "BTN|SB": {
+        "3bet": "QQ+ AQs+ AKo A5s-A4s",
+        "call": "22-JJ A2s-AJs K7s-KQs Q8s-QJs J8s-JTs T8s-T9s 97s+ 86s+ 75s+ 64s+ 54s A8o-AQo KTo-KQo QTo-QJo JTo"
+      },
+      "CO|BB": {
+        "3bet": "QQ+ AQs+ AKo A5s-A4s",
+        "call": "22-JJ A2s-AJs K8s-KQs Q8s-QJs J8s-JTs T8s-T9s 97s+ 86s+ 75s+ 64s+ 54s A8o-AQo KTo-KQo QTo-QJo JTo"
+      },
+      "CO|BTN": {
+        "3bet": "QQ+ AQs+ AKo A5s-A4s",
+        "call": "22-JJ A2s-AJs K8s-KQs Q8s-QJs J8s-JTs T8s-T9s 97s+ 86s+ 75s+ 64s+ 54s A8o-AQo KTo-KQo QTo-QJo JTo"
+      },
+      "CO|SB": {
+        "3bet": "QQ+ AQs+ AKo A5s-A4s",
+        "call": "22-JJ A2s-AJs K8s-KQs Q8s-QJs J8s-JTs T8s-T9s 97s+ 86s+ 75s+ 64s+ 54s A8o-AQo KTo-KQo QTo-QJo JTo"
+      },
+      "MP|BB": {
+        "3bet": "QQ+ AQs+ AKo A5s-A4s",
+        "call": "22-JJ A2s-AJs K9s-KQs Q9s-QJs J8s-JTs T8s-T9s 97s+ 86s+ 75s+ 64s+ 54s A9o-AQo KTo-KQo QTo-QJo JTo"
+      },
+      "MP|BTN": {
+        "3bet": "QQ+ AQs+ AKo A5s-A4s",
+        "call": "22-JJ A2s-AJs K9s-KQs Q9s-QJs J8s-JTs T8s-T9s 97s+ 86s+ 75s+ 64s+ 54s A9o-AQo KTo-KQo QTo-QJo JTo"
+      },
+      "MP|CO": {
+        "3bet": "QQ+ AQs+ AKo A5s-A4s",
+        "call": "22-JJ A2s-AJs K9s-KQs Q9s-QJs J8s-JTs T8s-T9s 97s+ 86s+ 75s+ 64s+ 54s A9o-AQo KTo-KQo QTo-QJo JTo"
+      },
+      "MP|SB": {
+        "3bet": "QQ+ AQs+ AKo A5s-A4s",
+        "call": "22-JJ A2s-AJs K9s-KQs Q9s-QJs J8s-JTs T8s-T9s 97s+ 86s+ 75s+ 64s+ 54s A9o-AQo KTo-KQo QTo-QJo JTo"
+      },
+      "SB|BB": {
+        "3bet": "QQ+ AQs+ AKo A5s-A4s",
+        "call": "22-JJ A2s-AJs K7s-KQs Q8s-QJs J8s-JTs T8s-T9s 97s+ 86s+ 75s+ 64s+ 54s A8o-AQo KTo-KQo QTo-QJo JTo"
+      },
+      "UTG|BB": {
+        "3bet": "QQ+ AQs+ AKo A5s-A4s",
+        "call": "22-JJ A2s-AJs K9s-KQs Q9s-QJs J8s-JTs T8s-T9s 97s+ 86s+ 75s+ 64s+ 54s A9o-AQo KTo-KQo QTo-QJo JTo"
+      },
+      "UTG|BTN": {
+        "3bet": "QQ+ AQs+ AKo A5s-A4s",
+        "call": "22-JJ A2s-AJs K9s-KQs Q9s-QJs J8s-JTs T8s-T9s 97s+ 86s+ 75s+ 64s+ 54s A9o-AQo KTo-KQo QTo-QJo JTo"
+      },
+      "UTG|CO": {
+        "3bet": "QQ+ AQs+ AKo A5s-A4s",
+        "call": "22-JJ A2s-AJs K9s-KQs Q9s-QJs J8s-JTs T8s-T9s 97s+ 86s+ 75s+ 64s+ 54s A9o-AQo KTo-KQo QTo-QJo JTo"
+      },
+      "UTG|MP": {
+        "3bet": "QQ+ AQs+ AKo A5s-A4s",
+        "call": "22-JJ A2s-AJs K9s-KQs Q9s-QJs J8s-JTs T8s-T9s 97s+ 86s+ 75s+ 64s+ 54s A9o-AQo KTo-KQo QTo-QJo JTo"
+      },
+      "UTG|SB": {
+        "3bet": "QQ+ AQs+ AKo A5s-A4s",
+        "call": "22-JJ A2s-AJs K9s-KQs Q9s-QJs J8s-JTs T8s-T9s 97s+ 86s+ 75s+ 64s+ 54s A9o-AQo KTo-KQo QTo-QJo JTo"
+      }
+    },
+    "opener_vs_3bet": {
+      "BTN|BB": {
+        "4bet": "TT+ AQs+ AKo",
+        "call": "55-99 A2s-AJs KTs-KQs QTs-QJs JTs T9s 98s AJo-AQo KQo"
+      },
+      "BTN|MP": {
+        "4bet": "QQ+ AKs AKo A5s-A4s",
+        "call": "TT-JJ AJs-AQs KQs"
+      },
+      "BTN|SB": {
+        "4bet": "TT+ AQs+ AKo",
+        "call": "99 A2s-AJs KTs-KQs QTs-QJs JTs T9s 98s AJo-AQo KQo"
+      },
+      "CO|BB": {
+        "4bet": "JJ+ AQs+ AKo",
+        "call": "TT-JJ ATs-AQs KQs QJs JTs AQo"
+      },
+      "CO|BTN": {
+        "4bet": "JJ+ AQs+ AKo",
+        "call": "TT-JJ ATs-AQs KQs QJs JTs AQo"
+      },
+      "CO|SB": {
+        "4bet": "JJ+ AQs+ AKo",
+        "call": "TT-JJ AJs-AQs KQs"
+      },
+      "MP|BB": {
+        "4bet": "QQ+ AQs+ AKo",
+        "call": "TT-JJ AJs-AQs KQs QJs"
+      },
+      "MP|BTN": {
+        "4bet": "QQ+ AQs+ AKo",
+        "call": "TT-JJ AJs-AQs KQs QJs"
+      },
+      "MP|CO": {
+        "4bet": "QQ+ AQs+ AKo",
+        "call": "TT-JJ AQs-AJs KQs"
+      },
+      "MP|SB": {
+        "4bet": "QQ+ AQs+ AKo",
+        "call": "TT-JJ AQs-AJs KQs"
+      },
+      "SB|BB": {
+        "4bet": "TT+ AQs+ AKo A2s-A5s",
+        "call": "88-99 A7s-AJs KTs-KQs QJs JTs T9s 98s AQo"
+      },
+      "UTG|BB": {
+        "4bet": "QQ+ AKs AKo",
+        "call": "TT-JJ AJs-AQs KQs"
+      },
+      "UTG|BTN": {
+        "4bet": "QQ+ AKs AKo",
+        "call": "TT-JJ AJs-AQs KQs"
+      },
+      "UTG|CO": {
+        "4bet": "QQ+ AKs AKo",
+        "call": "JJ-TT AQs-AJs KQs"
+      },
+      "UTG|MP": {
+        "4bet": "QQ+ AKs AKo",
+        "call": "JJ-TT AQs-AJs KQs"
+      },
+      "UTG|SB": {
+        "4bet": "QQ+ AKs AKo",
+        "call": "JJ-TT AQs KQs"
+      }
+    },
+    "rfi": {
+      "BTN": {
         "open_raise": "22+ A2s+ K5s+ Q6s+ J7s+ T6s+ 96s+ 85s+ 76s+ 65s+ A2o+ K8o+ Q8o+ J9o+ T9o+"
+      },
+      "CO": {
+        "open_raise": "22+ A2s+ K8s+ Q7s+ J8s+ T8s+ 97s+ 86s+ 76s+ A8o+ KTo+ QTo+"
+      },
+      "MP": {
+        "open_raise": "22+ A2s+ K9s+ Q9s+ J9s+ T8s+ 97s+ A9o+ KTo+ QTo+"
+      },
+      "UTG": {
+        "open_raise": "55+ A5s+ KTs+ QTs+ JTs+ T9s+ 98s+ ATo+ KJo+ QJo+"
       }
     },
     "sb_first_in": {
       "SB": {
-        "open_raise": "88+ A7s+ KTs+ QJs+ JTs+ T9s+ A9o+ KJo+ QJo+",
-        "limp": "22+ A2s+ K2s-KQs Q2s-QJs J2s-JTs T2s-T9s 92s-98s 82s-87s 72s-76s 63s 53s 43s A2o+ K2o-KJo Q8o-QJo J8o-JTo T8o 98o"
+        "limp": "22-88 A2s-A7s K2s-KTs Q2s-QJs J2s-JTs T2s-T9s 92s-98s 82s-87s 72s-76s 63s 53s 43s A2o+ K2o-KJo Q8o-QJo J8o-JTo T8o 98o",
+        "open_raise": "88+ A7s+ KTs+ QJs+ JTs+ T9s+ A9o+ KJo+ QJo+"
       }
     },
-    "iso_raise": {
-      "UTG": {},
-      "MP": {
-        "iso_raise": "88+ AJs+ KQs AQo+"
+    "threebettor_vs_4bet": {
+      "BB|BTN": {
+        "5bet_jam": "QQ+ AKs AKo",
+        "call": "JJ-QQ AQs+ AKo"
       },
-      "CO": {
-        "iso_raise": "77+ ATs+ KJs+ QJs JTs AJo+ KQo"
+      "BB|CO": {
+        "5bet_jam": "QQ+ AKs AKo",
+        "call": "JJ-QQ AQs+ AKo"
       },
-      "BTN": {
-        "iso_raise": "66+ A8s+ KTs+ QTs+ JTs T9s 98s ATo+ KJo+ QJo"
+      "BB|MP": {
+        "5bet_jam": "QQ+ AKs AKo",
+        "call": "JJ-QQ AQs+ AKo"
       },
-      "SB": {
-        "iso_raise": "77+ ATs+ KTs+ QTs+ JTs AJo+ KQo"
+      "BB|SB": {
+        "5bet_jam": "QQ+ AKs AKo",
+        "call": "JJ-QQ AQs+ AKo"
       },
-      "BB": {
-        "iso_raise": "88+ AJs+ KQs AQo+"
+      "BB|UTG": {
+        "5bet_jam": "QQ+ AKs AKo",
+        "call": "JJ-QQ AQs+ AKo"
+      },
+      "BTN|BB": {
+        "5bet_jam": "QQ+ AKs AKo",
+        "call": "JJ-QQ AQs+ AKo"
+      },
+      "BTN|CO": {
+        "5bet_jam": "QQ+ AKs AKo",
+        "call": "JJ-QQ AQs+ AKo"
+      },
+      "BTN|MP": {
+        "5bet_jam": "QQ+ AKs AKo",
+        "call": "JJ-QQ AQs+ AKo"
+      },
+      "BTN|SB": {
+        "5bet_jam": "QQ+ AKs AKo",
+        "call": "JJ-QQ AQs+ AKo"
+      },
+      "BTN|UTG": {
+        "5bet_jam": "QQ+ AKs AKo",
+        "call": "JJ-QQ AQs+ AKo"
+      },
+      "CO|BB": {
+        "5bet_jam": "QQ+ AKs AKo",
+        "call": "JJ-QQ AQs+ AKo"
+      },
+      "CO|BTN": {
+        "5bet_jam": "QQ+ AKs AKo",
+        "call": "JJ-QQ AQs+ AKo"
+      },
+      "CO|MP": {
+        "5bet_jam": "QQ+ AKs AKo",
+        "call": "JJ-QQ AQs+ AKo"
+      },
+      "CO|SB": {
+        "5bet_jam": "QQ+ AKs AKo",
+        "call": "JJ-QQ AQs+ AKo"
+      },
+      "CO|UTG": {
+        "5bet_jam": "QQ+ AKs AKo",
+        "call": "JJ-QQ AQs+ AKo"
+      },
+      "MP|BB": {
+        "5bet_jam": "QQ+ AKs AKo",
+        "call": "JJ-QQ AQs+ AKo"
+      },
+      "MP|BTN": {
+        "5bet_jam": "QQ+ AKs AKo",
+        "call": "JJ-QQ AQs+ AKo"
+      },
+      "MP|CO": {
+        "5bet_jam": "QQ+ AKs AKo",
+        "call": "JJ-QQ AQs+ AKo"
+      },
+      "MP|SB": {
+        "5bet_jam": "QQ+ AKs AKo",
+        "call": "JJ-QQ AQs+ AKo"
+      },
+      "MP|UTG": {
+        "5bet_jam": "QQ+ AKs AKo",
+        "call": "JJ-QQ AQs+ AKo"
+      },
+      "SB|BB": {
+        "5bet_jam": "QQ+ AKs AKo",
+        "call": "JJ-QQ AQs+ AKo"
+      },
+      "SB|BTN": {
+        "5bet_jam": "QQ+ AKs AKo",
+        "call": "JJ-QQ AQs+ AKo"
+      },
+      "SB|CO": {
+        "5bet_jam": "QQ+ AKs AKo",
+        "call": "JJ-QQ AQs+ AKo"
+      },
+      "SB|MP": {
+        "5bet_jam": "QQ+ AKs AKo",
+        "call": "JJ-QQ AQs+ AKo"
+      },
+      "SB|UTG": {
+        "5bet_jam": "QQ+ AKs AKo",
+        "call": "JJ-QQ AQs+ AKo"
       }
     },
-    "bb_vs_sb_limp": {
-      "BB": {
-        "iso_raise": "22+ A2s+ K5s+ Q8s+ J7s+ T7s+ 96s+ 86s+ 76s 65s A8o+ KTo+ QTo+ JTo",
-        "check": "A2o-A7o K2o-K9o Q5o-Q9o J7o-J9o T7o-T9o 98o 87o 76o K2s-K4s Q2s-Q7s J2s-J7s T2s-T7s 92s-96s 82s-86s 72s-75s 62s-64s 52s-54s 42s-43s 32s"
+    "vs_open": {
+      "BTN|BB": {
+        "3bet": "88+ ATs+ AJo+ A2s-A5s K8s-KQs QTs+ JTs T9s 98s",
+        "call": "22-77 A2s-A9s K4s-KJs Q7s-QJs J7s-JTs T7s-T9s 53s 64s 75s 86s 97s 98s A2o-ATo K8o-KQo QTo+ JTo"
+      },
+      "BTN|SB": {
+        "3bet": "99+ AJs+ AJo+ A2s-A5s KJs-KQs KQo QJs JTs",
+        "call": "22-88 A2s-A9s K8s-KJs Q9s-QJs J8s-JTs T8s-T9s 65s 76s 87s 98s ATo KTo-KQo QTo+ JTo"
+      },
+      "CO|BB": {
+        "3bet": "TT+ AJs+ AJo+ A2s-A5s KJs-KQs KQo",
+        "call": "22-99 A2s-ATs K7s-KJs Q8s-QJs J7s-JTs T8s-T9s 54s 65s 76s 87s 98s A8o-AJo K9o-KQo Q9o-QJo JTo"
+      },
+      "CO|BTN": {
+        "3bet": "TT+ AJs+ AJo+ A2s-A5s KJs-KQs KQo",
+        "call": "22-99 A2s-AJs KTs-KQs QTs-QJs J8s-JTs T9s 98s 87s 76s 65s ATo-AQo KJo-KQo QJo"
+      },
+      "CO|SB": {
+        "3bet": "TT+ AJs+ AJo+ A2s-A5s KJs-KQs KQo",
+        "call": "55-99 A7s-ATs KTs-KJs QJs JTs T9s 98s"
+      },
+      "MP|BB": {
+        "3bet": "JJ+ AQs+ AKo A2s-A5s KQs",
+        "call": "22-TT A2s-AJs K7s-KQs Q8s-QJs J7s-JTs T7s-T9s 54s 65s 76s 87s 98s A9o-AQo KTo-KQo QJo JTo"
+      },
+      "MP|BTN": {
+        "3bet": "TT+ AJs+ KQs AJo+ KQo",
+        "call": "22-TT A8s-AJs KTs-KQs QTs-QJs J9s-JTs T9s 98s 87s 76s ATo-AQo KQo"
+      },
+      "MP|CO": {
+        "3bet": "TT+ AJs+ KQs AJo+ KQo",
+        "call": "66-TT ATs-AQs KJs-KQs QJs JTs T9s 98s AJo+ KQo"
+      },
+      "MP|SB": {
+        "3bet": "TT+ AQs+ AKo A5s-A4s KQs",
+        "call": "22-99 ATs-AJs KJs-KQs QJs JTs T9s"
+      },
+      "SB|BB": {
+        "3bet": "88+ ATs+ AJo+ A2s-A5s KJs+ QJs JTs",
+        "call": "22-77 A2s-A9s K4s-KJs Q7s-QJs J7s-JTs T7s-T9s 53s 64s 75s 86s 97s 98s A2o-ATo K8o-KQo QTo+ JTo"
+      },
+      "UTG|BB": {
+        "3bet": "JJ+ AJs+ KQs AJo+",
+        "call": "22-TT A2s-AQs K7s-KQs Q7s-QJs J8s-JTs T8s-T9s 54s 65s 76s 87s 98s A7o-AQo KTo-KQo QTo+"
+      },
+      "UTG|BTN": {
+        "3bet": "JJ+ AJs+ KQs AJo+",
+        "call": "44-JJ A9s-AQs KTs-KQs QTs-QJs J9s-JTs T9s 98s 87s 76s AJo-AQo KQo"
+      },
+      "UTG|CO": {
+        "3bet": "JJ+ AJs+ KQs AJo+",
+        "call": "66-TT AJs-AQs KQs QJs JTs T9s 98s AJo-AQo KQo"
+      },
+      "UTG|MP": {
+        "3bet": "JJ+ AJs+ KQs AJo+",
+        "call": "88-TT AJs-AQs KQs QJs JTs T9s 98s AJo-AQo KQo"
+      },
+      "UTG|SB": {
+        "3bet": "JJ+ AJs+ KQs AJo+",
+        "call": "22-TT AJs-AQs KQs QJs JTs T9s"
+      }
+    },
+    "vs_open_callers": {
+      "BTN|BB|1": {
+        "3bet": "99+ ATs+ AJo+ A2s-A5s K8s-KQs QTs+ JTs T9s",
+        "call": "22-88 A2s-A9s K5s-KJs Q8s-QJs J8s-JTs T8s-T9s 64s 75s 86s 97s 98s A2o-ATo K9o-KQo QTo+ JTo"
+      },
+      "BTN|BB|2": {
+        "3bet": "JJ+ AQs+ AKo A5s-A4s",
+        "call": "55-TT A9s-AJs KTs-KQs QTs-QJs JTs T9s 98s"
+      },
+      "CO|BB|1": {
+        "3bet": "JJ+ AQs+ A5s-A4s AQo+",
+        "call": "22-99 A2s-ATs K7s-KJs Q8s-QJs J7s-JTs T8s-T9s 54s 65s 76s 87s 98s A8o-AJo K9o-KQo Q9o-QJo"
+      },
+      "CO|BB|2": {
+        "3bet": "QQ+ AKs AKo A5s",
+        "call": "66-JJ AJs-AQs KQs QJs JTs T9s"
+      },
+      "CO|BTN|1": {
+        "3bet": "TT+ AQs+ A5s-A4s AQo+",
+        "call": "22-99 A2s-AJs KTs-KQs QTs-QJs J8s-JTs T9s 98s 87s 76s ATo-AQo KJo-KQo"
+      },
+      "CO|SB|1": {
+        "3bet": "TT+ AQs+ A5s-A4s AQo+",
+        "call": "22-99 A7s-ATs KTs-KJs QJs JTs T9s"
+      },
+      "MP|BB|1": {
+        "3bet": "TT+ AQs+ A5s-A4s AQo+",
+        "call": "22-TT A2s-AJs K9s-KQs Q9s-QJs J8s-JTs T8s-T9s 54s 65s 76s 87s 98s A9o-AQo KTo-KQo QJo"
+      },
+      "MP|BB|2": {
+        "3bet": "QQ+ AKs AKo A5s-A4s",
+        "call": "66-JJ A9s-AQs KTs-KQs QTs-QJs JTs T9s 98s AQo KQo"
+      },
+      "MP|BTN|1": {
+        "3bet": "TT+ AQs+ A5s-A4s AQo+",
+        "call": "66-TT A9s-AJs KTs-KQs QTs-QJs JTs T9s 98s 87s AQo KQo"
+      },
+      "MP|SB|1": {
+        "3bet": "TT+ AQs+ A5s-A4s AQo+",
+        "call": "77-99 ATs-AJs KJs-KQs QJs JTs T9s"
+      },
+      "MP|SB|2": {
+        "3bet": "QQ+ AKs AKo A5s-A4s",
+        "call": "88-JJ AJs-AQs KQs QJs JTs T9s"
+      },
+      "UTG|BB|1": {
+        "3bet": "JJ+ AQs+ AKo A5s",
+        "call": "22-JJ A2s-AQs KTs-KQs QTs-QJs J8s-JTs T8s-T9s 54s 65s 76s 87s 98s ATo-AQo KJo-KQo"
+      },
+      "UTG|BB|2": {
+        "3bet": "QQ+ AKs AKo A5s-A4s",
+        "call": "77-JJ ATs-AQs KJs-KQs QJs JTs T9s 98s 87s AQo"
+      },
+      "UTG|BTN|1": {
+        "3bet": "JJ+ AQs+ AKo A5s",
+        "call": "77-JJ ATs-AQs KJs-KQs QJs JTs T9s 98s 87s 76s AQo"
+      },
+      "UTG|BTN|2": {
+        "3bet": "QQ+ AKs AKo A5s-A4s",
+        "call": "77-JJ ATs-AQs KJs-KQs QJs JTs T9s 98s 87s AQo"
+      },
+      "UTG|CO|1": {
+        "3bet": "JJ+ AQs+ AKo A5s",
+        "call": "88-JJ AJs-AQs KQs QJs JTs T9s 98s 87s AQo"
+      },
+      "UTG|SB|1": {
+        "3bet": "JJ+ AQs+ AKo A5s",
+        "call": "99-TT AJs-AQs KQs QJs JTs"
+      },
+      "UTG|SB|2": {
+        "3bet": "QQ+ AKs AKo A5s-A4s",
+        "call": "99-JJ AJs-AQs KQs QJs JTs"
       }
     }
   },
-  "defaults": {
-    "unopened": "fold",
-    "sb_first_in": "fold",
-    "iso_vs_limp": "fold",
-    "bb_option_vs_limp": "check",
-    "bb_vs_sb_limp": "check"
-  }
+  "profile": "hero",
+  "schema": "preflop_ranges_v1",
+  "source": "Converted from uploaded old ranges.py HERO_* charts for PokerVision_Solver_Preflop V0.5"
 }

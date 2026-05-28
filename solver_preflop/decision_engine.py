@@ -52,7 +52,7 @@ def solve_clear_json(data: dict[str, Any]) -> SolverDecision:
             engine_action = "safe_fallback"
             size_pct = None
             status = "fallback"
-            reason = f"Range engine unsupported node: {spot.node_type}"
+            reason = f"Range engine unsupported/unsafe node: {spot.node_type}"
         else:
             click_sequence = click_sequence_for_action(raw_action)
             engine_action = _engine_action(raw_action)
@@ -61,7 +61,7 @@ def solve_clear_json(data: dict[str, Any]) -> SolverDecision:
             reason = (
                 f"range:{range_decision.source}:{raw_action}"
                 if not range_decision.fallback_used
-                else f"range:{range_decision.source}:default:{raw_action}"
+                else f"range:{range_decision.source}:default_or_override:{raw_action}"
             )
 
         solver_fingerprint, decision_id = _build_identity(
