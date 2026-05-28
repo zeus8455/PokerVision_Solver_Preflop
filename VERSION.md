@@ -1,5 +1,16 @@
 # Version history
 
+## V1.9.0
+Snapshot cycle bridge smoke:
+- adds tools/run_snapshot_cycle_bridge_smoke.py
+- never touches C:\PokerVisionFinalVersionNoSolver
+- avoids full live screen/YOLO execution
+- uses snapshot Pending Clear_JSON files as controlled pre-click cycle inputs
+- verifies each preflop Pending Clear_JSON can be converted into Solver_Preflop bridge contract
+- verifies contracts contain bridge_payload/runtime_plan_candidate/action_decision
+- verifies optional diagnostic publication path writes Solver_Preflop_Bridge_JSON files
+- adds test coverage for the snapshot cycle bridge smoke
+
 ## V1.8.0
 Snapshot-only main startup smoke:
 - adds tools/run_snapshot_main_startup_smoke.py
@@ -11,14 +22,7 @@ Snapshot-only main startup smoke:
 - adds test coverage for snapshot-only main smoke
 
 ## V1.7.0
-Solver_Preflop bridge diagnostic publication toggle:
-- adds a display_analysis_cycle.py toggle:
-  V17_SOLVER_PREFLOP_BRIDGE_PUBLISH_DIAGNOSTIC_FILES = False
-- wires pending-preview Solver_Preflop bridge call to that toggle
-- default behavior stays safe: no diagnostic files are published
-- adds tools/run_solver_preflop_bridge_publication_check.py
-- verifies direct bridge publication writes Solver_Preflop_Bridge_JSON/table_xx/*.solver_preflop_bridge_preview.json
-- adds static and runtime tests for the publication toggle
+Solver_Preflop bridge diagnostic publication toggle.
 
 ## V1.6.0
 Display-cycle bridge embedding check.
