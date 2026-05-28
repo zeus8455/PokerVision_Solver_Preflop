@@ -5,7 +5,7 @@ from typing import Any, Optional
 
 
 SOLVER_NAME = "PokerVision_Solver_Preflop"
-SOLVER_VERSION = "0.9.0"
+SOLVER_VERSION = "1.0.0"
 SOLVER_CONTRACT_VERSION = "preflop_solver_response_v1"
 
 POSITIONS_6MAX = ("UTG", "MP", "CO", "BTN", "SB", "BB")

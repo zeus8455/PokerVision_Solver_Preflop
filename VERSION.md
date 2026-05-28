@@ -1,5 +1,17 @@
 # Version history
 
+## V1.0.0
+Pre-integration stabilization:
+- marks the standalone preflop solver as integration-ready baseline
+- adds tools/run_preintegration_check.py
+- preintegration check validates:
+  - pytest suite
+  - CLI --write-files path
+  - PokerVisionBridge JSON creation
+  - required bridge/runtime guard fields
+- adds tests for V1.0 version and preintegration tool
+- updates README with current chain and usage
+
 ## V0.9.0
 PokerVision integration bridge preview:
 - adds solver_preflop/pokervision_bridge.py
