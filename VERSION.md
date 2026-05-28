@@ -1,5 +1,17 @@
 # Version history
 
+## V2.4.0
+Snapshot Solver_Preflop click-guard eligibility check:
+- adds tools/run_v2_4_snapshot_click_guard_eligibility_check.py
+- runs all snapshot Pending preflop Clear_JSON cases through:
+  Pending Clear_JSON -> Solver_Preflop bridge -> V2.1 adapter
+  -> Action_Runtime_Plan_JSON -> ClickExecutionGuard
+- verifies dry-run click-result eligibility passes for all Solver-sourced runtime plans
+- verifies forced real-click request is blocked by real_click_master_not_armed
+- verifies slot-boundary/button/no-repeat/plan-source guards are satisfied in dry-run mode
+- keeps full live UI, screen capture, YOLO, and real project mutation disabled
+- adds test coverage for Solver_Preflop click-guard eligibility
+
 ## V2.3.0
 Snapshot Solver_Preflop runtime plan publication check:
 - adds tools/run_v2_3_snapshot_runtime_publication_check.py
@@ -13,16 +25,7 @@ Snapshot Solver_Preflop runtime plan publication check:
 - adds test coverage for the publication path
 
 ## V2.2.0
-Snapshot Solver_Preflop runtime source multi-case check:
-- adds tools/run_v2_2_snapshot_solver_source_multicase_check.py
-- runs every snapshot Pending preflop Clear_JSON through:
-  Pending Clear_JSON -> Solver_Preflop bridge -> Solver action_decision
-  -> V2.1 legacy-compatible Action_Decision_JSON adapter
-  -> Action_Runtime_Plan_JSON
-- verifies selected_source=Solver_Preflop_Bridge for all cases
-- verifies runtime plans for fold/check cases are valid and dry-run only
-- verifies no full live UI, screen capture, YOLO, or real project mutation
-- adds test coverage for the multi-case runtime source path
+Snapshot Solver_Preflop runtime source multi-case check.
 
 ## V2.1.0
 Snapshot Solver_Preflop runtime source dry-run ON.
