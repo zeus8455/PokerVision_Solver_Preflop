@@ -1,25 +1,23 @@
 # Version history
 
+## V2.0.0
+Snapshot-only runtime source switch scaffold:
+- adds disabled-by-default snapshot toggles:
+  - V20_USE_SOLVER_PREFLOP_AS_RUNTIME_SOURCE = False
+  - V20_SOLVER_PREFLOP_DRY_RUN_ONLY = True
+- adds _select_v20_runtime_action_decision_state(...)
+- keeps old Action_Decision_JSON as runtime source by default
+- prepares build_and_save_action_decision_contract(...) to accept optional solver_preflop_bridge_contract
+- reorders pending-preview branch so Solver_Preflop bridge is built before Action_Decision contract and can be passed into the selector
+- embeds v20_runtime_source_selection into action_decision_contract and action_runtime_plan_contract
+- does not touch C:\PokerVisionFinalVersionNoSolver
+- does not enable real-click Solver runtime source
+
 ## V1.9.0
-Snapshot cycle bridge smoke:
-- adds tools/run_snapshot_cycle_bridge_smoke.py
-- never touches C:\PokerVisionFinalVersionNoSolver
-- avoids full live screen/YOLO execution
-- uses snapshot Pending Clear_JSON files as controlled pre-click cycle inputs
-- verifies each preflop Pending Clear_JSON can be converted into Solver_Preflop bridge contract
-- verifies contracts contain bridge_payload/runtime_plan_candidate/action_decision
-- verifies optional diagnostic publication path writes Solver_Preflop_Bridge_JSON files
-- adds test coverage for the snapshot cycle bridge smoke
+Snapshot cycle bridge smoke.
 
 ## V1.8.0
-Snapshot-only main startup smoke:
-- adds tools/run_snapshot_main_startup_smoke.py
-- runs snapshot PokerVision main.py with --startup-audit-only
-- never touches C:\PokerVisionFinalVersionNoSolver
-- verifies snapshot display_analysis_cycle.py contains Solver_Preflop dry-run bridge wiring
-- verifies snapshot bridge module can locate C:\PokerVision_Solver_Preflop through env/default root
-- verifies startup audit exits before live UI launch
-- adds test coverage for snapshot-only main smoke
+Snapshot-only main startup smoke.
 
 ## V1.7.0
 Solver_Preflop bridge diagnostic publication toggle.

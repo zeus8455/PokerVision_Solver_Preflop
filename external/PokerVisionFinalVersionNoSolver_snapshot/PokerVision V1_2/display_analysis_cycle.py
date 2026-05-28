@@ -119,6 +119,11 @@ from runtime.solver_preflop_dryrun_bridge import build_solver_preflop_dryrun_bri
 # V1.7: diagnostic-only Solver_Preflop bridge file publication toggle.
 # Default remains False: bridge result is embedded into state/contract only.
 V17_SOLVER_PREFLOP_BRIDGE_PUBLISH_DIAGNOSTIC_FILES = False
+
+# V2.0: snapshot-only runtime source switch scaffold.
+# Default remains False: old Action_Decision_JSON remains the runtime source.
+V20_USE_SOLVER_PREFLOP_AS_RUNTIME_SOURCE = False
+V20_SOLVER_PREFLOP_DRY_RUN_ONLY = True
 from logic.click_execution_guard import (
     ClickExecutionRequest,
     ClickGuardConfig,
@@ -1473,6 +1478,56 @@ def _release_failed_active_finalization_if_needed(
 
     return release_payload
 
+def _select_v20_runtime_action_decision_state(
+    *,
+    default_action_decision_state: Dict[str, object],
+    solver_preflop_bridge_contract: Optional[Dict[str, object]] = None,
+) -> tuple[Dict[str, object], Dict[str, object]]:
+    """Select which Action_Decision-like payload feeds Action_Runtime_Plan_JSON.
+
+    V2.0 is deliberately disabled by default. When disabled, this function
+    always returns the legacy Action_Decision_JSON payload. When enabled later,
+    Solver_Preflop may become the source only if its bridge contract provides a
+    bridge_payload.action_decision object. This scaffold does not bypass runtime
+    guards and does not enable real-click by itself.
+    """
+    selection = {
+        "schema": "v20_runtime_action_decision_source_selection_v1",
+        "enabled": bool(V20_USE_SOLVER_PREFLOP_AS_RUNTIME_SOURCE),
+        "selected_source": "Action_Decision_JSON",
+        "reason": "v20_switch_disabled",
+        "dry_run_only": bool(V20_SOLVER_PREFLOP_DRY_RUN_ONLY),
+        "solver_bridge_status": None,
+        "solver_action_decision_available": False,
+    }
+
+    if not V20_USE_SOLVER_PREFLOP_AS_RUNTIME_SOURCE:
+        return dict(default_action_decision_state), selection
+
+    if not isinstance(solver_preflop_bridge_contract, dict):
+        selection["reason"] = "solver_bridge_contract_missing"
+        return dict(default_action_decision_state), selection
+
+    selection["solver_bridge_status"] = solver_preflop_bridge_contract.get("status")
+    bridge_payload = solver_preflop_bridge_contract.get("bridge_payload")
+    if not isinstance(bridge_payload, dict):
+        selection["reason"] = "solver_bridge_payload_missing"
+        return dict(default_action_decision_state), selection
+
+    solver_action_decision = bridge_payload.get("action_decision")
+    if not isinstance(solver_action_decision, dict):
+        selection["reason"] = "solver_action_decision_missing"
+        return dict(default_action_decision_state), selection
+
+    selection["solver_action_decision_available"] = True
+    selection["selected_source"] = "Solver_Preflop_Bridge"
+    selection["reason"] = "v20_solver_preflop_selected"
+    selection["source_frame_id"] = solver_action_decision.get("source_frame_id")
+    selection["decision_id"] = solver_action_decision.get("decision_id")
+    selection["solver_fingerprint"] = solver_action_decision.get("solver_fingerprint")
+    return dict(solver_action_decision), selection
+
+
 def build_and_save_action_runtime_plan_contract(
     *,
     action_decision_state: Dict[str, object],
@@ -1573,12 +1628,18 @@ def build_and_save_action_decision_contract(
             else:
                 path_text = None
                 publication_status = "preview_not_saved_pending_only"
+            runtime_action_decision_state, v20_runtime_source_selection = _select_v20_runtime_action_decision_state(
+                default_action_decision_state=action_decision_state,
+                solver_preflop_bridge_contract=solver_preflop_bridge_contract,
+            )
             runtime_plan_contract = build_and_save_action_runtime_plan_contract(
-                action_decision_state=action_decision_state,
+                action_decision_state=runtime_action_decision_state,
                 cycle_dir=cycle_dir,
                 table_id=table_id,
                 publish_files=publish_files,
             )
+            if isinstance(runtime_plan_contract, dict):
+                runtime_plan_contract["v20_runtime_source_selection"] = dict(v20_runtime_source_selection)
             return {
                 "enabled": True,
                 "source": "Decision_JSON",
@@ -1592,6 +1653,7 @@ def build_and_save_action_decision_contract(
                 "action": action_decision_state.get("action"),
                 "size_policy": action_decision_state.get("size_policy"),
                 "target_button_classes": action_decision_state.get("target_button_classes"),
+                "v20_runtime_source_selection": dict(v20_runtime_source_selection),
                 "action_runtime_plan_contract": runtime_plan_contract,
             }
         return {
