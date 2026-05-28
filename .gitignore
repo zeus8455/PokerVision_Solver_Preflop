@@ -4,3 +4,5 @@
 .venv/
 venv/
 .env
+
+tmp_solver_outputs/
