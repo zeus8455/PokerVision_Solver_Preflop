@@ -1,5 +1,15 @@
 # Version history
 
+## V1.8.0
+Snapshot-only main startup smoke:
+- adds tools/run_snapshot_main_startup_smoke.py
+- runs snapshot PokerVision main.py with --startup-audit-only
+- never touches C:\PokerVisionFinalVersionNoSolver
+- verifies snapshot display_analysis_cycle.py contains Solver_Preflop dry-run bridge wiring
+- verifies snapshot bridge module can locate C:\PokerVision_Solver_Preflop through env/default root
+- verifies startup audit exits before live UI launch
+- adds test coverage for snapshot-only main smoke
+
 ## V1.7.0
 Solver_Preflop bridge diagnostic publication toggle:
 - adds a display_analysis_cycle.py toggle:
@@ -11,14 +21,7 @@ Solver_Preflop bridge diagnostic publication toggle:
 - adds static and runtime tests for the publication toggle
 
 ## V1.6.0
-Display-cycle bridge embedding check:
-- adds tools/run_display_cycle_bridge_embedding_check.py
-- verifies display_analysis_cycle.py contains the Solver_Preflop dry-run bridge import
-- verifies pending-preview branch stores solver_preflop_bridge_contract into:
-  - action_decision_contract["solver_preflop_bridge_contract"]
-  - state["solver_preflop_bridge_contract"]
-- verifies the bridge module runs against pending preflop snapshot Clear_JSON
-- adds test coverage for the embedding check
+Display-cycle bridge embedding check.
 
 ## V1.5.0
 Cold-vs-3bet range support.
