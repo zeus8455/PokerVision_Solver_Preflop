@@ -1,5 +1,15 @@
 # Version history
 
+## V1.6.0
+Display-cycle bridge embedding check:
+- adds tools/run_display_cycle_bridge_embedding_check.py
+- verifies display_analysis_cycle.py contains the Solver_Preflop dry-run bridge import
+- verifies pending-preview branch stores solver_preflop_bridge_contract into:
+  - action_decision_contract["solver_preflop_bridge_contract"]
+  - state["solver_preflop_bridge_contract"]
+- verifies the bridge module runs against pending preflop snapshot Clear_JSON
+- adds test coverage for the embedding check
+
 ## V1.5.0
 Cold-vs-3bet range support:
 - wires cold_vs_3bet_or_higher into hero_preflop_ranges.json nodes.cold_4bet
@@ -9,11 +19,7 @@ Cold-vs-3bet range support:
 - table_01_hand_21_preflop now returns fold instead of safe_fallback
 
 ## V1.4.0
-Cold blind vs 3bet classifier fix:
-- fixes SB/BB cold-facing multi-raise spots
-- SB with 0.5bb blind and BB with 1.0bb blind can now classify as cold_vs_3bet_or_higher
-- table_01_hand_21_preflop now becomes cold_vs_3bet_or_higher instead of multi_raise_unknown
-- keeps decision guarded as safe_fallback until cold 4bet/all-in ranges are intentionally wired
+Cold blind vs 3bet classifier fix.
 
 ## V1.3.0
 Snapshot Clear_JSON bridge check.
