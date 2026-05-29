@@ -3178,6 +3178,36 @@ def run_ui_display_analysis_cycle(
                     f"reason={early_action_transaction_decision.reason}, "
                     f"locked_by={early_action_transaction_decision.locked_by_transaction_id}"
                 )
+
+                # V2.29: release stale early lifecycle directly inside the early gate blocked path.
+                #
+                # V2.28 released only after heavy analysis/action-runtime candidate calculation.
+                # That does not help when this early branch immediately continues before heavy
+                # analysis. In real live runs this left tables stuck at
+                # table_lifecycle_already_open_before_analysis and prevented the chain from
+                # reaching Clear_JSON -> Solver_Preflop -> Action_Button -> click.
+                #
+                # We still skip the current frame after releasing; the next scan can reopen a
+                # fresh lifecycle and process a real Active frame without re-entering this
+                # stale-lock loop.
+                if (
+                    table_action_transaction_gate is not None
+                    and str(early_action_transaction_decision.reason) == "table_lifecycle_already_open_before_analysis"
+                ):
+                    stale_lifecycle_release_before_continue = table_action_transaction_gate.abort_analysis_cycle(
+                        table_id=slot.table_id,
+                        reason="v229_release_stale_lifecycle_before_heavy_analysis",
+                        message=(
+                            "V2.29 released stale early table lifecycle before heavy-analysis skip; "
+                            "current frame remains skipped and the next scan may process normally."
+                        ),
+                    )
+                    print(
+                        f"[TableActionTransactionGate][{slot.table_id}] V2.29 released stale early lifecycle before continue: "
+                        f"status={stale_lifecycle_release_before_continue.get('status')}, "
+                        f"reason={stale_lifecycle_release_before_continue.get('reason')}, "
+                        f"released_transaction_id={stale_lifecycle_release_before_continue.get('transaction_id')}"
+                    )
                 continue
 
         if TABLE_STRUCTURE_ENABLED:

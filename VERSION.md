@@ -1,3 +1,34 @@
+## V2.29.0 - release stale lifecycle inside early gate blocked path
+
+Status: passed
+
+Goal:
+- Fix the remaining real-live stale lifecycle lock case where heavy analysis is skipped before the V2.28 release block can run.
+- Release table lifecycle directly inside the early gate blocked path when reason == table_lifecycle_already_open_before_analysis.
+
+Changed:
+- external/PokerVisionFinalVersionNoSolver_snapshot/PokerVision V1_2/display_analysis_cycle.py
+
+Added:
+- tools/apply_v2_29_early_gate_stale_lifecycle_release_patch.py
+- tools/run_v2_29_early_gate_stale_lifecycle_release_audit.py
+- tests/test_v2_29_early_gate_stale_lifecycle_release_audit.py
+
+Validated:
+- V2.29 audit status ok
+- V2.29 release is inside early gate blocked path
+- V2.29 release occurs before V2.28 late release block
+- abort_analysis_cycle used only for table_lifecycle_already_open_before_analysis
+- current frame remains skipped after release
+- next scan can reopen lifecycle normally
+- real project not touched
+- full pytest: 101 passed
+
+Live issue addressed:
+- table_lifecycle_already_open_before_analysis could block heavy analysis before the previous V2.28 release block was reached.
+- This prevented later stages from reaching Clear_JSON -> Solver_Preflop -> Action_Button -> click.
+- V2.29 releases that stale lifecycle before continue, allowing the next scan to process normally.
+
 ## V2.28.0 - release early transaction lifecycle when action runtime cannot start
 
 Status: passed
@@ -415,6 +446,7 @@ Removed Python cache artifacts from Git.
 
 ## V0.1.0
 Initial skeleton.
+
 
 
 
