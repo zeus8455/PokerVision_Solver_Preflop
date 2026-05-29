@@ -1,5 +1,19 @@
 ﻿# Version history
 
+## V2.18.0
+Startup audit-only readiness regression:
+- adds tools/run_v2_18_startup_audit_only_readiness.py
+- adds tests/test_v2_18_startup_audit_only_readiness.py
+- runs main.py --startup-audit-only from the snapshot runtime
+- confirms startup readiness exits with returncode 0
+- confirms live UI launch is skipped
+- confirms screen capture is not executed
+- confirms YOLO detectors are not executed
+- confirms physical click is not executed
+- confirms Action_Button real click is disabled and dry-run is enabled
+- confirms Trigger_UI service real click is disabled and dry-run is enabled
+- confirms V10 readiness reports safe_no_click
+- keeps real project mutation disabled
 ## V2.17.0
 Pre-live config audit:
 - adds tools/run_v2_17_pre_live_config_audit.py
@@ -248,6 +262,7 @@ Removed Python cache artifacts from Git.
 
 ## V0.1.0
 Initial skeleton.
+
 
 
 
