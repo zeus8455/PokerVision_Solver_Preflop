@@ -1,5 +1,18 @@
 ﻿# Version history
 
+## V2.10.0
+Snapshot transaction source audit:
+- adds tools/run_v2_10_snapshot_transaction_source_audit.py
+- adds tests/test_v2_10_snapshot_transaction_source_audit.py
+- audits TableActionTransactionGate.finalize_from_runtime as the source of clear_json_save_allowed and click_result_for_clear
+- confirms display cycle derives clear_json_save_allowed from transaction_runtime_report.click_completed
+- confirms click_result_for_clear is available only when click_completed is true
+- confirms action_button dry_run/clicked/confirmed complete the transaction
+- confirms skipped action_button runtime remains pending and does not publish Final Clear_JSON
+- confirms blocked action_button runtime fails and does not publish Final Clear_JSON
+- confirms service branch has priority over action_button when service status is completed or failed
+- confirms dry_run_counts_as_completed=False prevents dry_run from completing the transaction
+- keeps real project, live UI, screen capture, YOLO and physical click disabled
 ## V2.9.0
 Snapshot finalization blocker audit:
 - adds tools/run_v2_9_snapshot_finalization_blocker_audit.py
@@ -135,6 +148,7 @@ Removed Python cache artifacts from Git.
 
 ## V0.1.0
 Initial skeleton.
+
 
 
 
