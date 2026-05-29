@@ -1,3 +1,31 @@
+## V2.25.0 - real startup readiness after V2.24
+
+Status: passed
+
+Goal:
+- Prove controlled real-click startup readiness after V2.24 snapshot runtime E2E.
+- Run readiness through main.py --startup-audit-only without live UI, screen capture, YOLO, or physical mouse click.
+
+Added:
+- tools/run_v2_25_real_startup_readiness_after_v224.py
+- tests/test_v2_25_real_startup_readiness_after_v224.py
+
+Validated:
+- V2.24 VERSION record is present
+- V2.20 real-live startup readiness tool returns status ok
+- real_click_ready == true
+- no_click_mode disabled
+- master armed
+- Action_Button real-click enabled
+- Service real-click enabled
+- startup audit-only active
+- max clicks per run == 0
+- live UI not launched
+- screen capture not executed
+- YOLO detector not executed
+- physical_click_executed == false
+- full pytest: 98 passed
+
 ## V2.24.0 - snapshot live-runtime E2E
 
 Status: passed
@@ -332,6 +360,7 @@ Removed Python cache artifacts from Git.
 
 ## V0.1.0
 Initial skeleton.
+
 
 
 
