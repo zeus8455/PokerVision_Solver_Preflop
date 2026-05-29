@@ -1,5 +1,18 @@
 ﻿# Version history
 
+## V2.12.0
+Snapshot display transaction integration audit:
+- adds tools/run_v2_12_snapshot_display_transaction_integration_audit.py
+- adds tests/test_v2_12_snapshot_display_transaction_integration_audit.py
+- audits the production save_dark_and_clear_table_frame_json boundary
+- confirms transaction_runtime_report.click_completed controls clear_json_save_allowed
+- confirms click_result_for_clear is attached only when the transaction completed
+- confirms dry_run/clicked completed runtime saves Final Clear_JSON
+- confirms skipped/blocked runtime remains pending_only and does not save Final Clear_JSON
+- confirms inactive frames save Dark_JSON only
+- confirms duplicate/hard-stop frames stop before Pending/Decision/RuntimePlan and save Dark_JSON only
+- isolates ClickExecutionGuard with an in-tool forced-pass stub so V2.12 tests only the transaction/save boundary
+- keeps real project, live UI, screen capture, YOLO and physical click disabled
 ## V2.11.0
 Snapshot transaction lifecycle audit:
 - adds tools/run_v2_11_snapshot_transaction_lifecycle_audit.py
@@ -161,6 +174,7 @@ Removed Python cache artifacts from Git.
 
 ## V0.1.0
 Initial skeleton.
+
 
 
 
