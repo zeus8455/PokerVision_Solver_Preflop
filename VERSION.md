@@ -1,5 +1,21 @@
 ﻿# Version history
 
+## V2.17.0
+Pre-live config audit:
+- adds tools/run_v2_17_pre_live_config_audit.py
+- adds tests/test_v2_17_pre_live_config_audit.py
+- audits effective imported pre-live config, not only raw text grep
+- confirms live data capture no-click mode is enabled
+- confirms Action_Button real mouse click is disabled
+- confirms Action_Button dry-run is enabled
+- confirms Trigger_UI service real click is disabled
+- confirms real-click master arm is disabled
+- confirms transaction gate is enabled
+- confirms dry-run counts as completed for pre-live audit mode
+- confirms Final Clear_JSON requires click_result
+- confirms slot, no-repeat and button availability guards are required
+- confirms Solver_Preflop runtime source is enabled and dry-run only
+- keeps real project, live UI, screen capture, YOLO and physical click disabled
 ## V2.16.0
 Snapshot 6-slot preflop E2E regression:
 - adds tools/run_v2_16_snapshot_6slot_preflop_e2e.py
@@ -232,6 +248,7 @@ Removed Python cache artifacts from Git.
 
 ## V0.1.0
 Initial skeleton.
+
 
 
 
