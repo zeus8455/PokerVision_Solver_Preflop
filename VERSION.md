@@ -1,5 +1,18 @@
 ﻿# Version history
 
+## V2.11.0
+Snapshot transaction lifecycle audit:
+- adds tools/run_v2_11_snapshot_transaction_lifecycle_audit.py
+- adds tests/test_v2_11_snapshot_transaction_lifecycle_audit.py
+- audits the full TableActionTransactionGate lifecycle without live UI, YOLO, screen capture or physical click
+- confirms success path begin_analysis_cycle -> begin_action_cycle -> finalize_from_runtime -> click_done releases the table lock
+- confirms early duplicate Active lifecycle blocks repeated heavy analysis
+- confirms late duplicate action lifecycle blocks repeated action runtime
+- confirms skipped runtime enters click_pending and can be released by observe_inactive
+- confirms blocked runtime enters click_failed and requires abort/release before the table can process again
+- confirms failed active finalization release aborts the lifecycle and allows the next Active cycle
+- confirms release_on_inactive=False keeps the lifecycle lock active
+- keeps real project, live UI, screen capture, YOLO and physical click disabled
 ## V2.10.0
 Snapshot transaction source audit:
 - adds tools/run_v2_10_snapshot_transaction_source_audit.py
@@ -148,6 +161,7 @@ Removed Python cache artifacts from Git.
 
 ## V0.1.0
 Initial skeleton.
+
 
 
 
