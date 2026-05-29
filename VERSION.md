@@ -1,5 +1,17 @@
 ﻿# Version history
 
+## V2.19.0
+Live no-click capture probe regression:
+- adds tools/run_v2_19_live_no_click_capture_probe.py
+- adds tests/test_v2_19_live_no_click_capture_probe.py
+- runs one controlled live display-analysis pass over 6 table slots
+- confirms live cycle executes
+- confirms screen capture executes
+- confirms YOLO detector chain is reachable
+- confirms physical click is not executed
+- confirms all 6 table slots are bound
+- allows zero saved JSON files when no Active/meaningful Trigger_UI classes are detected
+- keeps real project mutation disabled and real-click disabled
 ## V2.18.0
 Startup audit-only readiness regression:
 - adds tools/run_v2_18_startup_audit_only_readiness.py
@@ -262,6 +274,7 @@ Removed Python cache artifacts from Git.
 
 ## V0.1.0
 Initial skeleton.
+
 
 
 
