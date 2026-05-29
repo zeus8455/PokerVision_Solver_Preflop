@@ -89,6 +89,67 @@ def _normalize_sequence_list(value: Any) -> List[List[str]]:
     return out
 
 
+
+# V2.34: enable Solver_Preflop controlled bet_raise branch.
+#
+# The legacy V1.1 simple-button stage intentionally blocked bet/raise.
+# Full live profile already enables V31_CONTROLLED_LIVE_CLICK_RAISE_BRANCH_ENABLED,
+# but the plan builder still hard-coded raise_branch_enabled=False.
+# This helper opens the raise branch only for Solver_Preflop-adapted preflop
+# decisions. All lower click guards remain enforced later by action_click_stub.py:
+# slot ROI, no-repeat decision_id, button availability, real-click flag, and
+# Solver_Preflop source/status checks.
+def _v234_solver_preflop_raise_branch_enabled() -> bool:
+    try:
+        from config import V31_CONTROLLED_LIVE_CLICK_RAISE_BRANCH_ENABLED
+        return bool(V31_CONTROLLED_LIVE_CLICK_RAISE_BRANCH_ENABLED)
+    except Exception:
+        return False
+
+
+def _v234_solver_preflop_raise_sequence(action_decision: Dict[str, Any], normalized_action: str) -> List[str]:
+    if normalized_action != "bet_raise":
+        return []
+
+    decision_context = action_decision.get("decision_context")
+    if not isinstance(decision_context, dict):
+        return []
+
+    if not bool(decision_context.get("solver_preflop_runtime_source")):
+        return []
+
+    raw_action = str(
+        decision_context.get("solver_raw_action")
+        or decision_context.get("solver_engine_action")
+        or action_decision.get("raw_action")
+        or action_decision.get("engine_action")
+        or action_decision.get("action")
+        or ""
+    ).strip().lower()
+
+    if raw_action == "open_raise":
+        return ["Raise"]
+    if raw_action in {"iso_raise", "3bet", "5bet", "jam", "all_in"}:
+        return ["98%", "Raise"]
+    if raw_action == "4bet":
+        return ["50%", "Raise"]
+
+    raw_targets = action_decision.get("target_button_classes")
+    if isinstance(raw_targets, list):
+        out: List[str] = []
+        for item in raw_targets:
+            token = str(item or "").strip()
+            if not token:
+                continue
+            if token == "Bet/Raise":
+                token = "Raise"
+            out.append(token)
+        if out:
+            return out
+
+    return []
+
+
 def _build_policy_result(action_decision: Dict[str, Any]) -> Dict[str, Any]:
     """Resolve V1.1 action-button policy in plan-building mode.
 
@@ -124,6 +185,26 @@ def build_action_runtime_plan_from_action_decision(action_decision: Dict[str, An
     target_sequence = _normalize_button_list(policy.get("selected_sequence"))
     target_sequences = _normalize_sequence_list(policy.get("target_sequences"))
 
+    v234_raise_sequence = _v234_solver_preflop_raise_sequence(action_decision, action)
+    v234_raise_branch_enabled = bool(_v234_solver_preflop_raise_branch_enabled() and v234_raise_sequence)
+    if v234_raise_branch_enabled:
+        target_sequence = list(v234_raise_sequence)
+        target_sequences = [list(v234_raise_sequence)]
+        policy = dict(policy)
+        policy.update(
+            {
+                "ok": True,
+                "action": action,
+                "selected_sequence": list(v234_raise_sequence),
+                "target_sequences": [list(v234_raise_sequence)],
+                "blocked_reason": None,
+                "missing_classes": [],
+                "real_click_allowed": bool(V11_REAL_MOUSE_CLICK_ENABLED),
+                "v234_solver_preflop_raise_branch": True,
+            }
+        )
+        policy_ok = True
+
     plan_status = "ok" if policy_ok else "blocked"
     blocked_reason = None if policy_ok else str(policy.get("blocked_reason") or "action_button_policy_blocked")
 
@@ -154,10 +235,16 @@ def build_action_runtime_plan_from_action_decision(action_decision: Dict[str, An
         "solver_stub": bool(action_decision.get("solver_stub", False)),
         "policy_stage": _PLAN_STAGE,
         "policy_version": str(policy.get("policy_version") or _POLICY_VERSION),
-        "raise_branch_enabled": False,
+        "raise_branch_enabled": bool(v234_raise_branch_enabled),
         "action_button_policy": dict(policy),
         "blocked_reason": blocked_reason,
         "plan_note": (
+            "V1.1 Action_Runtime_Plan_JSON is built through "
+            "Action_Button_Runtime_Policy. V2.34 allows Solver_Preflop-controlled "
+            "bet/raise branches only when the full live profile enables the raise "
+            "branch; all click guards remain enforced."
+            if bool(v234_raise_branch_enabled)
+            else
             "V1.1 Action_Runtime_Plan_JSON is built through "
             "Action_Button_Runtime_Policy. First controlled real-click stage allows "
             "only fold/check/call/check_fold simple button actions; bet/raise sizing "
@@ -285,7 +372,16 @@ def validate_action_runtime_plan_contract(plan: Dict[str, Any]) -> Dict[str, Any
         errors.append(f"Action_Runtime_Plan_JSON.policy_stage must be {_PLAN_STAGE!r}.")
 
     if plan.get("raise_branch_enabled") is not False:
-        errors.append("Action_Runtime_Plan_JSON.raise_branch_enabled must be False in V1.1 simple-button stage.")
+        if not (
+            str(plan.get("planned_action") or "") == "bet_raise"
+            and str(plan.get("status") or "") == "ok"
+            and isinstance(plan.get("target_sequence"), list)
+            and bool(plan.get("target_sequence"))
+        ):
+            errors.append(
+                "Action_Runtime_Plan_JSON.raise_branch_enabled may be True only for "
+                "a valid V2.34 Solver_Preflop bet_raise runtime plan."
+            )
 
     policy = plan.get("action_button_policy")
     if not isinstance(policy, dict):

@@ -1,3 +1,44 @@
+## V2.34.0 - enable Solver_Preflop controlled raise branch
+
+Status: passed
+
+Goal:
+- Enable controlled bet/raise runtime planning for Solver_Preflop decisions.
+- Remove the old V1.1 simple-button blocker only for Solver_Preflop-adapted preflop raise-family actions.
+- Keep all lower click guards active: active_confirmed, slot_guard, no_repeat, button_availability, dry_run_or_real_click_flag, click_execution_guard.
+
+Changed:
+- external/PokerVisionFinalVersionNoSolver_snapshot/PokerVision V1_2/logic/action_runtime_plan_builder.py
+
+Added:
+- tools/apply_v2_34_enable_solver_preflop_raise_branch_patch.py
+- tools/run_v2_34_enable_solver_preflop_raise_branch_audit.py
+- tests/test_v2_34_enable_solver_preflop_raise_branch_audit.py
+
+Removed:
+- tools/run_v2_33_raise_path_contract_audit.py
+- tests/test_v2_33_raise_path_contract_audit.py
+
+Validated:
+- V2.34 audit status ok
+- open_raise -> ["Raise"]
+- iso_raise -> ["98%", "Raise"]
+- 3bet -> ["98%", "Raise"]
+- 4bet -> ["50%", "Raise"]
+- all_in -> ["98%", "Raise"]
+- runtime_plan_status == ok
+- planned_action == bet_raise
+- raise_branch_enabled == true
+- blocked_reason == null
+- v11 decision_id is not v12_stub_*
+- real project not touched
+- full pytest: 105 passed
+
+Live issue addressed:
+- Fold path was already proven in real-live with physical click.
+- Raise path was not clickable because Action_Runtime_Plan builder always blocked bet_raise as bet_raise_branch_disabled_for_v1_1_first_real_click_stage.
+- V2.34 allows Solver_Preflop-controlled raise-family plans while preserving all runtime click guards.
+
 ## V2.32.0 - inject Solver_Preflop bridge before live runtime
 
 Status: passed
@@ -545,6 +586,7 @@ Removed Python cache artifacts from Git.
 
 ## V0.1.0
 Initial skeleton.
+
 
 
 
