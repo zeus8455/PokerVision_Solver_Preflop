@@ -1,5 +1,16 @@
 ﻿# Version history
 
+## V2.15.0
+Snapshot all-preflop E2E regression:
+- adds tools/run_v2_15_snapshot_all_preflop_e2e.py
+- adds tests/test_v2_15_snapshot_all_preflop_e2e.py
+- runs all real snapshot preflop Pending Clear_JSON cases
+- confirms Pending Clear_JSON -> Solver_Preflop_Bridge -> Action_Decision_JSON -> Action_Runtime_Plan_JSON
+- confirms dry-run transaction completes for every preflop case
+- confirms Final Clear_JSON is saved for every preflop case
+- confirms click_result is embedded into every Final Clear_JSON
+- confirms runtime source is Solver_Preflop_Bridge for every final runtime plan
+- keeps real project, live UI, screen capture, YOLO and physical click disabled
 ## V2.14.0
 Snapshot final Solver_Preflop source regression:
 - fixes final Solver_Preflop bridge source selection after Final Clear_JSON already contains click_result
@@ -199,6 +210,7 @@ Removed Python cache artifacts from Git.
 
 ## V0.1.0
 Initial skeleton.
+
 
 
 
