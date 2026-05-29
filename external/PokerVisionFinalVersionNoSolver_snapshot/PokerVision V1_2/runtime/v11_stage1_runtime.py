@@ -116,6 +116,114 @@ def _apply_solver_timeout_fallback(solver_payload: Dict[str, Any], solver_decisi
     )
 
 
+def _normalise_solver_preflop_runtime_action(value: Any) -> str:
+    raw = str(value or "").strip().lower().replace("-", "_").replace("/", "_")
+    if raw in {"fold"}:
+        return "fold"
+    if raw in {"call"}:
+        return "call"
+    if raw in {"check"}:
+        return "check"
+    if raw in {"check_fold", "checkfold"}:
+        return "check_fold"
+    if raw in {"raise", "bet", "bet_raise", "open_raise", "iso_raise", "3bet", "4bet", "5bet", "jam", "all_in"}:
+        return "bet_raise"
+    return raw
+
+
+def _extract_solver_preflop_decision_from_state(
+    *,
+    full_state: Dict[str, Any],
+    solver_payload: Dict[str, Any],
+    solver_payload_path: Path,
+) -> Optional[Dict[str, Any]]:
+    contract = full_state.get("solver_preflop_bridge_contract")
+    if not isinstance(contract, dict):
+        return None
+
+    if str(contract.get("status") or "") != "ok":
+        return None
+
+    bridge_payload = contract.get("bridge_payload")
+    if not isinstance(bridge_payload, dict):
+        return None
+
+    action_decision = bridge_payload.get("action_decision")
+    if not isinstance(action_decision, dict):
+        return None
+
+    raw_action = (
+        action_decision.get("action")
+        or action_decision.get("engine_action")
+        or action_decision.get("raw_action")
+        or contract.get("engine_action")
+        or contract.get("raw_action")
+    )
+    action = _normalise_solver_preflop_runtime_action(raw_action)
+
+    size_pct = (
+        action_decision.get("size_pct")
+        or action_decision.get("raise_size_pct")
+        or action_decision.get("button_pct")
+    )
+
+    if size_pct is None:
+        size_policy = action_decision.get("size_policy")
+        if isinstance(size_policy, dict):
+            size_pct = (
+                size_policy.get("size_pct")
+                or size_policy.get("raise_size_pct")
+                or size_policy.get("button_pct")
+            )
+
+    runtime_candidate = contract.get("runtime_plan_candidate")
+    if size_pct is None and isinstance(runtime_candidate, dict):
+        target_sequence = runtime_candidate.get("target_sequence")
+        if isinstance(target_sequence, list):
+            for button in target_sequence:
+                text = str(button).strip().replace("%", "")
+                if text in {"33", "50", "70", "98"}:
+                    size_pct = int(text)
+                    break
+
+    if action != "bet_raise":
+        size_pct = None
+
+    return {
+        "status": "ok",
+        "source": "PokerVision_Solver_Preflop",
+        "decision_id": (
+            action_decision.get("decision_id")
+            or contract.get("decision_id")
+            or bridge_payload.get("decision_id")
+        ),
+        "solver_fingerprint": (
+            action_decision.get("solver_fingerprint")
+            or contract.get("solver_fingerprint")
+            or bridge_payload.get("solver_fingerprint")
+        ),
+        "table_id": solver_payload.get("table_id"),
+        "hand_id": solver_payload.get("hand_id"),
+        "frame_name": solver_payload.get("frame_name"),
+        "action": action,
+        "raw_action": raw_action,
+        "engine_action": action_decision.get("engine_action") or contract.get("engine_action"),
+        "size_pct": size_pct,
+        "reason": str(action_decision.get("reason") or "solver_preflop_bridge_live_runtime_source"),
+        "json_path": str(solver_payload_path),
+        "source_frame_id": action_decision.get("source_frame_id") or contract.get("source_frame_id"),
+        "click_sequence": list(action_decision.get("click_sequence") or contract.get("click_sequence") or []),
+        "total_pot_bb": _extract_total_pot_bb(full_state),
+        "waited_sec": 0.0,
+        "runtime_source_selection": {
+            "selected_source": "Solver_Preflop_Bridge",
+            "reason": "v23_solver_preflop_selected_for_live_runtime",
+            "bridge_status": contract.get("status"),
+        },
+    }
+
+
+
 def run_v11_stage1_runtime(
     *,
     full_state: Dict[str, Any],
@@ -180,8 +288,15 @@ def run_v11_stage1_runtime(
             "click": {"status": "skipped", "target_sequence": [], "message": "Solver payload was not created."},
         }
 
-    solver_decision = build_solver_stub_decision(solver_payload, json_path=str(solver_payload_path))
-    solver_decision = _apply_solver_timeout_fallback(solver_payload, solver_decision, full_state)
+    solver_decision = _extract_solver_preflop_decision_from_state(
+        full_state=full_state,
+        solver_payload=solver_payload,
+        solver_payload_path=solver_payload_path,
+    )
+    if solver_decision is None:
+        solver_decision = build_solver_stub_decision(solver_payload, json_path=str(solver_payload_path))
+        solver_decision = _apply_solver_timeout_fallback(solver_payload, solver_decision, full_state)
+
     solver_decision.setdefault("total_pot_bb", _extract_total_pot_bb(full_state))
     solver_decision.setdefault("waited_sec", None)
 

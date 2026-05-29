@@ -1,5 +1,17 @@
 ﻿# Version history
 
+## V2.23.0
+Live runtime Solver_Preflop bridge source:
+- updates v11_stage1_runtime.py to read Solver_Preflop bridge contract from full_state
+- uses bridge_payload.action_decision as live runtime solver_decision when bridge status is ok
+- sets live runtime solver source to PokerVision_Solver_Preflop
+- maps Solver_Preflop open_raise/iso_raise/3bet/4bet/5bet/jam/all_in to legacy bet_raise for Action_Button runtime
+- preserves solver decision_id and solver_fingerprint
+- keeps v12_stub_* only as fallback path
+- keeps V2.21/V2.22 real-click blockers active for stub/fallback decisions
+- adds V2.23 live runtime Solver_Preflop bridge audit tool
+- adds V2.23 pytest coverage
+- full test suite: 96 passed
 ## V2.22.0
 Strict real-click source guard:
 - adds final Action_Button click-gate protection against non-Solver_Preflop real clicks
@@ -298,6 +310,7 @@ Removed Python cache artifacts from Git.
 
 ## V0.1.0
 Initial skeleton.
+
 
 
 
