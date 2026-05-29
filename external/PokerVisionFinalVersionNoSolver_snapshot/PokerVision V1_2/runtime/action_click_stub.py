@@ -116,6 +116,8 @@ def _build_controlled_live_click_gate_report(
     table_id = str(solver_decision.get("table_id") or "")
     action = _normalise_action(solver_decision.get("action"))
     decision_id = str(solver_decision.get("decision_id") or "").strip()
+    solver_source = str(solver_decision.get("source") or "")
+    solver_status = str(solver_decision.get("status") or "")
     target_button = str(selected_sequence[0]) if selected_sequence else ""
     wants_real_click = bool(real_click_enabled) and not bool(dry_run)
     configured_table_ids = _configured_controlled_live_click_table_ids()
@@ -143,6 +145,14 @@ def _build_controlled_live_click_gate_report(
                 blockers.append("controlled_live_click_point_outside_slot")
             if bool(V31_CONTROLLED_LIVE_CLICK_REQUIRE_ENV_CONFIRM) and not _env_confirmed():
                 blockers.append("controlled_live_click_env_confirmation_missing")
+            if solver_source != "PokerVision_Solver_Preflop":
+                blockers.append("controlled_live_click_solver_source_not_solver_preflop")
+            if solver_status != "ok":
+                blockers.append("controlled_live_click_solver_status_not_ok")
+            if decision_id.startswith("v12_stub_"):
+                blockers.append("controlled_live_click_stub_decision_blocked")
+            if decision_id.startswith("v12_fallback_"):
+                blockers.append("controlled_live_click_fallback_decision_blocked")
             if not decision_id:
                 blockers.append("controlled_live_click_missing_decision_id")
             if decision_id in _CONTROLLED_LIVE_CLICK_EXECUTED_DECISION_IDS:
@@ -177,6 +187,8 @@ def _build_controlled_live_click_gate_report(
         "target_sequence": list(selected_sequence),
         "target_button_class": target_button,
         "decision_id": decision_id,
+        "solver_source": solver_source,
+        "solver_status": solver_status,
         "dry_run": bool(dry_run),
         "real_click_enabled": bool(real_click_enabled),
         "wants_real_click": bool(wants_real_click),

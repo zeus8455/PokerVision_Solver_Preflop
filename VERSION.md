@@ -1,5 +1,16 @@
 ﻿# Version history
 
+## V2.22.0
+Strict real-click source guard:
+- adds final Action_Button click-gate protection against non-Solver_Preflop real clicks
+- blocks physical click when solver source is not PokerVision_Solver_Preflop
+- blocks physical click when solver status is not ok
+- blocks v12_stub_* decision IDs at final click gate
+- blocks v12_fallback_* decision IDs at final click gate
+- exposes solver_source and solver_status in controlled live-click gate report
+- adds V2.22 strict real-click source guard audit tool
+- adds V2.22 pytest coverage
+- full test suite: 95 passed
 ## V2.21.0
 Real-click stub fallback blocker:
 - opens V8.7 full live chain scope for real runtime testing
@@ -287,6 +298,7 @@ Removed Python cache artifacts from Git.
 
 ## V0.1.0
 Initial skeleton.
+
 
 
 
