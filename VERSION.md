@@ -1,5 +1,16 @@
 ﻿# Version history
 
+## V2.14.0
+Snapshot final Solver_Preflop source regression:
+- fixes final Solver_Preflop bridge source selection after Final Clear_JSON already contains click_result
+- keeps solver_preflop_dryrun_bridge.py guard unchanged
+- passes a final Clear_JSON copy without click_result into Solver_Preflop bridge
+- confirms final Solver_Preflop bridge status is ok
+- confirms final runtime source selection uses Solver_Preflop_Bridge
+- confirms final runtime selection reason is v20_solver_preflop_selected
+- confirms solver action decision is available and adapted to legacy Action_Decision shape
+- confirms final Action_Runtime_Plan_JSON is saved as final and file publication is enabled
+- keeps real project, live UI, screen capture, YOLO and physical click disabled
 ## V2.13.0
 Snapshot final Action_Decision publication regression:
 - fixes snapshot display_analysis_cycle.py final Action_Decision publication NameError path
@@ -188,6 +199,7 @@ Removed Python cache artifacts from Git.
 
 ## V0.1.0
 Initial skeleton.
+
 
 
 

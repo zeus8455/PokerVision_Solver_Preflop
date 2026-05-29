@@ -2211,8 +2211,10 @@ def save_dark_and_clear_table_frame_json(
                                                 cycle_dir=cycle_dir,
                                                 table_id=table_id,
                                             )
+                                            final_solver_bridge_clear_state = dict(final_clear_state)
+                                            final_solver_bridge_clear_state.pop("click_result", None)
                                             final_solver_preflop_bridge_contract = build_solver_preflop_dryrun_bridge_contract(
-                                                clear_state=final_clear_state,
+                                                clear_state=final_solver_bridge_clear_state,
                                                 cycle_dir=cycle_dir,
                                                 table_id=table_id,
                                                 publish_files=bool(V17_SOLVER_PREFLOP_BRIDGE_PUBLISH_DIAGNOSTIC_FILES),
@@ -2317,8 +2319,10 @@ def save_dark_and_clear_table_frame_json(
                                             cycle_dir=cycle_dir,
                                             table_id=table_id,
                                         )
+                                        final_solver_bridge_clear_state = dict(final_clear_state)
+                                        final_solver_bridge_clear_state.pop("click_result", None)
                                         final_solver_preflop_bridge_contract = build_solver_preflop_dryrun_bridge_contract(
-                                            clear_state=final_clear_state,
+                                            clear_state=final_solver_bridge_clear_state,
                                             cycle_dir=cycle_dir,
                                             table_id=table_id,
                                             publish_files=bool(V17_SOLVER_PREFLOP_BRIDGE_PUBLISH_DIAGNOSTIC_FILES),
