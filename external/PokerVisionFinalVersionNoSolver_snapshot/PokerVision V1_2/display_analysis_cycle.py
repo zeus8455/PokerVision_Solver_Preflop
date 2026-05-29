@@ -3598,6 +3598,39 @@ def run_ui_display_analysis_cycle(
             },
         )
 
+        # V2.28: release early lifecycle lock if the frame cannot enter action runtime.
+        #
+        # Real-live failure fixed here:
+        # - Trigger_UI can briefly open the early per-table lifecycle before the
+        #   post-analysis action_event_id/signature is available.
+        # - If the resulting frame is later classified as no_active_confirmed,
+        #   duplicate_active_frame_blocked, or missing action_event_id, the
+        #   Action_Button runtime will not run and therefore no click_result can
+        #   close the lifecycle.
+        # - Without this release, the next scans are blocked by
+        #   table_lifecycle_already_open_before_analysis and the bot never
+        #   reaches Solver_Preflop -> Action_Button -> click for that table.
+        early_lifecycle_release_before_action = None
+        if (
+            table_action_transaction_gate is not None
+            and early_action_transaction_decision is not None
+            and bool(getattr(early_action_transaction_decision, "should_process", False))
+            and not bool(action_runtime_candidate)
+        ):
+            release_reason = str(action_runtime_skip_reason or "action_runtime_not_candidate_after_analysis")
+            early_lifecycle_release_before_action = table_action_transaction_gate.abort_analysis_cycle(
+                table_id=slot.table_id,
+                reason=f"v228_release_early_lifecycle_{release_reason}",
+                message=(
+                    "V2.28 released early table lifecycle because this frame reached "
+                    "post-analysis but cannot enter the Action_Button runtime/click branch."
+                ),
+            )
+            _update_runtime_lifecycle_diagnostics(
+                state,
+                early_lifecycle_release_before_action=early_lifecycle_release_before_action,
+            )
+
         # V2.0: the table transaction lifecycle starts before heavy analysis and
         # enters the action/click phase only when the action runtime is actually
         # going to run. This prevents repeated heavy analysis while an unfinished

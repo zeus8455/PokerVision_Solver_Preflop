@@ -1,3 +1,32 @@
+## V2.28.0 - release early transaction lifecycle when action runtime cannot start
+
+Status: passed
+
+Goal:
+- Fix real-live lock issue where Active could be detected but Action_Button runtime never starts.
+- Prevent table lifecycle from staying locked as table_lifecycle_already_open_before_analysis after no_active_confirmed, duplicate_active_frame_blocked, or missing action_event_id/action runtime candidate.
+
+Changed:
+- external/PokerVisionFinalVersionNoSolver_snapshot/PokerVision V1_2/display_analysis_cycle.py
+
+Added:
+- tools/apply_v2_28_live_transaction_gate_unlock_patch.py
+- tools/run_v2_28_live_transaction_gate_unlock_audit.py
+- tests/test_v2_28_live_transaction_gate_unlock_audit.py
+
+Validated:
+- V2.28 audit status ok
+- early lifecycle release block present before action runtime stage
+- abort_analysis_cycle used for early lifecycle cleanup
+- transaction gate semantics ok
+- real project not touched
+- full pytest: 100 passed
+
+Live issue addressed:
+- Active was sometimes seen, but duplicated/no-event frames left the table lifecycle open.
+- Later frames were blocked by table_lifecycle_already_open_before_analysis.
+- This prevented Clear_JSON/Solver_Preflop/Action_Button/click chain from starting.
+
 ## V2.26.0 - live no-click probe after V2.25
 
 Status: passed
@@ -386,6 +415,7 @@ Removed Python cache artifacts from Git.
 
 ## V0.1.0
 Initial skeleton.
+
 
 
 
