@@ -1,3 +1,29 @@
+## V2.26.0 - live no-click probe after V2.25
+
+Status: passed
+
+Goal:
+- Re-run safe live no-click probe after Solver_Preflop runtime integration and startup readiness.
+- Validate live-cycle, screen capture, YOLO chain, and no physical click.
+- Do not falsely mark Solver_Preflop live chain as validated when no Active/Clear_JSON artifacts are produced.
+
+Added:
+- tools/run_v2_26_live_no_click_probe_after_v225.py
+- tests/test_v2_26_live_no_click_probe_after_v225.py
+
+Validated:
+- V2.25 VERSION record is present
+- live_cycle_executed == true
+- screen_capture_executed == true
+- yolo_detector_executed == true
+- physical_click_executed == false
+- current_cycle restored after probe
+- six table slots available
+- table_01..table_06 detected
+- real project not touched
+- solver_live_chain_validated == false when no Active/Clear_JSON artifacts are observed
+- full pytest: 99 passed
+
 ## V2.25.0 - real startup readiness after V2.24
 
 Status: passed
@@ -360,6 +386,7 @@ Removed Python cache artifacts from Git.
 
 ## V0.1.0
 Initial skeleton.
+
 
 
 
