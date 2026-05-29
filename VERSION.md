@@ -1,5 +1,27 @@
 ﻿# Version history
 
+## V2.16.0
+Snapshot 6-slot preflop E2E regression:
+- adds tools/run_v2_16_snapshot_6slot_preflop_e2e.py
+- adds tests/test_v2_16_snapshot_6slot_preflop_e2e.py
+- runs synthetic 6-slot preflop E2E over table_01 through table_06
+- confirms every slot gets its own Final Clear_JSON
+- confirms every slot gets its own final Action_Runtime_Plan_JSON
+- confirms unique table_id, table_index, slot_bbox and decision_id for all 6 slots
+- confirms final runtime source is Solver_Preflop_Bridge for every slot
+- confirms final/runtime output paths are scoped to the correct table directory
+- keeps real project, live UI, screen capture, YOLO and physical click disabled
+## V2.16.0
+Snapshot 6-slot preflop E2E regression:
+- adds tools/run_v2_16_snapshot_6slot_preflop_e2e.py
+- adds tests/test_v2_16_snapshot_6slot_preflop_e2e.py
+- runs synthetic 6-slot preflop E2E over table_01 through table_06
+- confirms every slot gets its own Final Clear_JSON
+- confirms every slot gets its own final Action_Runtime_Plan_JSON
+- confirms unique table_id, table_index, slot_bbox and decision_id for all 6 slots
+- confirms final runtime source is Solver_Preflop_Bridge for every slot
+- confirms final/runtime output paths are scoped to the correct table directory
+- keeps real project, live UI, screen capture, YOLO and physical click disabled
 ## V2.15.0
 Snapshot all-preflop E2E regression:
 - adds tools/run_v2_15_snapshot_all_preflop_e2e.py
@@ -210,6 +232,8 @@ Removed Python cache artifacts from Git.
 
 ## V0.1.0
 Initial skeleton.
+
+
 
 
 
