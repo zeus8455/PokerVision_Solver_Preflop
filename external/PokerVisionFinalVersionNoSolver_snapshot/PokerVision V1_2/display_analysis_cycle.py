@@ -3740,6 +3740,69 @@ def run_ui_display_analysis_cycle(
         )
 
         if action_runtime_allowed:
+
+            # V2.32: inject Solver_Preflop bridge into full_state before v11 runtime.
+            #
+            # Live failure fixed here:
+            # - Pending/Decision preview path builds solver_preflop_bridge_contract later inside
+            #   save_dark_and_clear_table_frame_json(...).
+            # - _run_v11_stage2_runtime_safely(...) receives full_state before that late save path,
+            #   so v11_stage1_runtime could not see state["solver_preflop_bridge_contract"].
+            # - v11 then fell back to legacy v12_stub_* and real-click was blocked as
+            #   blocked_stub_real_click, even though Solver_Preflop_Bridge was selected in preview.
+            # - This block builds the same bridge from a current Clear_JSON candidate before v11 runtime.
+            v232_existing_solver_preflop_bridge = state.get("solver_preflop_bridge_contract")
+            if not isinstance(v232_existing_solver_preflop_bridge, dict):
+                try:
+                    v232_pre_runtime_clear_state = build_clear_json_from_dark_state(state)
+                    if isinstance(v232_pre_runtime_clear_state, dict):
+                        v232_pre_runtime_clear_state = dict(v232_pre_runtime_clear_state)
+                        v232_pre_runtime_clear_state.pop("click_result", None)
+                        v232_pre_runtime_solver_preflop_bridge_contract = build_solver_preflop_dryrun_bridge_contract(
+                            clear_state=v232_pre_runtime_clear_state,
+                            cycle_dir=cycle_dir,
+                            table_id=slot.table_id,
+                            publish_files=bool(V17_SOLVER_PREFLOP_BRIDGE_PUBLISH_DIAGNOSTIC_FILES),
+                        )
+                        state["solver_preflop_bridge_contract"] = v232_pre_runtime_solver_preflop_bridge_contract
+                        v232_bridge_payload = (
+                            v232_pre_runtime_solver_preflop_bridge_contract.get("bridge_payload")
+                            if isinstance(v232_pre_runtime_solver_preflop_bridge_contract, dict)
+                            else None
+                        )
+                        v232_action_decision = (
+                            v232_bridge_payload.get("action_decision")
+                            if isinstance(v232_bridge_payload, dict)
+                            else None
+                        )
+                        state["v232_pre_runtime_solver_preflop_bridge"] = {
+                            "status": "built",
+                            "bridge_status": (
+                                v232_pre_runtime_solver_preflop_bridge_contract.get("status")
+                                if isinstance(v232_pre_runtime_solver_preflop_bridge_contract, dict)
+                                else None
+                            ),
+                            "action_decision_available": isinstance(v232_action_decision, dict),
+                            "decision_id": (
+                                v232_action_decision.get("decision_id")
+                                if isinstance(v232_action_decision, dict)
+                                else None
+                            ),
+                            "source": "pre_runtime_injection_before_v11_stage2",
+                        }
+                    else:
+                        state["v232_pre_runtime_solver_preflop_bridge"] = {
+                            "status": "not_built",
+                            "reason": "clear_json_candidate_not_dict",
+                            "source": "pre_runtime_injection_before_v11_stage2",
+                        }
+                except Exception as exc:
+                    state["v232_pre_runtime_solver_preflop_bridge"] = {
+                        "status": "error",
+                        "reason": str(exc),
+                        "source": "pre_runtime_injection_before_v11_stage2",
+                    }
+                    add_error(state, block="solver_preflop_bridge_contract", message=f"V2.32 pre-runtime bridge build failed: {exc}")
             action_report = _run_v11_stage2_runtime_safely(
                 state=state,
                 table_roi=table_roi,

@@ -1,3 +1,35 @@
+## V2.32.0 - inject Solver_Preflop bridge before live runtime
+
+Status: passed
+
+Goal:
+- Fix live runtime still falling back to legacy v12_stub_* because v11_stage1_runtime received full_state before solver_preflop_bridge_contract was built.
+- Build and inject Solver_Preflop bridge into state before _run_v11_stage2_runtime_safely(...).
+
+Changed:
+- external/PokerVisionFinalVersionNoSolver_snapshot/PokerVision V1_2/display_analysis_cycle.py
+
+Added:
+- tools/apply_v2_32_pre_runtime_solver_bridge_injection_patch.py
+- tools/run_v2_32_pre_runtime_solver_bridge_injection_audit.py
+- tests/test_v2_32_pre_runtime_solver_bridge_injection_audit.py
+
+Validated:
+- V2.32 audit status ok
+- pre-runtime Clear_JSON candidate is built before v11 runtime
+- solver_preflop_bridge_contract is built before v11 runtime
+- state["solver_preflop_bridge_contract"] is set before _run_v11_stage2_runtime_safely(...)
+- late pending/final bridge path remains present
+- display_analysis_cycle imports successfully
+- real project not touched
+- full pytest: 104 passed
+
+Live issue addressed:
+- After V2.31, v11_stage1_runtime could accept ok/fallback Solver_Preflop bridge.
+- But live full_state did not contain solver_preflop_bridge_contract before v11 runtime.
+- Runtime therefore still built legacy v12_stub_* and blocked real-click as blocked_stub_real_click.
+- V2.32 injects the bridge before runtime, so the live click path can use Solver_Preflop instead of legacy stub.
+
 ## V2.31.0 - accept Solver_Preflop fallback bridge in live runtime
 
 Status: passed
@@ -513,6 +545,7 @@ Removed Python cache artifacts from Git.
 
 ## V0.1.0
 Initial skeleton.
+
 
 
 
