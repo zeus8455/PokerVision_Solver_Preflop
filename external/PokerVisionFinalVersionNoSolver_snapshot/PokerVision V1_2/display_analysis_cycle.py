@@ -30,7 +30,7 @@ from __future__ import annotations
 import hashlib
 import json
 import shutil
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
@@ -3432,6 +3432,43 @@ def run_ui_display_analysis_cycle(
                         f"[ActionEventGate][{slot.table_id}] duplicate Active action suppressed, "
                         f"analysis preserved: reason={action_event_decision.reason}, "
                         f"duplicate_of={action_event_decision.duplicate_of}"
+                    )
+
+                # V2.30: recover duplicate Active into runtime retry when no runtime/final artifact exists.
+                #
+                # Real-live failure fixed here:
+                # - ActionEventGate correctly suppresses identical Active frames to avoid repeated output.
+                # - However, if the original Active produced only Pending/Solver payload diagnostics and never
+                #   reached Action_Runtime_Plan_JSON or Final Clear_JSON/click_result, then treating every
+                #   following identical Active as a hard duplicate permanently prevents clicking.
+                # - In that unfinished state we convert the duplicate decision into a guarded retry event.
+                #   Existing click guards/no-repeat guards still decide whether a physical click is allowed.
+                v230_runtime_plan_dir = cycle_dir / V07_ACTION_RUNTIME_PLAN_DIR_NAME / slot.table_id
+                v230_final_clear_dir = cycle_dir / V04_CLEAR_JSON_FINAL_DIR_NAME / slot.table_id
+                v230_has_runtime_plan = v230_runtime_plan_dir.exists() and any(v230_runtime_plan_dir.glob("*.json"))
+                v230_has_final_clear = v230_final_clear_dir.exists() and any(v230_final_clear_dir.glob("*.json"))
+                v230_duplicate_retry_allowed = (
+                    str(action_event_decision.reason) == "duplicate_active_frame_blocked"
+                    and not bool(v230_has_runtime_plan)
+                    and not bool(v230_has_final_clear)
+                )
+                if v230_duplicate_retry_allowed:
+                    v230_retry_base = (
+                        action_event_decision.duplicate_of
+                        or f"evt_{slot.table_id}_{str(action_event_decision.action_signature or 'no_signature')[:16]}"
+                    )
+                    v230_retry_event_id = f"{v230_retry_base}_v230_retry"
+                    action_event_decision = replace(
+                        action_event_decision,
+                        should_process=True,
+                        action_event_id=v230_retry_event_id,
+                        reason="v230_duplicate_active_runtime_retry_without_completed_runtime",
+                    )
+                    print(
+                        f"[ActionEventGate][{slot.table_id}] V2.30 duplicate Active runtime retry enabled: "
+                        f"event_id={v230_retry_event_id}, "
+                        f"has_runtime_plan={v230_has_runtime_plan}, "
+                        f"has_final_clear={v230_has_final_clear}"
                     )
             else:
                 action_event_gate.observe_inactive(slot.table_id)

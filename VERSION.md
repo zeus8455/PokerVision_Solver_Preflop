@@ -1,3 +1,36 @@
+## V2.30.0 - duplicate Active runtime retry when no runtime/final artifact exists
+
+Status: passed
+
+Goal:
+- Fix real-live case where Active is detected but ActionEventGate suppresses it as duplicate before runtime/click can start.
+- Allow duplicate Active to re-enter the guarded runtime branch only when the current table has no Action_Runtime_Plan_JSON and no Final Clear_JSON.
+
+Changed:
+- external/PokerVisionFinalVersionNoSolver_snapshot/PokerVision V1_2/display_analysis_cycle.py
+
+Added:
+- tools/apply_v2_30_duplicate_active_runtime_retry_flexible_patch.py
+- tools/run_v2_30_duplicate_active_runtime_retry_audit.py
+- tests/test_v2_30_duplicate_active_runtime_retry_audit.py
+
+Validated:
+- V2.30 audit status ok
+- duplicate Active retry block is after duplicate suppression log
+- retry block is before action_runtime_candidate and duplicate hard-stop
+- retry is limited to reason == duplicate_active_frame_blocked
+- retry requires no Action_Runtime_Plan_JSON and no Final Clear_JSON for the table
+- retry creates action_event_id and sets should_process=True via dataclass replace
+- display_analysis_cycle imports successfully
+- real project not touched
+- full pytest: 102 passed
+
+Live issue addressed:
+- After V2.29, stale lifecycle was released correctly.
+- The next blocker was duplicate_active_frame_blocked with event_id_present=False.
+- That prevented Action_Runtime_Plan_JSON, Final Clear_JSON, and click.
+- V2.30 converts unfinished duplicate Active frames into guarded runtime retry events without disabling click guards.
+
 ## V2.29.0 - release stale lifecycle inside early gate blocked path
 
 Status: passed
@@ -446,6 +479,7 @@ Removed Python cache artifacts from Git.
 
 ## V0.1.0
 Initial skeleton.
+
 
 
 
