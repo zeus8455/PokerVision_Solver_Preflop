@@ -926,7 +926,39 @@ def assert_path_inside(child_path: Path, parent_dir: Path) -> None:
 # Slot/no-repeat/button guards remain enforced by runtime click layers.
 if V87_FULL_LIVE_CHAIN_SCOPE_ACTIVE:
     V10_REAL_CLICK_REQUIRE_SERVICE_CLICKS_DISABLED = False
+
     V11_TRIGGER_UI_SERVICE_REAL_CLICK_ENABLED = True
     V11_TRIGGER_UI_SERVICE_DRY_RUN = False
+
+    V31_CONTROLLED_LIVE_CLICK_ACTION_BUTTON_ONLY = False
+    V31_CONTROLLED_LIVE_CLICK_SIMPLE_ACTIONS_ONLY = False
     V31_CONTROLLED_LIVE_CLICK_SERVICE_BRANCH_DISABLED = False
+    V31_CONTROLLED_LIVE_CLICK_RAISE_BRANCH_ENABLED = True
     V31_CONTROLLED_LIVE_CLICK_MAX_CLICKS_PER_RUN = 0
+
+    V31_CONTROLLED_LIVE_CLICK_ALLOWED_ACTIONS = (
+        "fold",
+        "check",
+        "call",
+        "check_fold",
+        "raise",
+        "open_raise",
+        "iso_raise",
+        "3bet",
+        "4bet",
+        "5bet",
+        "jam",
+        "all_in",
+    )
+    V31_CONTROLLED_LIVE_CLICK_ALLOWED_BUTTONS = (
+        "FOLD",
+        "Check",
+        "CALL",
+        "Call",
+        "Check/fold",
+        "Raise",
+        "33%",
+        "50%",
+        "70%",
+        "98%",
+    )

@@ -32,6 +32,11 @@ from pipeline.action_button_pipeline import run_action_button_pipeline
 from runtime.action_click_stub import build_and_maybe_execute_click_plan
 from runtime.solver_payload_builder import build_and_save_solver_payload
 from runtime.solver_stub import build_solver_stub_decision
+from config import (
+    V09_REAL_CLICK_MASTER_ARMED,
+    V11_REAL_MOUSE_CLICK_ENABLED,
+    V11_CLICK_DRY_RUN,
+)
 from runtime.table_overlay_status import update_table_runtime_status
 
 
@@ -179,6 +184,46 @@ def run_v11_stage1_runtime(
     solver_decision = _apply_solver_timeout_fallback(solver_payload, solver_decision, full_state)
     solver_decision.setdefault("total_pot_bb", _extract_total_pot_bb(full_state))
     solver_decision.setdefault("waited_sec", None)
+
+    real_click_mode = (
+        bool(V09_REAL_CLICK_MASTER_ARMED)
+        and bool(V11_REAL_MOUSE_CLICK_ENABLED)
+        and V11_CLICK_DRY_RUN is False
+    )
+    stub_decision_id = str(solver_decision.get("decision_id") or "")
+    stub_status = str(solver_decision.get("status") or "")
+    if real_click_mode and (stub_status == "stub" or stub_decision_id.startswith("v12_stub_")):
+        update_table_runtime_status(
+            table_id,
+            solver_status="blocked_stub_real_click",
+            solver_action=solver_decision.get("action"),
+            solver_size_pct=solver_decision.get("size_pct"),
+            click_status="blocked",
+        )
+        return {
+            "schema_version": "1.1-runtime",
+            "table_id": table_id,
+            "hand_id": hand_id,
+            "frame_name": frame_name,
+            "json": {"status": json_status, "processing_time_ms": json_time_ms},
+            "payload": {"status": "saved", "path": str(solver_payload_path)},
+            "solver": {
+                **dict(solver_decision),
+                "status": "blocked_stub_real_click",
+                "blocked": True,
+                "block_reason": "v21_stub_decision_cannot_execute_real_click",
+            },
+            "action_buttons": {"status": "skipped", "detected_classes": []},
+            "click": {
+                "status": "blocked",
+                "target_sequence": [],
+                "click_completed": False,
+                "guard_passed": False,
+                "reason": "v21_stub_decision_cannot_execute_real_click",
+                "message": "Real-click runtime blocked because selected solver decision is the legacy v12 stub.",
+            },
+        }
+
     update_table_runtime_status(
         table_id,
         solver_status=str(solver_decision.get("status")),

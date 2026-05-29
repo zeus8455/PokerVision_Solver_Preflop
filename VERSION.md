@@ -1,5 +1,18 @@
 ﻿# Version history
 
+## V2.21.0
+Real-click stub fallback blocker:
+- opens V8.7 full live chain scope for real runtime testing
+- enables raise branch in controlled full-live mode
+- disables simple-actions-only in controlled full-live mode
+- allows Solver_Preflop raise/open_raise/iso_raise/3bet/4bet/5bet/jam/all_in action names
+- allows Raise and sizing buttons 33%/50%/70%/98% in full-live scope
+- adds real-click startup readiness audit tool
+- blocks legacy v12_stub_* decisions from executing physical clicks in real-click mode
+- returns click_completed=false and guard_passed=false when stub real-click is blocked
+- fixes V2.19 live no-click probe stdout so JSON report remains parseable
+- adds V2.21 regression audit and pytest coverage
+- full test suite: 94 passed
 ## V2.19.0
 Live no-click capture probe regression:
 - adds tools/run_v2_19_live_no_click_capture_probe.py
@@ -274,6 +287,7 @@ Removed Python cache artifacts from Git.
 
 ## V0.1.0
 Initial skeleton.
+
 
 
 

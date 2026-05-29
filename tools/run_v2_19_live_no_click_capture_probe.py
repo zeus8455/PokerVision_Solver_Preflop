@@ -1,6 +1,8 @@
 ﻿from __future__ import annotations
 
+import contextlib
 import importlib.util
+import io
 import json
 import shutil
 import sys
@@ -80,18 +82,21 @@ def main() -> int:
 
     backup_current_cycle()
 
+    probe_stdout = io.StringIO()
+
     try:
-        saved_paths = display.run_ui_display_analysis_cycle(
-            image_by_table_id=image_by_table_id,
-            opened_table_ids=opened_table_ids,
-            hand_tracker=hand_tracker,
-            action_event_gate=action_event_gate,
-            clear_json_state_machine=clear_state_machine,
-            table_action_transaction_gate=transaction_gate,
-            display_pass_id="v219_live_probe_000001",
-            clear_previous_outputs_on_start=True,
-            cycle_id="v219_live_probe",
-        )
+        with contextlib.redirect_stdout(probe_stdout):
+            saved_paths = display.run_ui_display_analysis_cycle(
+                image_by_table_id=image_by_table_id,
+                opened_table_ids=opened_table_ids,
+                hand_tracker=hand_tracker,
+                action_event_gate=action_event_gate,
+                clear_json_state_machine=clear_state_machine,
+                table_action_transaction_gate=transaction_gate,
+                display_pass_id="v219_live_probe_000001",
+                clear_previous_outputs_on_start=True,
+                cycle_id="v219_live_probe",
+            )
 
         counts = {
             "dark_json": count_json_files("Dark_JSON"),
@@ -122,6 +127,7 @@ def main() -> int:
         "opened_table_ids": sorted(opened_table_ids),
         "saved_paths_count": len(saved_paths),
         "saved_paths": [str(path) for path in saved_paths],
+        "probe_stdout_lines": probe_stdout.getvalue().splitlines()[-20:],
         "output_counts": counts,
     }
 
