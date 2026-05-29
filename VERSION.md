@@ -1,5 +1,19 @@
 ﻿# Version history
 
+## V2.9.0
+Snapshot finalization blocker audit:
+- adds tools/run_v2_9_snapshot_finalization_blocker_audit.py
+- adds tests/test_v2_9_snapshot_finalization_blocker_audit.py
+- audits the central Final Clear_JSON blocker matrix without patching display_analysis_cycle.py
+- confirms pending validation failure maps to pending_clear_json_contract_validation_failed
+- confirms unfinished transaction maps to action_transaction_not_completed
+- confirms missing click_result maps to missing_click_result_for_final_clear_json
+- confirms ClickExecutionGuard failure maps to click_execution_guard_failed
+- confirms duplicate click_result.decision_id maps to duplicate_click_result_reused
+- confirms state-machine no-save path maps to pending_only / duplicate_or_not_advanced
+- confirms final Clear_JSON validation failure maps to final_clear_json_contract_validation_failed
+- confirms success path saves Final Clear_JSON after dry-run ClickExecutionGuard passes
+- keeps real project, live UI, screen capture, YOLO and physical click disabled
 ## V2.8.0
 Snapshot 6-slot isolation audit:
 - adds tools/run_v2_8_snapshot_6slot_isolation_audit.py
@@ -121,5 +135,6 @@ Removed Python cache artifacts from Git.
 
 ## V0.1.0
 Initial skeleton.
+
 
 
