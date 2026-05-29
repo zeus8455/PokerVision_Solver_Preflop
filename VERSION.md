@@ -1,5 +1,15 @@
-# Version history
+﻿# Version history
 
+## V2.7.0
+Snapshot display finalization audit:
+- adds tools/run_v2_7_snapshot_display_finalization_audit.py
+- adds tests/test_v2_7_snapshot_display_finalization_audit.py
+- audits the central Display finalization gates around Pending Clear_JSON -> Action_Runtime_Plan_JSON -> ClickExecutionGuard -> Final Clear_JSON
+- confirms pending runtime plan status preview_not_saved_pending_only is expected when publish_files=False
+- confirms final runtime plan publication works when publish_files=True
+- confirms Solver_Preflop_Bridge is selected as runtime source
+- confirms compact click_result remains schema-safe for Final Clear_JSON
+- confirms final validation and Final Clear_JSON save path work without touching real project, live UI, screen capture, YOLO, or physical click
 ## V2.6.0
 Snapshot Solver_Preflop Final Clear_JSON embedding check:
 - adds tools/run_v2_6_snapshot_final_clear_embedding_check.py
@@ -98,3 +108,4 @@ Removed Python cache artifacts from Git.
 
 ## V0.1.0
 Initial skeleton.
+
