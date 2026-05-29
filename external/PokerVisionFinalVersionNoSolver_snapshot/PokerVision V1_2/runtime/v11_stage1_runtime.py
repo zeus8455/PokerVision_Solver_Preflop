@@ -141,7 +141,18 @@ def _extract_solver_preflop_decision_from_state(
     if not isinstance(contract, dict):
         return None
 
-    if str(contract.get("status") or "") != "ok":
+    # V2.31: accept Solver_Preflop fallback bridge when action_decision is available.
+    #
+    # Live failure fixed here:
+    # - display/runtime source selection can correctly choose Solver_Preflop_Bridge with
+    #   solver_action_decision_available=True while the bridge contract status is "fallback"
+    #   for conservative unsupported nodes such as multi_raise_unknown.
+    # - The previous extractor accepted only status == "ok", returned None for fallback,
+    #   and run_v11_stage1_runtime then built the legacy v12_stub_* decision.
+    # - Real-click is explicitly blocked for legacy v12 stubs, so the poker Action_Button
+    #   click branch never executed even though Solver_Preflop had a usable safe fold/check/call decision.
+    contract_status = str(contract.get("status") or "")
+    if contract_status not in {"ok", "fallback"}:
         return None
 
     bridge_payload = contract.get("bridge_payload")

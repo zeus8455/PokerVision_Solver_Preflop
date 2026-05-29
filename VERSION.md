@@ -1,3 +1,37 @@
+## V2.31.0 - accept Solver_Preflop fallback bridge in live runtime
+
+Status: passed
+
+Goal:
+- Fix live runtime falling back to legacy v12_stub_* when Solver_Preflop bridge status is fallback but bridge_payload.action_decision is available.
+- Prevent real-click from being blocked by blocked_stub_real_click when Solver_Preflop already produced a usable safe decision.
+
+Changed:
+- external/PokerVisionFinalVersionNoSolver_snapshot/PokerVision V1_2/runtime/v11_stage1_runtime.py
+- tools/run_v2_23_live_runtime_solver_bridge_audit.py
+
+Added:
+- tools/apply_v2_31_accept_solver_preflop_fallback_contract_patch.py
+- tools/run_v2_31_accept_solver_preflop_fallback_contract_audit.py
+- tests/test_v2_31_accept_solver_preflop_fallback_contract_audit.py
+
+Validated:
+- V2.31 audit status ok
+- fallback Solver_Preflop bridge now returns runtime decision
+- fallback decision source == PokerVision_Solver_Preflop
+- fallback decision_id is not v12_stub_*
+- ok bridge status still works
+- bad bridge status is still rejected
+- V2.23 live runtime solver bridge audit updated for ok|fallback contract
+- real project not touched
+- full pytest: 103 passed
+
+Live issue addressed:
+- After V2.30, duplicate Active retry reached action runtime.
+- Runtime selected Solver_Preflop_Bridge in preview but v11_stage1_runtime rejected bridge.status=fallback.
+- Runtime then built legacy v12_stub_* and real-click was blocked as blocked_stub_real_click.
+- V2.31 accepts fallback bridge when bridge_payload.action_decision exists, so live runtime uses Solver_Preflop instead of legacy stub.
+
 ## V2.30.0 - duplicate Active runtime retry when no runtime/final artifact exists
 
 Status: passed
@@ -479,6 +513,7 @@ Removed Python cache artifacts from Git.
 
 ## V0.1.0
 Initial skeleton.
+
 
 
 
