@@ -1,28 +1,25 @@
 # Version history
 
-## V2.5.0
-Snapshot Solver_Preflop dry-run click-result publication check:
-- adds tools/run_v2_5_snapshot_click_result_publication_check.py
-- runs all snapshot Pending preflop Clear_JSON cases through:
-  Pending Clear_JSON -> Solver_Preflop bridge -> V2.1 adapter
-  -> Action_Runtime_Plan_JSON -> ClickExecutionGuard -> Click_Result_JSON file
-- verifies dry-run click_result_v09 is saved for every case
-- verifies saved click_result matches in-memory guard result
-- verifies physical click is never executed and forced real-click remains blocked
-- keeps full live UI, screen capture, YOLO, and real project mutation disabled
-- adds test coverage for click-result publication
-
-## V2.4.0
-Snapshot Solver_Preflop click-guard eligibility check:
-- adds tools/run_v2_4_snapshot_click_guard_eligibility_check.py
+## V2.6.0
+Snapshot Solver_Preflop Final Clear_JSON embedding check:
+- adds tools/run_v2_6_snapshot_final_clear_embedding_check.py
 - runs all snapshot Pending preflop Clear_JSON cases through:
   Pending Clear_JSON -> Solver_Preflop bridge -> V2.1 adapter
   -> Action_Runtime_Plan_JSON -> ClickExecutionGuard
-- verifies dry-run click-result eligibility passes for all Solver-sourced runtime plans
-- verifies forced real-click request is blocked by real_click_master_not_armed
-- verifies slot-boundary/button/no-repeat/plan-source guards are satisfied in dry-run mode
-- keeps full live UI, screen capture, YOLO, and real project mutation disabled
-- adds test coverage for Solver_Preflop click-guard eligibility
+  -> schema-safe compact click_result_v09 -> Final Clear_JSON
+- verifies compact click_result is schema-safe for Clear_JSON
+- verifies Final Clear_JSON validates and is saved under Clear_JSON_Final
+- verifies saved Final Clear_JSON contains click_result and matches source frame/action/decision
+- keeps full live UI, screen capture, YOLO, physical click, and real project mutation disabled
+- adds test coverage for Final Clear_JSON embedding
+- V2.6 fix: Clear_JSON.click_result does not embed click_completed because snapshot clear_json_builder forbids that key
+- V2.6 count fix: final Clear_JSON file count is derived from actual saved final_clear.path values, because the snapshot final dir resolves to Clear_JSON rather than Clear_JSON_Final.
+
+## V2.5.0
+Snapshot Solver_Preflop dry-run click-result publication check.
+
+## V2.4.0
+Snapshot Solver_Preflop click-guard eligibility check.
 
 ## V2.3.0
 Snapshot Solver_Preflop runtime plan publication check.
