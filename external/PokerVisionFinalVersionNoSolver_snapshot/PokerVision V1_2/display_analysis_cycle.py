@@ -1671,6 +1671,7 @@ def build_and_save_action_runtime_plan_contract(
     cycle_dir: Path,
     table_id: str,
     publish_files: bool = True,
+    solver_preflop_bridge_contract: Optional[Dict[str, object]] = None,
 ) -> Dict[str, object]:
     """Build Action_Runtime_Plan_JSON contract and optionally publish the file."""
     if not V07_ACTION_RUNTIME_PLAN_ENABLED:
@@ -1739,6 +1740,7 @@ def build_and_save_action_decision_contract(
     cycle_dir: Path,
     table_id: str,
     publish_files: bool = True,
+    solver_preflop_bridge_contract: Optional[Dict[str, object]] = None,
 ) -> Dict[str, object]:
     """Build Action_Decision_JSON contract and optionally publish the file."""
     if not V06_ACTION_DECISION_ENABLED:
@@ -1998,17 +2000,18 @@ def save_dark_and_clear_table_frame_json(
                             # do not publish Decision_JSON, Action_Decision_JSON or
                             # Action_Runtime_Plan_JSON files until Final Clear_JSON is
                             # actually saved after click/dry-run completion.
-                            action_decision_contract = build_and_save_action_decision_contract(
-                                decision_state=decision_state,
-                                cycle_dir=cycle_dir,
-                                table_id=table_id,
-                                publish_files=False,
-                            )
                             solver_preflop_bridge_contract = build_solver_preflop_dryrun_bridge_contract(
                                 clear_state=clear_state_candidate,
                                 cycle_dir=cycle_dir,
                                 table_id=table_id,
                                 publish_files=bool(V17_SOLVER_PREFLOP_BRIDGE_PUBLISH_DIAGNOSTIC_FILES),
+                            )
+                            action_decision_contract = build_and_save_action_decision_contract(
+                                decision_state=decision_state,
+                                cycle_dir=cycle_dir,
+                                table_id=table_id,
+                                publish_files=False,
+                                solver_preflop_bridge_contract=solver_preflop_bridge_contract,
                             )
                             if isinstance(action_decision_contract, dict):
                                 action_decision_contract["solver_preflop_bridge_contract"] = solver_preflop_bridge_contract
@@ -2208,12 +2211,21 @@ def save_dark_and_clear_table_frame_json(
                                                 cycle_dir=cycle_dir,
                                                 table_id=table_id,
                                             )
+                                            final_solver_preflop_bridge_contract = build_solver_preflop_dryrun_bridge_contract(
+                                                clear_state=final_clear_state,
+                                                cycle_dir=cycle_dir,
+                                                table_id=table_id,
+                                                publish_files=bool(V17_SOLVER_PREFLOP_BRIDGE_PUBLISH_DIAGNOSTIC_FILES),
+                                            )
                                             final_action_decision_contract = build_and_save_action_decision_contract(
                                                 decision_state=final_decision_state,
                                                 cycle_dir=cycle_dir,
                                                 table_id=table_id,
                                                 publish_files=True,
+                                                solver_preflop_bridge_contract=final_solver_preflop_bridge_contract,
                                             )
+                                            if isinstance(final_action_decision_contract, dict):
+                                                final_action_decision_contract["solver_preflop_bridge_contract"] = final_solver_preflop_bridge_contract
                                             if final_action_decision_contract.get("status") not in {"saved", "disabled"}:
                                                 for message in final_action_decision_contract.get("validation", {}).get("errors", []) if isinstance(final_action_decision_contract.get("validation"), dict) else []:
                                                     add_error(state, block="action_decision_contract", message=str(message))
@@ -2305,12 +2317,21 @@ def save_dark_and_clear_table_frame_json(
                                             cycle_dir=cycle_dir,
                                             table_id=table_id,
                                         )
+                                        final_solver_preflop_bridge_contract = build_solver_preflop_dryrun_bridge_contract(
+                                            clear_state=final_clear_state,
+                                            cycle_dir=cycle_dir,
+                                            table_id=table_id,
+                                            publish_files=bool(V17_SOLVER_PREFLOP_BRIDGE_PUBLISH_DIAGNOSTIC_FILES),
+                                        )
                                         final_action_decision_contract = build_and_save_action_decision_contract(
                                             decision_state=final_decision_state,
                                             cycle_dir=cycle_dir,
                                             table_id=table_id,
                                             publish_files=True,
+                                            solver_preflop_bridge_contract=final_solver_preflop_bridge_contract,
                                         )
+                                        if isinstance(final_action_decision_contract, dict):
+                                            final_action_decision_contract["solver_preflop_bridge_contract"] = final_solver_preflop_bridge_contract
                                         if final_action_decision_contract.get("status") not in {"saved", "disabled"}:
                                             for message in final_action_decision_contract.get("validation", {}).get("errors", []) if isinstance(final_action_decision_contract.get("validation"), dict) else []:
                                                 add_error(state, block="action_decision_contract", message=str(message))

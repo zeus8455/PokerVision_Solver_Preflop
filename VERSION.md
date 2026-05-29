@@ -1,5 +1,19 @@
 ﻿# Version history
 
+## V2.13.0
+Snapshot final Action_Decision publication regression:
+- fixes snapshot display_analysis_cycle.py final Action_Decision publication NameError path
+- adds solver_preflop_bridge_contract as an explicit optional argument to build_and_save_action_decision_contract
+- builds Solver_Preflop bridge before pending Action_Decision preview
+- passes Solver_Preflop bridge into pending and final Action_Decision/RuntimePlan publication
+- confirms Final Clear_JSON still saves after completed dry-run/clicked transaction
+- confirms final Decision_JSON is saved
+- confirms final Action_Decision_JSON is saved
+- confirms final Action_Runtime_Plan_JSON is saved
+- confirms unexpected keyword argument error is absent
+- confirms name 'solver_preflop_bridge_contract' is not defined error is absent
+- records known V2.14 gap: final Solver_Preflop bridge may be skipped when Final Clear_JSON already contains click_result
+- keeps real project, live UI, screen capture, YOLO and physical click disabled
 ## V2.12.0
 Snapshot display transaction integration audit:
 - adds tools/run_v2_12_snapshot_display_transaction_integration_audit.py
@@ -174,6 +188,7 @@ Removed Python cache artifacts from Git.
 
 ## V0.1.0
 Initial skeleton.
+
 
 
 
