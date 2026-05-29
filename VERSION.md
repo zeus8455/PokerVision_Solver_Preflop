@@ -1,5 +1,18 @@
 ﻿# Version history
 
+## V2.8.0
+Snapshot 6-slot isolation audit:
+- adds tools/run_v2_8_snapshot_6slot_isolation_audit.py
+- adds tests/test_v2_8_snapshot_6slot_isolation_audit.py
+- builds synthetic preflop cases for table_01 through table_06 from existing Pending Clear_JSON templates
+- validates table_slots.py exposes exactly six unique table slots, table indexes and slot bboxes
+- confirms Solver_Preflop_Bridge is selected independently for every table slot
+- confirms each slot gets a unique decision_id
+- confirms Action_Runtime_Plan_JSON files are scoped under Action_Runtime_Plan_JSON/table_N
+- confirms Final Clear_JSON files are scoped under Clear_JSON/table_N
+- confirms technical table/slot_bbox data is not embedded into schema-safe Final Clear_JSON
+- keeps slot bbox only in synthetic guard/runtime state for dry-run ClickExecutionGuard validation
+- keeps real project, live UI, screen capture, YOLO and physical click disabled
 ## V2.7.0
 Snapshot display finalization audit:
 - adds tools/run_v2_7_snapshot_display_finalization_audit.py
@@ -108,4 +121,5 @@ Removed Python cache artifacts from Git.
 
 ## V0.1.0
 Initial skeleton.
+
 
