@@ -1,4 +1,26 @@
-﻿# Version history
+## V2.24.0 - snapshot live-runtime E2E
+
+Status: passed
+
+Goal:
+- Prove Solver_Preflop bridge -> v11_stage1_runtime -> Action_Button dry-run click plan path without YOLO, screen capture, or physical mouse click.
+
+Added:
+- tools/run_v2_24_snapshot_live_runtime_e2e.py
+- tests/test_v2_24_snapshot_live_runtime_e2e.py
+
+Validated:
+- bridge.status == ok
+- runtime solver source == PokerVision_Solver_Preflop
+- solver decision_id is not v12_stub_* and not v12_fallback_*
+- click decision_id matches solver decision_id
+- open_raise raise-family action maps to legacy bet_raise
+- fake Action_Button pipeline is used
+- click status == dry_run
+- physical_click_executed == false
+- full pytest: 97 passed
+
+# Version history
 
 ## V2.23.0
 Live runtime Solver_Preflop bridge source:
@@ -310,6 +332,7 @@ Removed Python cache artifacts from Git.
 
 ## V0.1.0
 Initial skeleton.
+
 
 
 
