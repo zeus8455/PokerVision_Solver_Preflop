@@ -665,3 +665,49 @@ Notes:
 - Full pytest is intentionally not claimed as closed in this checkpoint.
 - Legacy snapshot/full-pytest fixture stabilization is a separate follow-up task and must not be mixed with this V2.35 click-gate checkpoint.
 
+
+## V2.36.0 — synthetic Clear_JSON runtime chain E2E
+
+Date: 2026-05-30
+
+Status: targeted proof passed.
+
+Goal:
+- Prove the preflop runtime chain one level above V2.35.
+- Start from synthetic Clear_JSON instead of direct click-runtime input.
+- Validate Solver_Preflop bridge, v11 runtime selection, fake Action_Button execution, click_result, and synthetic Final publication proof without live UI, screen capture, YOLO, or real mouse movement.
+
+Synthetic chain:
+- synthetic Clear_JSON
+- Solver_Preflop dryrun bridge
+- solver_preflop_bridge_contract
+- v11_stage1_runtime
+- fake Action_Button result
+- mouse executor spy
+- click_result
+- synthetic Final_Clear_JSON / JSON_Complete publication proof
+
+Positive proof:
+- fold -> clicked -> final saved -> mouse spy called
+- call -> clicked -> final saved -> mouse spy called
+- check -> clicked -> final saved -> mouse spy called
+- open_raise -> Bet/Raise -> clicked -> final saved -> mouse spy called
+- iso_raise -> 98% -> Bet/Raise -> clicked -> final saved -> mouse spy called
+- 3bet -> 98% -> Bet/Raise -> clicked -> final saved -> mouse spy called
+- 4bet -> 50% -> Bet/Raise -> clicked -> final saved -> mouse spy called
+- 5bet_jam -> 98% -> Bet/Raise -> clicked -> final saved -> mouse spy called
+
+Negative proof:
+- missing Bet/Raise button blocks click and skips final publication.
+- postflop Clear_JSON is skipped.
+- Clear_JSON with existing click_result is skipped.
+
+Validation:
+- `tools/run_v2_36_synthetic_clear_json_runtime_chain.py`
+  - `V2.36_SYNTHETIC_CLEAR_JSON_RUNTIME_CHAIN_OK = True`
+- `pytest tests/test_v2_36_synthetic_clear_json_runtime_chain.py -q`
+  - `1 passed`
+
+Notes:
+- Full pytest is intentionally not claimed as closed in this checkpoint.
+- Legacy snapshot/full-pytest fixture stabilization remains separate.
