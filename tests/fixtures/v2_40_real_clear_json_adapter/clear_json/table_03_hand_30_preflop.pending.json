@@ -1,0 +1,45 @@
+{
+  "frame_id": "table_03_hand_30_preflop",
+  "board": {
+    "cards": [],
+    "street": "preflop"
+  },
+  "Total_pot": 1.5,
+  "players": {
+    "MP": {
+      "hero": true,
+      "cards": [
+        "3_diamonds",
+        "2_spades"
+      ],
+      "stack": 38.5,
+      "fold": false,
+      "chips": false
+    },
+    "CO": {
+      "stack": 87.5,
+      "fold": false,
+      "chips": false
+    },
+    "BTN": {
+      "stack": 162.5,
+      "fold": false,
+      "chips": false
+    },
+    "SB": {
+      "stack": 93.0,
+      "fold": false,
+      "chips": 0.5
+    },
+    "BB": {
+      "stack": 84.5,
+      "fold": false,
+      "chips": 1.0
+    },
+    "UTG": {
+      "stack": 195.0,
+      "fold": true,
+      "chips": false
+    }
+  }
+}

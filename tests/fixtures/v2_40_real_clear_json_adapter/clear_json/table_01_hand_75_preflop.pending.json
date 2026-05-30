@@ -1,0 +1,40 @@
+{
+  "frame_id": "table_02_hand_01_preflop",
+  "board": {
+    "cards": [],
+    "street": "preflop"
+  },
+  "Total_pot": 3.5,
+  "players": {
+    "SB": {
+      "hero": true,
+      "cards": [
+        "Q_clubs",
+        "3_hearts"
+      ],
+      "stack": 38.5,
+      "fold": false,
+      "chips": 0.5
+    },
+    "BB": {
+      "stack": 95.0,
+      "fold": false,
+      "chips": 1.0
+    },
+    "MP": {
+      "stack": 25.0,
+      "fold": true,
+      "chips": false
+    },
+    "CO": {
+      "stack": 81.5,
+      "fold": true,
+      "chips": false
+    },
+    "BTN": {
+      "stack": 98.0,
+      "fold": false,
+      "chips": 2.0
+    }
+  }
+}

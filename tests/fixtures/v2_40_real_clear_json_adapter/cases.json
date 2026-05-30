@@ -1,0 +1,106 @@
+{
+  "schema_version": "v2_40_real_clear_json_adapter_cases_v1",
+  "description": "Real/live-like PokerVision Clear_JSON fixtures copied from collected project artifacts.",
+  "cases": [
+    {
+      "case_id": "live_current_table_01_hand_75_sb_vs_btn_open_q3o_fold",
+      "dest": "table_01_hand_75_preflop.pending.json",
+      "kind": "positive",
+      "expected_hero_position": "SB",
+      "expected_hand_class": "Q3o",
+      "expected_node_type": "blind_vs_open",
+      "expected_action": "fold",
+      "expected_status": "ok",
+      "expected_to_call_bb": 1.5,
+      "fixture": "clear_json/table_01_hand_75_preflop.pending.json",
+      "source_artifact_path": "real_json_artifacts\\external\\PokerVisionFinalVersionNoSolver_snapshot\\PokerVision V1_2\\outputs\\ui_display_cycle\\current_cycle\\Clear_JSON_Pending\\table_01\\table_01_hand_75_preflop.pending.json"
+    },
+    {
+      "case_id": "live_current_table_01_hand_93_utg_unopened_q2o_fold",
+      "dest": "table_01_hand_93_preflop.pending.json",
+      "kind": "positive",
+      "expected_hero_position": "UTG",
+      "expected_hand_class": "Q2o",
+      "expected_node_type": "unopened",
+      "expected_action": "fold",
+      "expected_status": "ok",
+      "expected_to_call_bb": 1.0,
+      "fixture": "clear_json/table_01_hand_93_preflop.pending.json",
+      "source_artifact_path": "real_json_artifacts\\external\\PokerVisionFinalVersionNoSolver_snapshot\\PokerVision V1_2\\outputs\\ui_display_cycle\\current_cycle\\Clear_JSON_Pending\\table_01\\table_01_hand_93_preflop.pending.json"
+    },
+    {
+      "case_id": "live_current_table_02_hand_29_bb_option_limp_j7o_check",
+      "dest": "table_02_hand_29_preflop.pending.json",
+      "kind": "positive",
+      "expected_hero_position": "BB",
+      "expected_hand_class": "J7o",
+      "expected_node_type": "bb_option_vs_1_limper",
+      "expected_action": "check",
+      "expected_status": "ok",
+      "expected_to_call_bb": 0.0,
+      "fixture": "clear_json/table_02_hand_29_preflop.pending.json",
+      "source_artifact_path": "real_json_artifacts\\tmp_solver_outputs\\v227_current_cycle_backup\\Clear_JSON_Pending\\table_02\\table_02_hand_29_preflop.pending.json"
+    },
+    {
+      "case_id": "v227_table_01_hand_21_sb_cold_vs_3bet_t7o_fold",
+      "dest": "table_01_hand_21_preflop.pending.json",
+      "kind": "positive",
+      "expected_hero_position": "SB",
+      "expected_hand_class": "T7o",
+      "expected_node_type": "cold_vs_3bet_or_higher",
+      "expected_action": "fold",
+      "expected_status": "ok",
+      "expected_to_call_bb": 8.5,
+      "fixture": "clear_json/table_01_hand_21_preflop.pending.json",
+      "source_artifact_path": "real_json_artifacts\\tmp_solver_outputs\\v227_current_cycle_backup\\Clear_JSON_Pending\\table_01\\table_01_hand_21_preflop.pending.json"
+    },
+    {
+      "case_id": "v227_table_03_hand_09_sb_vs_btn_open_j9o_fold",
+      "dest": "table_03_hand_09_preflop.pending.json",
+      "kind": "positive",
+      "expected_hero_position": "SB",
+      "expected_hand_class": "J9o",
+      "expected_node_type": "blind_vs_open",
+      "expected_action": "fold",
+      "expected_status": "ok",
+      "expected_to_call_bb": 2.0,
+      "fixture": "clear_json/table_03_hand_09_preflop.pending.json",
+      "source_artifact_path": "real_json_artifacts\\tmp_solver_outputs\\v227_current_cycle_backup\\Clear_JSON_Pending\\table_03\\table_03_hand_09_preflop.pending.json"
+    },
+    {
+      "case_id": "v227_table_03_hand_30_mp_unopened_32o_fold",
+      "dest": "table_03_hand_30_preflop.pending.json",
+      "kind": "positive",
+      "expected_hero_position": "MP",
+      "expected_hand_class": "32o",
+      "expected_node_type": "unopened",
+      "expected_action": "fold",
+      "expected_status": "ok",
+      "expected_to_call_bb": 1.0,
+      "fixture": "clear_json/table_03_hand_30_preflop.pending.json",
+      "source_artifact_path": "real_json_artifacts\\tmp_solver_outputs\\v227_current_cycle_backup\\Clear_JSON_Pending\\table_03\\table_03_hand_30_preflop.pending.json"
+    },
+    {
+      "case_id": "v227_table_02_hand_30_final_with_click_result_rejected",
+      "dest": "table_02_hand_30_preflop_01.final.json",
+      "kind": "reject",
+      "expected_error_contains": "click_result",
+      "expected_solver_status": "fallback",
+      "expected_solver_node_type": "solver_input_error",
+      "expected_solver_raw_action": "safe_fallback",
+      "fixture": "clear_json/table_02_hand_30_preflop_01.final.json",
+      "source_artifact_path": "real_json_artifacts\\tmp_solver_outputs\\v227_current_cycle_backup\\Clear_JSON\\table_02\\table_02_hand_30_preflop_01.json"
+    },
+    {
+      "case_id": "v228_table_01_hand_29_flop_rejected",
+      "dest": "table_01_hand_29_flop.pending.json",
+      "kind": "reject",
+      "expected_error_contains": "preflop",
+      "expected_solver_status": "fallback",
+      "expected_solver_node_type": "solver_input_error",
+      "expected_solver_raw_action": "safe_fallback",
+      "fixture": "clear_json/table_01_hand_29_flop.pending.json",
+      "source_artifact_path": "real_json_artifacts\\tmp_solver_outputs\\v2_28_pending_before_prune_to_4\\table_01\\table_01_hand_29_flop.pending.json"
+    }
+  ]
+}

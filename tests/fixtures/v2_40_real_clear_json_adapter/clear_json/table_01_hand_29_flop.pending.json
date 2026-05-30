@@ -1,0 +1,49 @@
+{
+  "frame_id": "table_01_hand_29_flop",
+  "board": {
+    "cards": [
+      "A_diamonds",
+      "A_clubs",
+      "3_spades"
+    ],
+    "street": "flop"
+  },
+  "Total_pot": 6.5,
+  "players": {
+    "BB": {
+      "hero": true,
+      "cards": [
+        "K_diamonds",
+        "10_diamonds"
+      ],
+      "stack": 38.0,
+      "fold": false,
+      "chips": false
+    },
+    "UTG": {
+      "stack": 56.0,
+      "fold": false,
+      "chips": false
+    },
+    "MP": {
+      "stack": 102.0,
+      "fold": true,
+      "chips": false
+    },
+    "CO": {
+      "stack": 154.5,
+      "fold": true,
+      "chips": false
+    },
+    "BTN": {
+      "stack": 38.5,
+      "fold": false,
+      "chips": false
+    },
+    "SB": {
+      "stack": 129.5,
+      "fold": true,
+      "chips": false
+    }
+  }
+}

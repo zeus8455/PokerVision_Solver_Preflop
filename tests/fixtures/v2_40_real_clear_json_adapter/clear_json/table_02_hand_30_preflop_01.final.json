@@ -1,0 +1,51 @@
+{
+  "frame_id": "table_02_hand_30_preflop_01",
+  "board": {
+    "cards": [],
+    "street": "preflop"
+  },
+  "Total_pot": 4.0,
+  "players": {
+    "SB": {
+      "hero": true,
+      "cards": [
+        "9_diamonds",
+        "7_diamonds"
+      ],
+      "stack": 39.0,
+      "fold": false,
+      "chips": 1.0
+    },
+    "BB": {
+      "stack": 99.0,
+      "fold": true,
+      "chips": false
+    },
+    "MP": {
+      "stack": 178.0,
+      "fold": true,
+      "chips": false
+    },
+    "CO": {
+      "stack": 100.5,
+      "fold": false,
+      "chips": 2.5
+    },
+    "BTN": {
+      "stack": 103.0,
+      "fold": true,
+      "chips": false
+    }
+  },
+  "click_result": {
+    "status": "clicked",
+    "branch": "action_button",
+    "action": "fold",
+    "size_pct": null,
+    "dry_run": false,
+    "real_click_enabled": true,
+    "guard_passed": true,
+    "decision_id": "v12_stub_table_02_hand_30_evt_table_02_49f84234d2bc8aa5_fold_none",
+    "message": "Physical click executed with human-like mouse runtime after V3.1 controlled live-click gate."
+  }
+}

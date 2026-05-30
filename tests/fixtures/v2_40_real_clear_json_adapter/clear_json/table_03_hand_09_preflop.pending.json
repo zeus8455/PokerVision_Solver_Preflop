@@ -1,0 +1,45 @@
+{
+  "frame_id": "table_03_hand_09_preflop",
+  "board": {
+    "cards": [],
+    "street": "preflop"
+  },
+  "Total_pot": 4.0,
+  "players": {
+    "SB": {
+      "hero": true,
+      "cards": [
+        "J_diamonds",
+        "9_hearts"
+      ],
+      "stack": 38.5,
+      "fold": false,
+      "chips": 0.5
+    },
+    "BB": {
+      "stack": 91.0,
+      "fold": false,
+      "chips": 1.0
+    },
+    "UTG": {
+      "stack": 159.5,
+      "fold": true,
+      "chips": false
+    },
+    "MP": {
+      "stack": 93.0,
+      "fold": true,
+      "chips": false
+    },
+    "CO": {
+      "stack": 85.5,
+      "fold": true,
+      "chips": false
+    },
+    "BTN": {
+      "stack": 191.0,
+      "fold": false,
+      "chips": 2.5
+    }
+  }
+}

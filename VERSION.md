@@ -870,3 +870,38 @@ Proof:
 Notes:
 - Full pytest is intentionally not claimed as closed in this checkpoint.
 - Legacy snapshot/full-pytest fixture stabilization remains separate.
+
+## V2.40.0 вЂ” real Clear_JSON adapter fixture audit
+
+Date: 2026-05-30
+
+Status: targeted proof passed.
+
+Goal:
+- Validate Solver_Preflop adapter/classifier/decision behavior on real/live-like Clear_JSON artifacts.
+- Prove real saved JSON files can pass through:
+  - clear_json_adapter
+  - spot_classifier
+  - decision_engine
+  - Solver_Preflop bridge payload
+- Keep this stage fully offline: no live room, no screen capture, no YOLO, no real mouse movement.
+
+Validation:
+- `tools/run_v2_40_real_clear_json_adapter_audit.py`
+  - `V2.40_REAL_CLEAR_JSON_ADAPTER_AUDIT_OK = True`
+- `pytest tests/test_v2_40_real_clear_json_adapter_audit.py -q`
+  - `1 passed`
+
+Proof cases:
+- live_current_table_01_hand_75_sb_vs_btn_open_q3o -> blind_vs_open -> fold.
+- live_current_table_01_hand_93_utg_unopened_q2o_fold -> unopened -> fold.
+- live_current_table_02_hand_29_bb_option_limp_j7o -> bb_option_vs_1_limper -> check.
+- v227_table_01_hand_21_sb_cold_vs_3bet_t7o_fold -> cold_vs_3bet_or_higher -> fold.
+- v227_table_03_hand_09_sb_vs_btn_open_j9o_fold -> blind_vs_open -> fold.
+- v227_table_03_hand_30_mp_unopened_32o_fold -> unopened -> fold.
+- v227_table_02_hand_30_final_with_click_result_rejected -> rejected because Clear_JSON already has click_result.
+- v228_table_01_hand_29_flop_rejected -> rejected because street is not preflop.
+
+Notes:
+- Full pytest is intentionally not claimed as closed in this checkpoint.
+- Live detector/button proof remains V2.41 and requires running the poker room/live mode.

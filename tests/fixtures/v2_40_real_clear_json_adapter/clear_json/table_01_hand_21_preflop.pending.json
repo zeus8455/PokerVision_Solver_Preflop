@@ -1,0 +1,45 @@
+{
+  "frame_id": "table_01_hand_21_preflop",
+  "board": {
+    "cards": [],
+    "street": "preflop"
+  },
+  "Total_pot": 13.5,
+  "players": {
+    "SB": {
+      "hero": true,
+      "cards": [
+        "10_clubs",
+        "7_diamonds"
+      ],
+      "stack": 41.0,
+      "fold": false,
+      "chips": 0.5
+    },
+    "BB": {
+      "stack": 259.0,
+      "fold": false,
+      "chips": 1.0
+    },
+    "UTG": {
+      "stack": 109.0,
+      "fold": false,
+      "chips": 3.0
+    },
+    "MP": {
+      "stack": 100.0,
+      "fold": true,
+      "chips": false
+    },
+    "CO": {
+      "stack": 92.0,
+      "fold": false,
+      "chips": 9.0
+    },
+    "BTN": {
+      "stack": 106.0,
+      "fold": true,
+      "chips": false
+    }
+  }
+}
