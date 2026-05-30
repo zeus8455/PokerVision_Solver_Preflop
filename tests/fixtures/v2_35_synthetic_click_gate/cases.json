@@ -1,0 +1,267 @@
+{
+  "schema_version": "v2_35_synthetic_click_gate_cases",
+  "cases": [
+    {
+      "case_id": "fold",
+      "kind": "positive",
+      "solver_decision": {
+        "decision_id": "v235_fold",
+        "action": "fold",
+        "raw_action": "fold",
+        "engine_action": "fold",
+        "size_pct": null
+      },
+      "expected_sequence": [
+        "FOLD"
+      ],
+      "expected_status": "clicked",
+      "expected_gate_status": "CONTROLLED_LIVE_CLICK_GATE_PASSED",
+      "expect_mouse_spy_called": true
+    },
+    {
+      "case_id": "call",
+      "kind": "positive",
+      "solver_decision": {
+        "decision_id": "v235_call",
+        "action": "call",
+        "raw_action": "call",
+        "engine_action": "call",
+        "size_pct": null
+      },
+      "expected_sequence": [
+        "Call"
+      ],
+      "expected_status": "clicked",
+      "expected_gate_status": "CONTROLLED_LIVE_CLICK_GATE_PASSED",
+      "expect_mouse_spy_called": true
+    },
+    {
+      "case_id": "check",
+      "kind": "positive",
+      "solver_decision": {
+        "decision_id": "v235_check",
+        "action": "check",
+        "raw_action": "check",
+        "engine_action": "check",
+        "size_pct": null
+      },
+      "expected_sequence": [
+        "Check"
+      ],
+      "expected_status": "clicked",
+      "expected_gate_status": "CONTROLLED_LIVE_CLICK_GATE_PASSED",
+      "expect_mouse_spy_called": true
+    },
+    {
+      "case_id": "open_raise",
+      "kind": "positive",
+      "check_runtime_plan": true,
+      "solver_sequence": [
+        "Raise"
+      ],
+      "solver_decision": {
+        "decision_id": "v235_open_raise",
+        "action": "bet_raise",
+        "raw_action": "open_raise",
+        "engine_action": "raise",
+        "size_pct": null
+      },
+      "expected_sequence": [
+        "Bet/Raise"
+      ],
+      "expected_status": "clicked",
+      "expected_gate_status": "CONTROLLED_LIVE_CLICK_GATE_PASSED",
+      "expect_mouse_spy_called": true
+    },
+    {
+      "case_id": "iso_raise",
+      "kind": "positive",
+      "check_runtime_plan": true,
+      "solver_sequence": [
+        "98%",
+        "Raise"
+      ],
+      "solver_decision": {
+        "decision_id": "v235_iso_raise",
+        "action": "bet_raise",
+        "raw_action": "iso_raise",
+        "engine_action": "raise",
+        "size_pct": 98
+      },
+      "expected_sequence": [
+        "98%",
+        "Bet/Raise"
+      ],
+      "expected_status": "clicked",
+      "expected_gate_status": "CONTROLLED_LIVE_CLICK_GATE_PASSED",
+      "expect_mouse_spy_called": true
+    },
+    {
+      "case_id": "threebet",
+      "kind": "positive",
+      "check_runtime_plan": true,
+      "solver_sequence": [
+        "98%",
+        "Raise"
+      ],
+      "solver_decision": {
+        "decision_id": "v235_threebet",
+        "action": "bet_raise",
+        "raw_action": "3bet",
+        "engine_action": "raise",
+        "size_pct": 98
+      },
+      "expected_sequence": [
+        "98%",
+        "Bet/Raise"
+      ],
+      "expected_status": "clicked",
+      "expected_gate_status": "CONTROLLED_LIVE_CLICK_GATE_PASSED",
+      "expect_mouse_spy_called": true
+    },
+    {
+      "case_id": "fourbet",
+      "kind": "positive",
+      "check_runtime_plan": true,
+      "solver_sequence": [
+        "50%",
+        "Raise"
+      ],
+      "solver_decision": {
+        "decision_id": "v235_fourbet",
+        "action": "bet_raise",
+        "raw_action": "4bet",
+        "engine_action": "raise",
+        "size_pct": 50
+      },
+      "expected_sequence": [
+        "50%",
+        "Bet/Raise"
+      ],
+      "expected_status": "clicked",
+      "expected_gate_status": "CONTROLLED_LIVE_CLICK_GATE_PASSED",
+      "expect_mouse_spy_called": true
+    },
+    {
+      "case_id": "fivebet",
+      "kind": "positive",
+      "check_runtime_plan": true,
+      "solver_sequence": [
+        "50%",
+        "Raise"
+      ],
+      "solver_decision": {
+        "decision_id": "v235_fivebet",
+        "action": "bet_raise",
+        "raw_action": "5bet",
+        "engine_action": "raise",
+        "size_pct": 50
+      },
+      "expected_sequence": [
+        "50%",
+        "Bet/Raise"
+      ],
+      "expected_status": "clicked",
+      "expected_gate_status": "CONTROLLED_LIVE_CLICK_GATE_PASSED",
+      "expect_mouse_spy_called": true
+    },
+    {
+      "case_id": "all_in",
+      "kind": "positive",
+      "check_runtime_plan": true,
+      "solver_sequence": [
+        "98%",
+        "Raise"
+      ],
+      "solver_decision": {
+        "decision_id": "v235_all_in",
+        "action": "bet_raise",
+        "raw_action": "all_in",
+        "engine_action": "raise",
+        "size_pct": 98
+      },
+      "expected_sequence": [
+        "98%",
+        "Bet/Raise"
+      ],
+      "expected_status": "clicked",
+      "expected_gate_status": "CONTROLLED_LIVE_CLICK_GATE_PASSED",
+      "expect_mouse_spy_called": true
+    },
+    {
+      "case_id": "legacy_stub_bet_raise",
+      "kind": "negative",
+      "solver_decision": {
+        "decision_id": "v12_stub_v235_open_raise",
+        "action": "bet_raise",
+        "raw_action": "open_raise",
+        "engine_action": "raise",
+        "size_pct": null
+      },
+      "expected_sequence": [
+        "Bet/Raise"
+      ],
+      "expected_status": "blocked",
+      "expected_gate_status": "CONTROLLED_LIVE_CLICK_GATE_BLOCKED",
+      "expected_blockers_any": [
+        "controlled_live_click_stub_decision_blocked"
+      ],
+      "expect_mouse_spy_called": false
+    },
+    {
+      "case_id": "wrong_source_bet_raise",
+      "kind": "negative",
+      "solver_decision": {
+        "decision_id": "v235_wrong_source",
+        "source": "Decision_JSON",
+        "action": "bet_raise",
+        "raw_action": "open_raise",
+        "engine_action": "raise",
+        "size_pct": null
+      },
+      "expected_sequence": [
+        "Bet/Raise"
+      ],
+      "expected_status": "blocked",
+      "expected_gate_status": "CONTROLLED_LIVE_CLICK_GATE_BLOCKED",
+      "expected_blockers_any": [
+        "controlled_live_click_solver_source_not_solver_preflop"
+      ],
+      "expect_mouse_spy_called": false
+    },
+    {
+      "case_id": "missing_bet_raise_button",
+      "kind": "negative",
+      "missing_buttons": [
+        "Bet/Raise"
+      ],
+      "solver_decision": {
+        "decision_id": "v235_missing_bet_raise",
+        "action": "bet_raise",
+        "raw_action": "open_raise",
+        "engine_action": "raise",
+        "size_pct": null
+      },
+      "expected_sequence": [],
+      "expected_status": "blocked",
+      "expect_mouse_spy_called": false
+    },
+    {
+      "case_id": "missing_98_for_iso_raise",
+      "kind": "negative",
+      "missing_buttons": [
+        "98%"
+      ],
+      "solver_decision": {
+        "decision_id": "v235_missing_98",
+        "action": "bet_raise",
+        "raw_action": "iso_raise",
+        "engine_action": "raise",
+        "size_pct": 98
+      },
+      "expected_sequence": [],
+      "expected_status": "blocked",
+      "expect_mouse_spy_called": false
+    }
+  ]
+}

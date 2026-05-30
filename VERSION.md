@@ -612,3 +612,56 @@ Initial skeleton.
 
 
 
+
+## V2.35.0 — synthetic real-click gate E2E and controlled canonical raise gate fix
+
+Date: 2026-05-30
+
+Status: targeted proof passed.
+
+Goal:
+- Stop relying on repeated real-live runs for every raise-click fix.
+- Add a synthetic real-click gate E2E harness that proves runtime would reach the physical mouse executor without moving the real mouse.
+- Fix the actual live blocker found in artifacts: normalized `bet_raise` action and canonical `Bet/Raise` button were not accepted by controlled live click gate.
+- Fix preflop `5bet` runtime mapping to `50% -> Raise`.
+
+Changed:
+- `config.py`
+  - Allowed normalized `bet_raise` in the controlled V8.7 full-live click scope.
+  - Allowed canonical `Bet/Raise` button in controlled live button allowlist.
+- `logic/action_runtime_plan_builder.py`
+  - Corrected `5bet` mapping from `98% -> Raise` to `50% -> Raise`.
+- `logic/click_execution_guard.py`
+  - Accepted `bet_raise` as a valid click-execution action.
+- Added synthetic E2E harness:
+  - `tools/run_v2_35_synthetic_real_click_gate_e2e.py`
+  - `tests/test_v2_35_synthetic_real_click_gate_e2e.py`
+  - `tests/fixtures/v2_35_synthetic_click_gate/`
+
+Synthetic proof:
+- fold -> FOLD -> gate passed -> clicked -> mouse spy called
+- call -> Call -> gate passed -> clicked -> mouse spy called
+- check -> Check -> gate passed -> clicked -> mouse spy called
+- open_raise -> Bet/Raise -> gate passed -> clicked -> mouse spy called
+- iso_raise -> 98% -> Bet/Raise -> gate passed -> clicked -> mouse spy called
+- 3bet -> 98% -> Bet/Raise -> gate passed -> clicked -> mouse spy called
+- 4bet -> 50% -> Bet/Raise -> gate passed -> clicked -> mouse spy called
+- 5bet -> 50% -> Bet/Raise -> gate passed -> clicked -> mouse spy called
+- all_in -> 98% -> Bet/Raise -> gate passed -> clicked -> mouse spy called
+
+Negative proof:
+- legacy stub bet_raise is blocked.
+- wrong solver source bet_raise is blocked.
+- missing Bet/Raise button is blocked.
+- missing 98% for iso_raise is blocked.
+
+Validation:
+- `tools/run_v2_35_synthetic_real_click_gate_e2e.py`
+  - `V2.35_SYNTHETIC_REAL_CLICK_GATE_E2E_OK = True`
+- `pytest tests/test_v2_35_synthetic_real_click_gate_e2e.py -q`
+  - `1 passed`
+
+Notes:
+- Full pytest is intentionally not claimed as closed in this checkpoint.
+- Legacy snapshot/full-pytest fixture stabilization is a separate follow-up task and must not be mixed with this V2.35 click-gate checkpoint.
+

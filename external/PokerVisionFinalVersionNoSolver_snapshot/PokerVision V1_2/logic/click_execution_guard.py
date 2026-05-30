@@ -20,7 +20,7 @@ BBox = Tuple[float, float, float, float]
 Point = Tuple[float, float]
 
 
-_ALLOWED_ACTIONS = {"fold", "call", "check", "check_fold", "bet", "raise"}
+_ALLOWED_ACTIONS = {'fold', 'call', 'check', 'check_fold', 'bet', 'raise', 'bet_raise'}
 
 
 @dataclass(frozen=True)

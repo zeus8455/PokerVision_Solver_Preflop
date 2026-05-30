@@ -129,11 +129,8 @@ def _v234_solver_preflop_raise_sequence(action_decision: Dict[str, Any], normali
 
     if raw_action == "open_raise":
         return ["Raise"]
-    if raw_action in {"iso_raise", "3bet", "5bet", "jam", "all_in"}:
-        return ["98%", "Raise"]
-    if raw_action == "4bet":
-        return ["50%", "Raise"]
-
+    if raw_action in {"iso_raise", "3bet", "jam", "all_in"}: return ["98%", "Raise"]
+    if raw_action in {"4bet", "5bet"}: return ["50%", "Raise"]
     raw_targets = action_decision.get("target_button_classes")
     if isinstance(raw_targets, list):
         out: List[str] = []
