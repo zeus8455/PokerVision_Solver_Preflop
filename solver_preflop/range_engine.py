@@ -155,6 +155,17 @@ def decide_preflop_action_from_ranges(
             source="bb_vs_sb_limp.BB",
         )
 
+    # V239_BB_UNOPENED_OPTION_DEFAULT_CHECK:
+    # Logical BB no-raise/no-limper option. If this frame ever reaches an Active
+    # cycle, the safe preflop action is a guarded check attempt, not unknown fallback.
+    if node == "bb_unopened_option_no_raise":
+        return RangeDecision(
+            action=_default_for(data, "bb_unopened_option_no_raise", "check"),
+            source="bb_unopened_option_no_raise.default",
+            fallback_used=True,
+            notes=["BB no-raise option classified; default guarded check."],
+        )
+
     if node.startswith("bb_option_vs_"):
         action_map = ((nodes.get("iso_raise") or {}).get("BB") or {})
         return _pick_from_action_map(

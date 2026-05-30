@@ -175,6 +175,25 @@ def _classify_all_in_spot(
     )
 
 
+# V239_POSITIONAL_TWO_LEVEL_4BET_INFERENCE:
+# With only final commitments, CO=22 and BTN=9 may look like BTN open -> CO 3bet.
+# In real preflop order, CO acts before BTN, so BTN cannot open before CO responds.
+# Therefore if Hero holds the lower non-blind raise level and the max-commitment
+# player is earlier in preflop order, infer Hero is the threebettor facing a 4bet.
+def _preflop_order_index(position: str) -> int:
+    order = ["UTG", "MP", "CO", "BTN", "SB", "BB"]
+    try:
+        return order.index(str(position))
+    except ValueError:
+        return 999
+
+
+def _acts_before_preflop(left: str | None, right: str | None) -> bool:
+    if not left or not right:
+        return False
+    return _preflop_order_index(left) < _preflop_order_index(right)
+
+
 def classify_preflop_spot(frame: NormalizedPreflopFrame) -> PreflopSpot:
     active_players = frame.active_players
     hero = frame.hero_player
@@ -243,6 +262,16 @@ def classify_preflop_spot(frame: NormalizedPreflopFrame) -> PreflopSpot:
                 **common,
             )
 
+        # V239_SB_BLIND_VS_LIMPER_CLASSIFICATION:
+        # SB has a blind-only 0.5bb commitment and faces one or more limpers.
+        # This is still a limp/isolation spot, not unknown_no_raise_preflop_spot.
+        if hero.position == "SB" and limpers and _is_close(hero_commitment, 0.5) and _is_close(max_commitment, 1.0):
+            return PreflopSpot(
+                node_type=f"iso_vs_{len(limpers)}_limper" if len(limpers) == 1 else "iso_vs_2plus_limpers",
+                notes=["Hero SB has blind-only commitment and faces limper(s); classify as limp/isolation spot."],
+                **common,
+            )
+
         if limpers and _is_close(hero_commitment, 0.0):
             return PreflopSpot(
                 node_type=f"iso_vs_{len(limpers)}_limper" if len(limpers) == 1 else "iso_vs_2plus_limpers",
@@ -255,9 +284,20 @@ def classify_preflop_spot(frame: NormalizedPreflopFrame) -> PreflopSpot:
                 **common,
             )
 
+        # V239_BB_NO_RAISE_OPTION_CLASSIFICATION:
+        # If Hero is BB, no raise exists, no limper exists, and there is nothing to call,
+        # this should not fall into unknown_no_raise_preflop_spot. It is a logical
+        # BB option/no-decision frame, mapped to a guarded check/default by range_engine.
+        if hero.position == "BB" and not limpers and _is_close(hero_commitment, 1.0) and max_commitment <= 1.0 and _is_close(to_call, 0.0):
+            return PreflopSpot(
+                node_type="bb_unopened_option_no_raise",
+                notes=["Hero BB has no raise/limp and no amount to call; classify as BB no-raise option."],
+                **common,
+            )
+
         return PreflopSpot(
             node_type="unknown_no_raise_preflop_spot",
-            notes=["No raise exists, but V0.6 cannot classify this no-raise state."],
+            notes=["No raise exists, but V2.39 cannot classify this no-raise state."],
             **common,
         )
 
@@ -322,6 +362,31 @@ def classify_preflop_spot(frame: NormalizedPreflopFrame) -> PreflopSpot:
         three_bettor_pos = _first_position(_positions_with_commitment(active_players, second_raise))
         four_bettor_pos = _first_position(_positions_with_commitment(active_players, third_raise)) if third_raise is not None else None
         last_aggressor_pos = _first_position(_positions_with_commitment(active_players, max_commitment))
+
+
+        # V239_POSITIONAL_TWO_LEVEL_4BET_INFERENCE:
+        # Example: CO=22, BTN Hero=9. Static commitments have only [9, 22],
+        # but CO acts before BTN, so this is CO open -> BTN 3bet -> CO 4bet.
+        if (
+            third_raise is None
+            and _is_close(hero_commitment, first_raise)
+            and hero_commitment < max_commitment
+            and _acts_before_preflop(three_bettor_pos, hero.position)
+        ):
+            category, ratio = _size_category("4bet", first_raise, second_raise)
+            return PreflopSpot(
+                node_type=f"threebettor_vs_{category}" if category else "threebettor_vs_4bet",
+                opener_pos=three_bettor_pos,
+                three_bettor_pos=hero.position,
+                four_bettor_pos=three_bettor_pos,
+                last_aggressor_pos=three_bettor_pos,
+                previous_raise_size_bb=first_raise,
+                facing_raise_size_bb=second_raise,
+                sizing_ratio=ratio,
+                sizing_category=category,
+                notes=["V239 inferred two-level positional 4bet: earlier max-commitment player re-raised after Hero 3bet."],
+                **common,
+            )
 
         if _is_close(hero_commitment, first_raise) and hero_commitment < max_commitment:
             category, ratio = _size_category("3bet", first_raise, second_raise)

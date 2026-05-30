@@ -820,3 +820,53 @@ Validation:
 Notes:
 - Full pytest is intentionally not claimed as closed in this checkpoint.
 - Legacy snapshot/full-pytest fixture stabilization remains separate.
+
+## V2.39.0 — preflop spot-classifier no-raise fallback cleanup
+
+Date: 2026-05-30
+
+Status: targeted proof passed.
+
+Goal:
+- Improve Solver_Preflop decision quality before full live mode.
+- Stop obvious no-raise/limp/check spots from falling into unknown_no_raise_preflop_spot.
+- Correct positional inference for final commitments where Hero is the threebettor facing a 4bet.
+
+Changed:
+- `solver_preflop/spot_classifier.py`
+  - SB blind-only 0.5bb vs limper(s) is classified as limp/isolation spot, not unknown.
+  - BB no-raise/no-limper/to_call=0 is classified as `bb_unopened_option_no_raise`.
+  - Added positional two-level 4bet inference:
+    - CO=22, BTN Hero=9 is inferred as CO open -> BTN 3bet -> CO 4bet.
+    - Hero BTN becomes `threebettor_vs_normal_4bet`, not `opener_vs_normal_3bet`.
+
+- `solver_preflop/range_engine.py`
+  - `bb_unopened_option_no_raise` maps to guarded default check.
+
+Added:
+- `tests/fixtures/v2_39_spot_classifier_no_raise/cases.json`
+- `tools/run_v2_39_spot_classifier_no_raise_audit.py`
+- `tests/test_v2_39_spot_classifier_no_raise_audit.py`
+
+Validation:
+- `tools/run_v2_39_spot_classifier_no_raise_audit.py`
+  - `V2.39_SPOT_CLASSIFIER_NO_RAISE_AUDIT_OK = True`
+- `pytest tests/test_v2_39_spot_classifier_no_raise_audit.py -q`
+  - `1 passed`
+
+Proof:
+- BB vs SB limp -> check.
+- BB option vs limper -> check.
+- BTN iso vs limper -> iso_raise.
+- SB iso vs limper -> iso_raise.
+- SB weak vs limper -> fold, not unknown.
+- BB unopened option -> check.
+- CO unopened AKo -> open_raise.
+- BB blind vs BTN open AKo -> 3bet.
+- CO opener vs BTN 3bet AKo -> 4bet.
+- BTN threebettor vs CO 4bet AKo -> 5bet_jam.
+- SB cold vs UTG open + CO 3bet T7o -> fold.
+
+Notes:
+- Full pytest is intentionally not claimed as closed in this checkpoint.
+- Legacy snapshot/full-pytest fixture stabilization remains separate.

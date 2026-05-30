@@ -1,0 +1,700 @@
+{
+  "schema_version": "v2_39_spot_classifier_no_raise_cases_v1",
+  "cases": [
+    {
+      "case_id": "bb_vs_sb_limp_check_j7o",
+      "clear_json": {
+        "frame_id": "v239_bb_vs_sb_limp_check_j7o",
+        "board": {
+          "street": "preflop",
+          "cards": []
+        },
+        "Total_pot": 2.0,
+        "players": {
+          "UTG": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "MP": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "CO": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "BTN": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "SB": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": 1.0,
+            "fold": false
+          },
+          "BB": {
+            "hero": true,
+            "cards": [
+              "Jh",
+              "7d"
+            ],
+            "stack": 100,
+            "chips": 1.0,
+            "fold": false
+          }
+        }
+      },
+      "expected_node_type": "bb_vs_sb_limp",
+      "expected_action": "check",
+      "expected_to_call_bb": 0.0,
+      "expected_status": "ok",
+      "expect_no_unknown": true
+    },
+    {
+      "case_id": "bb_option_vs_utg_limper_check_j7o",
+      "clear_json": {
+        "frame_id": "v239_bb_option_vs_utg_limper_check_j7o",
+        "board": {
+          "street": "preflop",
+          "cards": []
+        },
+        "Total_pot": 2.5,
+        "players": {
+          "UTG": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": 1.0,
+            "fold": false
+          },
+          "MP": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "CO": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "BTN": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "SB": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": 0.5,
+            "fold": false
+          },
+          "BB": {
+            "hero": true,
+            "cards": [
+              "Jh",
+              "7d"
+            ],
+            "stack": 100,
+            "chips": 1.0,
+            "fold": false
+          }
+        }
+      },
+      "expected_node_type": "bb_option_vs_1_limper",
+      "expected_action": "check",
+      "expected_to_call_bb": 0.0,
+      "expected_status": "ok",
+      "expect_no_unknown": true
+    },
+    {
+      "case_id": "btn_iso_vs_utg_limper_ako",
+      "clear_json": {
+        "frame_id": "v239_btn_iso_vs_utg_limper_ako",
+        "board": {
+          "street": "preflop",
+          "cards": []
+        },
+        "Total_pot": 2.5,
+        "players": {
+          "UTG": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": 1.0,
+            "fold": false
+          },
+          "MP": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "CO": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "BTN": {
+            "hero": true,
+            "cards": [
+              "Ah",
+              "Kd"
+            ],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "SB": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": 0.5,
+            "fold": false
+          },
+          "BB": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": 1.0,
+            "fold": false
+          }
+        }
+      },
+      "expected_node_type": "iso_vs_1_limper",
+      "expected_action": "iso_raise",
+      "expected_to_call_bb": 1.0,
+      "expected_status": "ok",
+      "expect_no_unknown": true
+    },
+    {
+      "case_id": "sb_iso_vs_utg_limper_ako",
+      "clear_json": {
+        "frame_id": "v239_sb_iso_vs_utg_limper_ako",
+        "board": {
+          "street": "preflop",
+          "cards": []
+        },
+        "Total_pot": 2.5,
+        "players": {
+          "UTG": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": 1.0,
+            "fold": false
+          },
+          "MP": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "CO": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "BTN": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "SB": {
+            "hero": true,
+            "cards": [
+              "Ah",
+              "Kd"
+            ],
+            "stack": 100,
+            "chips": 0.5,
+            "fold": false
+          },
+          "BB": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": 1.0,
+            "fold": false
+          }
+        }
+      },
+      "expected_node_type": "iso_vs_1_limper",
+      "expected_action": "iso_raise",
+      "expected_to_call_bb": 0.5,
+      "expected_status": "ok",
+      "expect_no_unknown": true,
+      "v239_expected_fix": "SB blind-only vs limper must not be unknown_no_raise_preflop_spot"
+    },
+    {
+      "case_id": "sb_vs_utg_limper_72o_not_unknown",
+      "clear_json": {
+        "frame_id": "v239_sb_vs_utg_limper_72o_not_unknown",
+        "board": {
+          "street": "preflop",
+          "cards": []
+        },
+        "Total_pot": 2.5,
+        "players": {
+          "UTG": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": 1.0,
+            "fold": false
+          },
+          "MP": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "CO": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "BTN": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "SB": {
+            "hero": true,
+            "cards": [
+              "7c",
+              "2d"
+            ],
+            "stack": 100,
+            "chips": 0.5,
+            "fold": false
+          },
+          "BB": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": 1.0,
+            "fold": false
+          }
+        }
+      },
+      "expected_node_type": "iso_vs_1_limper",
+      "expected_action": "fold",
+      "expected_to_call_bb": 0.5,
+      "expected_status": "ok",
+      "expect_no_unknown": true
+    },
+    {
+      "case_id": "bb_unopened_option_no_raise_check",
+      "clear_json": {
+        "frame_id": "v239_bb_unopened_option_no_raise_check",
+        "board": {
+          "street": "preflop",
+          "cards": []
+        },
+        "Total_pot": 1.5,
+        "players": {
+          "UTG": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "MP": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "CO": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "BTN": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "SB": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": 0.5,
+            "fold": false
+          },
+          "BB": {
+            "hero": true,
+            "cards": [
+              "Qc",
+              "2d"
+            ],
+            "stack": 100,
+            "chips": 1.0,
+            "fold": false
+          }
+        }
+      },
+      "expected_node_type": "bb_unopened_option_no_raise",
+      "expected_action": "check",
+      "expected_to_call_bb": 0.0,
+      "expected_status": "ok",
+      "expect_no_unknown": true,
+      "v239_expected_fix": "BB no-raise/no-limper option must not be unknown_no_raise_preflop_spot"
+    },
+    {
+      "case_id": "co_unopened_ako_open_raise",
+      "clear_json": {
+        "frame_id": "v239_co_unopened_ako_open_raise",
+        "board": {
+          "street": "preflop",
+          "cards": []
+        },
+        "Total_pot": 1.5,
+        "players": {
+          "UTG": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "MP": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "CO": {
+            "hero": true,
+            "cards": [
+              "Ah",
+              "Kd"
+            ],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "BTN": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "SB": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": 0.5,
+            "fold": false
+          },
+          "BB": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": 1.0,
+            "fold": false
+          }
+        }
+      },
+      "expected_node_type": "unopened",
+      "expected_action": "open_raise",
+      "expected_to_call_bb": 1.0,
+      "expected_status": "ok",
+      "expect_no_unknown": true
+    },
+    {
+      "case_id": "bb_blind_vs_btn_open_ako_3bet",
+      "clear_json": {
+        "frame_id": "v239_bb_blind_vs_btn_open_ako_3bet",
+        "board": {
+          "street": "preflop",
+          "cards": []
+        },
+        "Total_pot": 4.5,
+        "players": {
+          "UTG": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "MP": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "CO": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "BTN": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": 3.0,
+            "fold": false
+          },
+          "SB": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": 0.5,
+            "fold": false
+          },
+          "BB": {
+            "hero": true,
+            "cards": [
+              "Ah",
+              "Kd"
+            ],
+            "stack": 100,
+            "chips": 1.0,
+            "fold": false
+          }
+        }
+      },
+      "expected_node_type": "blind_vs_open",
+      "expected_action": "3bet",
+      "expected_to_call_bb": 2.0,
+      "expected_status": "ok",
+      "expect_no_unknown": true
+    },
+    {
+      "case_id": "co_opener_vs_btn_3bet_ako_4bet",
+      "clear_json": {
+        "frame_id": "v239_co_opener_vs_btn_3bet_ako_4bet",
+        "board": {
+          "street": "preflop",
+          "cards": []
+        },
+        "Total_pot": 13.5,
+        "players": {
+          "UTG": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "MP": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "CO": {
+            "hero": true,
+            "cards": [
+              "Ah",
+              "Kd"
+            ],
+            "stack": 100,
+            "chips": 3.0,
+            "fold": false
+          },
+          "BTN": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": 9.0,
+            "fold": false
+          },
+          "SB": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": 0.5,
+            "fold": false
+          },
+          "BB": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": 1.0,
+            "fold": false
+          }
+        }
+      },
+      "expected_node_type": "opener_vs_normal_3bet",
+      "expected_action": "4bet",
+      "expected_to_call_bb": 6.0,
+      "expected_status": "ok",
+      "expect_no_unknown": true
+    },
+    {
+      "case_id": "btn_threebettor_vs_co_4bet_ako_5bet_jam",
+      "clear_json": {
+        "frame_id": "v239_btn_threebettor_vs_co_4bet_ako_5bet_jam",
+        "board": {
+          "street": "preflop",
+          "cards": []
+        },
+        "Total_pot": 32.5,
+        "players": {
+          "UTG": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "MP": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "CO": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": 22.0,
+            "fold": false
+          },
+          "BTN": {
+            "hero": true,
+            "cards": [
+              "Ah",
+              "Kd"
+            ],
+            "stack": 100,
+            "chips": 9.0,
+            "fold": false
+          },
+          "SB": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": 0.5,
+            "fold": false
+          },
+          "BB": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": 1.0,
+            "fold": false
+          }
+        }
+      },
+      "expected_node_type": "threebettor_vs_normal_4bet",
+      "expected_action": "5bet_jam",
+      "expected_to_call_bb": 13.0,
+      "expected_status": "ok",
+      "expect_no_unknown": true
+    },
+    {
+      "case_id": "sb_cold_vs_utg_open_co_3bet_t7o_fold",
+      "clear_json": {
+        "frame_id": "v239_sb_cold_vs_utg_open_co_3bet_t7o_fold",
+        "board": {
+          "street": "preflop",
+          "cards": []
+        },
+        "Total_pot": 13.5,
+        "players": {
+          "UTG": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": 3.0,
+            "fold": false
+          },
+          "MP": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "CO": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": 9.0,
+            "fold": false
+          },
+          "BTN": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false
+          },
+          "SB": {
+            "hero": true,
+            "cards": [
+              "Th",
+              "7d"
+            ],
+            "stack": 100,
+            "chips": 0.5,
+            "fold": false
+          },
+          "BB": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": 1.0,
+            "fold": false
+          }
+        }
+      },
+      "expected_node_type": "cold_vs_3bet_or_higher",
+      "expected_action": "fold",
+      "expected_to_call_bb": 8.5,
+      "expected_status": "ok",
+      "expect_no_unknown": true
+    }
+  ]
+}
