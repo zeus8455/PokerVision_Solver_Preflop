@@ -398,6 +398,16 @@ def build_and_maybe_execute_click_plan(
         "frame_name": solver_decision.get("frame_name"),
         "action": solver_decision.get("action"),
         "size_pct": solver_decision.get("size_pct"),
+        # V2.37: expose Solver_Preflop lineage directly in click_result/runtime report.
+        # This keeps Final Clear/JSON_Complete audits readable without digging into
+        # nested solver_preflop_bridge_contract payloads.
+        "solver_source": solver_decision.get("source"),
+        "solver_status": solver_decision.get("status"),
+        "solver_raw_action": (solver_decision.get("solver_raw_action") or solver_decision.get("raw_action") or locals().get("raw_action")),  # V237_CLICK_ORIGINAL_SOLVER_RAW_ACTION_LINEAGE
+        "solver_engine_action": solver_decision.get("engine_action"),
+        "solver_fingerprint": solver_decision.get("solver_fingerprint"),
+        "source_frame_id": solver_decision.get("source_frame_id"),
+        "solver_click_sequence": list(solver_decision.get("click_sequence") or []),
         "target_sequence": [],
         "click_points": [],
         "guard_passed": False,

@@ -205,10 +205,41 @@ def build_action_runtime_plan_from_action_decision(action_decision: Dict[str, An
     plan_status = "ok" if policy_ok else "blocked"
     blocked_reason = None if policy_ok else str(policy.get("blocked_reason") or "action_button_policy_blocked")
 
+    # V2.37: expose Solver_Preflop lineage in Action_Runtime_Plan_JSON.
+    decision_context = action_decision.get("decision_context")
+    if not isinstance(decision_context, dict):
+        decision_context = {}
+    solver_preflop_runtime_source = bool(decision_context.get("solver_preflop_runtime_source"))
+    solver_lineage = {
+        "schema_version": "solver_preflop_runtime_plan_lineage_v2_37",
+        "source": "PokerVision_Solver_Preflop" if solver_preflop_runtime_source else str(action_decision.get("source") or ""),
+        "selected_source": "Solver_Preflop_Bridge" if solver_preflop_runtime_source else "Action_Decision_JSON",
+        "adapted_to_legacy_action_decision": bool(decision_context.get("solver_stub_legacy_compat")),
+        "decision_id": decision_context.get("solver_decision_id") or action_decision.get("decision_id"),
+        "solver_fingerprint": decision_context.get("solver_fingerprint") or action_decision.get("solver_fingerprint"),
+        "source_frame_id": decision_context.get("source_frame_id") or action_decision.get("source_decision_frame_id"),
+        "solver_raw_action": decision_context.get("solver_raw_action") or action_decision.get("raw_action"),
+        "solver_engine_action": decision_context.get("solver_engine_action") or action_decision.get("engine_action") or action_decision.get("action"),
+        "runtime_action": action,
+        "target_sequence": list(target_sequence),
+        "target_sequences": [list(seq) for seq in target_sequences],
+        "raise_branch_enabled": bool(v234_raise_branch_enabled),
+    }
+
     return {
         "schema_version": V07_ACTION_RUNTIME_PLAN_SCHEMA_VERSION,
         "source": V07_RUNTIME_ACTION_SOURCE_REQUIRED,
         "source_action_decision_frame_id": str(action_decision.get("source_decision_frame_id") or ""),
+        "decision_id": solver_lineage.get("decision_id"),
+        "solver_source": solver_lineage.get("source"),
+        "solver_raw_action": solver_lineage.get("solver_raw_action"),
+        "solver_engine_action": solver_lineage.get("solver_engine_action"),
+        "solver_fingerprint": solver_lineage.get("solver_fingerprint"),
+        "runtime_source_selection": {
+            "selected_source": solver_lineage.get("selected_source"),
+            "adapted_to_legacy_action_decision": solver_lineage.get("adapted_to_legacy_action_decision"),
+        },
+        "lineage": dict(solver_lineage),
         "status": plan_status,
         "planned_action": action,
         "size_policy": action_decision.get("size_policy"),

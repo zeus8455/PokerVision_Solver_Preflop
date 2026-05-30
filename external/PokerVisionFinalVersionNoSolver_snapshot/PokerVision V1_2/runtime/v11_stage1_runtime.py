@@ -160,6 +160,19 @@ def _extract_solver_preflop_decision_from_state(
         return None
 
     action_decision = bridge_payload.get("action_decision")
+    # V237_ORIGINAL_SOLVER_RAW_ACTION_LINEAGE: preserve semantic Solver_Preflop raw action.
+    if isinstance(action_decision, dict):
+        original_solver_raw_action = (
+            bridge_payload.get('raw_action')
+            or bridge_payload.get('solver_raw_action')
+            or (action_decision.get('decision_context') or {}).get('solver_raw_action')
+            or action_decision.get('raw_action')
+            or action_decision.get('action')
+        )
+        action_decision['solver_raw_action'] = original_solver_raw_action
+        action_decision.setdefault('decision_context', {})['solver_raw_action'] = original_solver_raw_action
+    else:
+        original_solver_raw_action = None
     if not isinstance(action_decision, dict):
         return None
 
@@ -217,7 +230,7 @@ def _extract_solver_preflop_decision_from_state(
         "hand_id": solver_payload.get("hand_id"),
         "frame_name": solver_payload.get("frame_name"),
         "action": action,
-        "raw_action": raw_action,
+        "raw_action": original_solver_raw_action,
         "engine_action": action_decision.get("engine_action") or contract.get("engine_action"),
         "size_pct": size_pct,
         "reason": str(action_decision.get("reason") or "solver_preflop_bridge_live_runtime_source"),
@@ -233,6 +246,49 @@ def _extract_solver_preflop_decision_from_state(
         },
     }
 
+
+
+# V2.37: compact runtime lineage exposed next to the v11 runtime result.
+def _build_v237_runtime_lineage(
+    *,
+    solver_decision: Dict[str, Any],
+    action_button_result: Any,
+    click_report: Dict[str, Any],
+) -> Dict[str, Any]:
+    click = click_report if isinstance(click_report, dict) else {}
+    gate = click.get("controlled_live_click_gate") if isinstance(click.get("controlled_live_click_gate"), dict) else {}
+    detected_classes = getattr(action_button_result, "detected_classes", None)
+    if detected_classes is None and isinstance(action_button_result, dict):
+        detected_classes = action_button_result.get("detected_classes")
+    return {
+        "schema_version": "solver_preflop_v237_runtime_lineage_v1",
+        "source": solver_decision.get("source"),
+        "selected_source": (
+            (solver_decision.get("runtime_source_selection") or {}).get("selected_source")
+            if isinstance(solver_decision.get("runtime_source_selection"), dict)
+            else None
+        ),
+        "bridge_status": (
+            (solver_decision.get("runtime_source_selection") or {}).get("bridge_status")
+            if isinstance(solver_decision.get("runtime_source_selection"), dict)
+            else None
+        ),
+        "decision_id": solver_decision.get("decision_id"),
+        "solver_fingerprint": solver_decision.get("solver_fingerprint"),
+        "source_frame_id": solver_decision.get("source_frame_id"),
+        "solver_raw_action": solver_decision.get("raw_action"),
+        "solver_engine_action": solver_decision.get("engine_action"),
+        "runtime_action": solver_decision.get("action"),
+        "size_pct": solver_decision.get("size_pct"),
+        "solver_click_sequence": list(solver_decision.get("click_sequence") or []),
+        "click_status": click.get("status"),
+        "click_completed": click.get("status") == "clicked" and bool(click.get("guard_passed")),
+        "target_sequence": list(click.get("target_sequence") or []),
+        "guard_passed": bool(click.get("guard_passed")),
+        "controlled_gate_status": gate.get("status"),
+        "controlled_gate_blockers": list(gate.get("blockers") or []),
+        "action_button_detected_classes": list(detected_classes or []),
+    }
 
 
 def run_v11_stage1_runtime(
@@ -401,5 +457,10 @@ def run_v11_stage1_runtime(
             "warnings": action_button_result.warnings,
             "errors": action_button_result.errors,
         },
+        "runtime_lineage": _build_v237_runtime_lineage(
+            solver_decision=solver_decision,
+            action_button_result=action_button_result,
+            click_report=click_report,
+        ),
         "click": click_report,
     }

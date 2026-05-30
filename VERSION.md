@@ -711,3 +711,75 @@ Validation:
 Notes:
 - Full pytest is intentionally not claimed as closed in this checkpoint.
 - Legacy snapshot/full-pytest fixture stabilization remains separate.
+
+## V2.37.0 — Solver_Preflop runtime lineage cleanup
+
+Date: 2026-05-30
+
+Status: targeted proof passed.
+
+Goal:
+- Make runtime artifacts clearly show Solver_Preflop lineage.
+- Preserve original Solver_Preflop semantic raw actions through v11 runtime, click_result, and Action_Runtime_Plan_JSON.
+- Prevent raise-family decisions from collapsing lineage to generic `raise`.
+
+Changed:
+- `runtime/v11_stage1_runtime.py`
+  - Added `runtime_lineage` block.
+  - Preserves original Solver_Preflop raw action:
+    - open_raise
+    - iso_raise
+    - 3bet
+    - 4bet
+    - 5bet_jam
+  - Links decision_id, selected source, bridge status, runtime action, click status, and click completion.
+
+- `runtime/action_click_stub.py`
+  - click_result now carries Solver_Preflop lineage:
+    - solver_source
+    - solver_status
+    - solver_raw_action
+    - solver_engine_action
+    - solver_fingerprint
+    - source_frame_id
+
+- `logic/action_runtime_plan_builder.py`
+  - Action_Runtime_Plan_JSON now carries Solver_Preflop lineage:
+    - decision_id
+    - solver_source
+    - solver_raw_action
+    - solver_engine_action
+    - solver_fingerprint
+    - runtime_source_selection
+    - lineage
+
+Added:
+- `tools/run_v2_37_lineage_cleanup_audit.py`
+- `tests/test_v2_37_lineage_cleanup_audit.py`
+
+Validation:
+- `tools/run_v2_37_lineage_cleanup_audit.py`
+  - `V2.37_LINEAGE_CLEANUP_AUDIT_OK = True`
+- `pytest tests/test_v2_37_lineage_cleanup_audit.py -q`
+  - `1 passed`
+
+Proof:
+- Runtime lineage OK for:
+  - fold
+  - call
+  - check
+  - open_raise
+  - iso_raise
+  - 3bet
+  - 4bet
+  - 5bet_jam
+- Runtime plan lineage OK for:
+  - open_raise
+  - iso_raise
+  - 4bet
+  - 5bet
+  - fold
+
+Notes:
+- Full pytest is intentionally not claimed as closed in this checkpoint.
+- Legacy snapshot/full-pytest fixture stabilization remains separate.
