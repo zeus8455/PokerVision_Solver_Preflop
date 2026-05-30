@@ -949,3 +949,69 @@ Notes:
 - This intentionally does not change blind/position recognition.
 - This fixes fallback execution policy only: if state is ambiguous or wrong, runtime now folds safely instead of failing with unknown action.
 - Full pytest is intentionally not claimed as closed in this checkpoint.
+
+## V2.42.0 вЂ” full synthetic preflop spot matrix E2E
+
+Date: 2026-05-30
+
+Status: targeted proof passed.
+
+Goal:
+- Add a file-only synthetic E2E matrix that simulates live Clear_JSON after detection.
+- Validate the preflop runtime chain without screen capture, YOLO, poker room, or real mouse clicks.
+- Cover the main Solver_Preflop spot families:
+  - unopened / no-raise
+  - BB options vs limp
+  - limp / iso
+  - facing open
+  - open + callers / squeeze-like
+  - opener vs 3bet
+  - threebettor vs 4bet
+  - all-in / jam / dirty all-in
+  - blind-vs-blind
+  - defensive fallback and reject cases
+
+Added:
+- `tests/fixtures/v2_42_full_preflop_spot_matrix/cases.json`
+- `tools/run_v2_42_full_preflop_spot_matrix_e2e.py`
+- `tests/test_v2_42_full_preflop_spot_matrix_e2e.py`
+
+Validation:
+- `tools/run_v2_42_full_preflop_spot_matrix_e2e.py`
+  - `V2.42_FULL_PREFLOP_SPOT_MATRIX_E2E_OK = True`
+- `pytest tests/test_v2_42_full_preflop_spot_matrix_e2e.py -q`
+  - `1 passed`
+
+Proof:
+- `cases_total = 53`
+- `cases_ok = 53`
+- `cases_failed = 0`
+- `runtime_chain_ok = True`
+- `semantic_exact_ok = False`
+- `known_semantic_gaps = 6`
+- `unexpected_semantic_failed = 0`
+
+Runtime-chain coverage:
+- Synthetic Clear_JSON
+- Solver_Preflop adapter/classifier/decision
+- Solver_Preflop bridge payload
+- v11 runtime decision extraction
+- legacy-compatible Action_Decision_JSON build
+- Action_Runtime_Plan_JSON build
+- fake Action_Button availability
+- synthetic click_result
+- synthetic Final proof
+
+Known semantic gaps intentionally documented:
+- `caller_vs_3bet_or_higher_btn_88`
+- `facing_5bet_jam_fourbettor_kk`
+- `call_vs_5bet_jam_aa`
+- `fold_vs_5bet_jam_72o`
+- `fourbet_jam_threebettor_vs`
+- `fivebet_jam_fourbettor_vs`
+
+Notes:
+- These six cases are not runtime failures.
+- They are high-order frame-only/all-in semantic gaps reserved for a later cleanup stage.
+- The matrix must fail if a new unexpected semantic gap appears or if the runtime-chain breaks.
+- Full pytest is intentionally not claimed as closed in this checkpoint.
