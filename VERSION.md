@@ -783,3 +783,40 @@ Proof:
 Notes:
 - Full pytest is intentionally not claimed as closed in this checkpoint.
 - Legacy snapshot/full-pytest fixture stabilization remains separate.
+
+## V2.38.0 — synthetic lifecycle regression
+
+Date: 2026-05-30
+
+Status: targeted proof passed.
+
+Goal:
+- Prove PokerVision preflop lifecycle behavior synthetically without live UI, screen capture, YOLO, or real mouse movement.
+- Cover duplicate Active suppression, retry policy, transaction lifecycle, dry-run completion, Final publication gating, and no-repeat click behavior.
+
+Proof:
+- ActionEventGate duplicate/inactive release works.
+- V2.30 duplicate Active retry policy works:
+  - unfinished duplicate allows retry;
+  - duplicate with runtime_plan blocks retry;
+  - duplicate with final_clear blocks retry;
+  - non-duplicate blocks retry.
+- TableActionTransaction lifecycle works:
+  - second analysis blocked while lifecycle is open;
+  - abort releases lifecycle;
+  - clicked completion releases lifecycle;
+  - blocked click does not publish Final Clear_JSON;
+  - failed finalization release works;
+  - inactive release works.
+- Dry-run completion policy works.
+- Same decision_id no-repeat guard blocks second click.
+
+Validation:
+- `tools/run_v2_38_synthetic_lifecycle_regression.py`
+  - `V2.38_SYNTHETIC_LIFECYCLE_REGRESSION_OK = True`
+- `pytest tests/test_v2_38_synthetic_lifecycle_regression.py -q`
+  - `1 passed`
+
+Notes:
+- Full pytest is intentionally not claimed as closed in this checkpoint.
+- Legacy snapshot/full-pytest fixture stabilization remains separate.
