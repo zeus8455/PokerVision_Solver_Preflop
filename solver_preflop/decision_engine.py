@@ -52,11 +52,14 @@ def solve_clear_json(data: dict[str, Any]) -> SolverDecision:
         raw_action = range_decision.action
 
         if raw_action == "safe_fallback":
-            click_sequence = list(SAFE_FALLBACK_SEQUENCE)
-            engine_action = "safe_fallback"
+            # V2.41: unsupported/unsafe Solver_Preflop nodes must remain diagnostic
+            # raw_action=safe_fallback, but runtime must receive a valid click action.
+            # Use direct FOLD instead of Check/Check-fold chain for real live safety.
+            click_sequence = ["FOLD"]
+            engine_action = "fold"
             size_pct = None
             status = "fallback"
-            reason = f"Range engine unsupported/unsafe node: {spot.node_type}"
+            reason = f"Range engine unsupported/unsafe node: {spot.node_type}; V2.41 runtime fallback action=fold"
         else:
             click_sequence = click_sequence_for_action(raw_action)
             engine_action = _engine_action(raw_action)
@@ -131,9 +134,9 @@ def solve_clear_json(data: dict[str, Any]) -> SolverDecision:
             hand_class="unknown",
             node_type="solver_input_error",
             raw_action="safe_fallback",
-            engine_action="safe_fallback",
-            click_sequence=list(SAFE_FALLBACK_SEQUENCE),
-            reason=f"Solver input error: {exc}",
+            engine_action="fold",
+            click_sequence=["FOLD"],
+            reason=f"Solver input error: {exc}; V2.41 runtime fallback action=fold",
             warnings=[str(exc)],
             debug={"exception_type": type(exc).__name__},
         )

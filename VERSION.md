@@ -905,3 +905,47 @@ Proof cases:
 Notes:
 - Full pytest is intentionally not claimed as closed in this checkpoint.
 - Live detector/button proof remains V2.41 and requires running the poker room/live mode.
+
+## V2.41.0 вЂ” safe_fallback runtime fold compatibility
+
+Date: 2026-05-30
+
+Status: targeted proof passed.
+
+Goal:
+- Fix live spots where Solver_Preflop returns diagnostic `raw_action=safe_fallback`.
+- Preserve safe_fallback as lineage/diagnostic information.
+- Prevent v11 runtime from rejecting fallback decisions as unknown runtime actions.
+- Make runtime receive a valid safe action: `engine_action=fold`, `click_sequence=["FOLD"]`.
+
+Changed:
+- `solver_preflop/decision_engine.py`
+  - Range-engine unsafe/unsupported nodes now keep `raw_action=safe_fallback`, but expose runtime-safe `engine_action=fold`.
+  - Solver input errors now keep `raw_action=safe_fallback`, but expose runtime-safe `engine_action=fold`.
+  - Fallback click sequence is now direct `["FOLD"]` for real-live safety.
+
+Added:
+- `tools/run_v2_41_safe_fallback_runtime_fold_audit.py`
+- `tests/test_v2_41_safe_fallback_runtime_fold_audit.py`
+
+Validation:
+- `tools/run_v2_41_safe_fallback_runtime_fold_audit.py`
+  - `V2.41_SAFE_FALLBACK_RUNTIME_FOLD_AUDIT_OK = True`
+- `pytest tests/test_v2_41_safe_fallback_runtime_fold_audit.py -q`
+  - `1 passed`
+
+Proof:
+- Solver decision keeps `status=fallback`.
+- Solver decision keeps `raw_action=safe_fallback`.
+- Solver decision exposes `engine_action=fold`.
+- Solver click sequence is `["FOLD"]`.
+- Bridge keeps `raw_action=safe_fallback`.
+- Bridge exposes `engine_action=fold`.
+- v11 runtime extracts valid `action=fold`.
+- v11 runtime still keeps `raw_action=safe_fallback` for lineage.
+- v11 runtime click sequence is `["FOLD"]`.
+
+Notes:
+- This intentionally does not change blind/position recognition.
+- This fixes fallback execution policy only: if state is ambiguous or wrong, runtime now folds safely instead of failing with unknown action.
+- Full pytest is intentionally not claimed as closed in this checkpoint.
