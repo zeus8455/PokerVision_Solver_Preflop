@@ -1553,20 +1553,19 @@
         }
       },
       "expected_node_any": [
-        "opener_vs_normal_3bet",
-        "cold_vs_3bet_or_higher",
-        "multi_raise_unknown"
+        "caller_vs_3bet_or_higher"
       ],
       "expected_raw_any": [
-        "call",
         "fold",
+        "call",
         "4bet",
         "safe_fallback"
       ],
       "must_plan": true,
       "reject_reason": null,
       "notes": [
-        "Frame-only classifier may not distinguish caller-vs-squeeze precisely."
+        "Frame-only classifier may not distinguish caller-vs-squeeze precisely.",
+        "V2.43 exact semantic target: caller_vs_3bet_or_higher."
       ]
     },
     {

@@ -125,6 +125,31 @@ def _classify_all_in_spot(
         three_bettor_pos = _first_position(_positions_with_commitment(active_players, second_raise))
         four_bettor_pos = _first_position(_positions_with_commitment(active_players, third_raise)) if third_raise is not None else None
 
+        # V243_POSITIONAL_TWO_LEVEL_4BET_JAM_INFERENCE:
+        # Example: CO all-in 35, BTN Hero 9. With final commitments only this can
+        # look like Hero opener vs 3bet jam, but CO acts before BTN, so infer:
+        # CO open/4bet-jam after Hero 3bet -> Hero is threebettor facing 4bet jam.
+        if (
+            third_raise is None
+            and all_in_actor is not None
+            and _is_close(hero_commitment, first_raise)
+            and hero_commitment < max_commitment
+            and _acts_before_preflop(all_in_actor.position, hero.position)
+        ):
+            node = "threebettor_vs_4bet_jam" if is_full_raise else "threebettor_vs_incomplete_4bet_allin"
+            return PreflopSpot(
+                node_type=node,
+                opener_pos=all_in_actor.position,
+                three_bettor_pos=hero.position,
+                four_bettor_pos=all_in_actor.position,
+                last_aggressor_pos=all_in_actor.position,
+                previous_raise_size_bb=first_raise,
+                facing_raise_size_bb=max_commitment,
+                notes=["V2.43 inferred positional two-level all-in 4bet jam: earlier all-in actor re-raised after Hero 3bet."],
+                **common,
+                **all_in_diag,
+            )
+
         if _is_close(hero_commitment, first_raise) and hero_commitment < max_commitment:
             node = "opener_vs_3bet_jam" if is_full_raise else "opener_vs_incomplete_3bet_allin"
             return PreflopSpot(
@@ -135,6 +160,34 @@ def _classify_all_in_spot(
                 previous_raise_size_bb=first_raise,
                 facing_raise_size_bb=max_commitment,
                 notes=["Opener-vs-all-in 3bet node classified; guarded fallback until all-in ranges exist."],
+                **common,
+                **all_in_diag,
+            )
+
+        # V243_FOURBETTOR_VS_5BET_JAM_INFERENCE:
+        # If final commitments show opener level, Hero's 4bet-sized middle level,
+        # and a max all-in level, classify Hero as fourbettor facing 5bet jam.
+        # This deliberately handles frame-only data where the 3bet amount is not
+        # present anymore but the semantic live spot is still recoverable.
+        if (
+            third_raise is not None
+            and all_in_actor is not None
+            and _is_close(hero_commitment, second_raise)
+            and hero_commitment < max_commitment
+        ):
+            category, ratio = _size_category("5bet", hero_commitment, max_commitment)
+            node = f"fourbettor_vs_{category}_jam" if category else "fourbettor_vs_5bet_jam"
+            return PreflopSpot(
+                node_type=node,
+                opener_pos=opener_pos,
+                three_bettor_pos=three_bettor_pos,
+                four_bettor_pos=hero.position,
+                last_aggressor_pos=all_in_actor.position,
+                previous_raise_size_bb=hero_commitment,
+                facing_raise_size_bb=max_commitment,
+                sizing_ratio=ratio,
+                sizing_category=category,
+                notes=["V2.43 inferred fourbettor-vs-5bet-jam from opener level, Hero middle 4bet level, and max all-in level."],
                 **common,
                 **all_in_diag,
             )
@@ -363,6 +416,30 @@ def classify_preflop_spot(frame: NormalizedPreflopFrame) -> PreflopSpot:
         four_bettor_pos = _first_position(_positions_with_commitment(active_players, third_raise)) if third_raise is not None else None
         last_aggressor_pos = _first_position(_positions_with_commitment(active_players, max_commitment))
 
+
+        # V243_CALLER_VS_3BET_OR_HIGHER_INFERENCE:
+        # If Hero shares the first raise level with another earlier active player
+        # and a later player has a higher raise level, frame-only data should not
+        # force Hero into opener_vs_3bet. Classify as caller-vs-squeeze/3bet.
+        if (
+            third_raise is None
+            and _is_close(hero_commitment, first_raise)
+            and hero_commitment < max_commitment
+        ):
+            first_level_positions = _positions_with_commitment(active_players, first_raise)
+            other_first_level_positions = [pos for pos in first_level_positions if pos != hero.position]
+            if other_first_level_positions:
+                caller_opener_pos = _first_position(other_first_level_positions)
+                return PreflopSpot(
+                    node_type="caller_vs_3bet_or_higher",
+                    opener_pos=caller_opener_pos,
+                    three_bettor_pos=three_bettor_pos,
+                    last_aggressor_pos=three_bettor_pos,
+                    previous_raise_size_bb=first_raise,
+                    facing_raise_size_bb=second_raise,
+                    notes=["V2.43 inferred caller-vs-3bet/squeeze from shared first raise level and higher raise behind."],
+                    **common,
+                )
 
         # V239_POSITIONAL_TWO_LEVEL_4BET_INFERENCE:
         # Example: CO=22, BTN Hero=9. Static commitments have only [9, 22],

@@ -22,14 +22,7 @@ FAKE_AVAILABLE_BUTTONS = {
     "33%", "50%", "70%", "98%", "100%",
 }
 
-KNOWN_SEMANTIC_GAP_CASE_IDS = {
-    "caller_vs_3bet_or_higher_btn_88",
-    "facing_5bet_jam_fourbettor_kk",
-    "call_vs_5bet_jam_aa",
-    "fold_vs_5bet_jam_72o",
-    "fourbet_jam_threebettor_vs",
-    "fivebet_jam_fourbettor_vs",
-}
+KNOWN_SEMANTIC_GAP_CASE_IDS: set[str] = set()
 
 
 def _street(data: dict[str, Any]) -> str:

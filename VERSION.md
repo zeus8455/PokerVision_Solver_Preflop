@@ -1015,3 +1015,71 @@ Notes:
 - They are high-order frame-only/all-in semantic gaps reserved for a later cleanup stage.
 - The matrix must fail if a new unexpected semantic gap appears or if the runtime-chain breaks.
 - Full pytest is intentionally not claimed as closed in this checkpoint.
+
+## V2.43.0 вЂ” all-in and high-order preflop semantic cleanup
+
+Date: 2026-05-30
+
+Status: targeted proof passed.
+
+Goal:
+- Close the six V2.42 known semantic gaps without changing runtime safety.
+- Make the full synthetic preflop spot matrix semantically exact.
+- Keep all all-in/high-order unsupported range nodes guarded by safe fallback -> fold.
+
+Changed:
+- `solver_preflop/spot_classifier.py`
+  - Added caller-vs-3bet/squeeze inference for shared first-raise-level frame states.
+  - Added positional two-level all-in 4bet-jam inference.
+  - Added fourbettor-vs-5bet-jam inference from opener level, Hero middle 4bet level, and max all-in level.
+
+- `solver_preflop/range_engine.py`
+  - Added guarded default handling for `caller_vs_3bet_or_higher`.
+
+- `tests/fixtures/v2_42_full_preflop_spot_matrix/cases.json`
+  - Updated exact semantic expectation for `caller_vs_3bet_or_higher_btn_88`.
+
+- `tools/run_v2_42_full_preflop_spot_matrix_e2e.py`
+  - Removed V2.42 known semantic gap registry.
+  - The matrix now requires full semantic exactness.
+
+- `tests/test_v2_42_full_preflop_spot_matrix_e2e.py`
+  - Now requires:
+    - `semantic_exact_ok = True`
+    - `known_semantic_gaps_total = 0`
+    - `semantic_failed_total = 0`
+
+Added:
+- `tools/run_v2_43_allin_semantic_cleanup_audit.py`
+- `tests/test_v2_43_allin_semantic_cleanup_audit.py`
+
+Validation:
+- `tools/run_v2_42_full_preflop_spot_matrix_e2e.py`
+  - `V2.42_FULL_PREFLOP_SPOT_MATRIX_E2E_OK = True`
+- `tools/run_v2_43_allin_semantic_cleanup_audit.py`
+  - `V2.43_ALLIN_SEMANTIC_CLEANUP_AUDIT_OK = True`
+- `pytest tests/test_v2_42_full_preflop_spot_matrix_e2e.py tests/test_v2_43_allin_semantic_cleanup_audit.py -q`
+  - `2 passed`
+
+Proof:
+- Full matrix:
+  - `cases_total = 53`
+  - `cases_ok = 53`
+  - `cases_failed = 0`
+  - `runtime_chain_ok = True`
+  - `semantic_exact_ok = True`
+  - `known_semantic_gaps = 0`
+  - `unexpected_semantic_failed = 0`
+
+Closed semantic gaps:
+- `caller_vs_3bet_or_higher_btn_88 -> caller_vs_3bet_or_higher`
+- `facing_5bet_jam_fourbettor_kk -> fourbettor_vs_small_5bet_jam`
+- `call_vs_5bet_jam_aa -> fourbettor_vs_small_5bet_jam`
+- `fold_vs_5bet_jam_72o -> fourbettor_vs_small_5bet_jam`
+- `fourbet_jam_threebettor_vs -> threebettor_vs_4bet_jam`
+- `fivebet_jam_fourbettor_vs -> fourbettor_vs_small_5bet_jam`
+
+Notes:
+- All-in/high-order nodes still use guarded fallback where ranges are not wired.
+- Runtime behavior remains safe: unsupported all-in ranges plan `fold` through V2.41 fallback compatibility.
+- Full pytest is intentionally not claimed as closed in this checkpoint.

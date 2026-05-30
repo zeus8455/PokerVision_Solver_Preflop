@@ -218,6 +218,14 @@ def decide_preflop_action_from_ranges(
             source=source,
         )
 
+    if node == "caller_vs_3bet_or_higher":
+        return RangeDecision(
+            action=_default_for(data, "caller_vs_3bet_or_higher", "fold"),
+            source=f"caller_vs_3bet_or_higher.{spot.hero_position}",
+            fallback_used=True,
+            notes=["V2.43 caller-vs-3bet/squeeze classified; guarded default until caller-vs-squeeze ranges exist."],
+        )
+
     if node.startswith("opener_vs_") and "3bet" in node:
         if not spot.three_bettor_pos:
             return RangeDecision(

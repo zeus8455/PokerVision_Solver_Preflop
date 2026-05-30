@@ -32,6 +32,7 @@ def test_v2_42_full_preflop_spot_matrix_e2e_passes(tmp_path: Path) -> None:
     assert report["reject_failed_total"] == 0
     assert report["unexpected_semantic_failed_total"] == 0
 
-    # V2.42 documents known semantic gaps; it must not hide runtime-chain gaps.
-    assert report["semantic_exact_ok"] is False
-    assert report["known_semantic_gaps_total"] == 6
+    # V2.43 closes the V2.42 known semantic gaps.
+    assert report["semantic_exact_ok"] is True
+    assert report["known_semantic_gaps_total"] == 0
+    assert report["semantic_failed_total"] == 0
