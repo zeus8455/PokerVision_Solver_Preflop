@@ -43,6 +43,6 @@ def test_v2_45_allin_taxonomy_audit_passes(tmp_path: Path) -> None:
         "ALLIN_AMOUNT_DETECTED_BUT_ALLIN_FLAG_DROPPED" in weak_categories
         or "ALLIN_AMOUNT_DETECTED_AND_FLAG_PROPAGATED" in weak_categories
     )
-    assert "ALLIN_FLAG_NO_AMOUNT_SAVED_AS_ACTIVE" in weak_categories
+    assert ("ALLIN_FLAG_NO_AMOUNT_SAVED_AS_ACTIVE" in weak_categories or "ALLIN_UNKNOWN_AMOUNT_MARKED" in weak_categories)
     assert "ALLIN_FLAG_NO_AMOUNT_NO_CLEAR" in weak_categories
     assert "POSTFLOP_IGNORED" in weak_categories

@@ -34,6 +34,7 @@ ALL_IN_NODE_PREFIXES = (
     "facing_short_allin",
     "hero_already_allin_no_decision",
     "facing_allin_or_allin_present",
+    "facing_allin_unknown_amount",
 )
 
 

@@ -275,6 +275,20 @@ def classify_preflop_spot(frame: NormalizedPreflopFrame) -> PreflopSpot:
         "commitment_by_pos": commitment_by_pos,
         "raise_levels": raise_levels,
     }
+    unknown_allin_players = [
+        player for player in active_players
+        if player.position != hero.position and bool(getattr(player, "all_in_unknown_amount", False))
+    ]
+    if unknown_allin_players:
+        last_unknown_allin = unknown_allin_players[-1]
+        return PreflopSpot(
+            node_type="facing_allin_unknown_amount",
+            last_aggressor_pos=last_unknown_allin.position,
+            facing_raise_size_bb=None,
+            notes=["V2.48 classified opponent all_in=true with missing amount as facing_allin_unknown_amount."],
+            **common,
+        )
+
 
     if all_in_players:
         return _classify_all_in_spot(

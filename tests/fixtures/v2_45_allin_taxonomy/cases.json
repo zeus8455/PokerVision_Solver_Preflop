@@ -236,7 +236,7 @@
     },
     {
       "case_id": "allin_flag_no_amount_saved_as_active",
-      "category": "ALLIN_FLAG_NO_AMOUNT_SAVED_AS_ACTIVE",
+      "category": "ALLIN_UNKNOWN_AMOUNT_MARKED",
       "dark_state": {
         "frame_id": "allin_flag_no_amount_saved_as_active",
         "table_id": "table_01",
@@ -289,10 +289,14 @@
         "premium_guard_should_activate": true,
         "expected_click_sequence": [
           "Bet/Raise"
-        ]
+        ],
+        "clear_co_all_in_unknown_amount": true,
+        "expected_node_type": "facing_allin_unknown_amount",
+        "expected_raw_action": "safe_fallback"
       },
       "notes": [
-        "Hand_1414-like KK danger class: all_in flag exists in dark, amount missing, active opponent survives with chips=false."
+        "Hand_1414-like KK danger class: all_in flag exists in dark, amount missing, active opponent survives with chips=false.",
+        "V2.48 preserves missing-amount all-in as all_in_unknown_amount and classifies facing_allin_unknown_amount."
       ]
     },
     {

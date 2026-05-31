@@ -1334,3 +1334,86 @@ Notes:
 - V2.47 does not handle all-in with missing amount.
 - Missing-amount all-in remains reserved for V2.48 `facing_allin_unknown_amount` semantics.
 - Full pytest is intentionally not claimed as closed in this checkpoint.
+
+## V2.48.0 вЂ” unknown-amount all-in semantics
+
+Date: 2026-05-31
+
+Status: targeted proof passed.
+
+Goal:
+- Preserve `all_in=true + chips=false + sitout=false` as explicit diagnostic state.
+- Do not invent an all-in amount when chips are missing.
+- Classify this state as `facing_allin_unknown_amount`.
+- Keep weak hands on guarded `safe_fallback -> FOLD`.
+- Keep AA / KK / QQ protected by the V2.44 premium fold guard.
+
+Changed:
+- `external/PokerVisionFinalVersionNoSolver_snapshot/PokerVision V1_2/logic/clear_json_builder.py`
+  - When source player has `all_in=true` and normalized `chips=false`, Clear_JSON now stores:
+    - `all_in_unknown_amount=true`
+  - Clear_JSON contract now allows `all_in_unknown_amount`.
+  - Validation ensures:
+    - `all_in_unknown_amount` is boolean when present
+    - `all_in_unknown_amount=true` requires `chips=false`
+    - `all_in=true` and `all_in_unknown_amount=true` cannot coexist
+
+- `solver_preflop/contracts.py`
+  - `NormalizedPlayer` now includes:
+    - `all_in_unknown_amount: bool = False`
+
+- `solver_preflop/clear_json_adapter.py`
+  - Propagates `raw["all_in_unknown_amount"]` into `NormalizedPlayer.all_in_unknown_amount`.
+
+- `solver_preflop/spot_classifier.py`
+  - If an active non-hero player has `all_in_unknown_amount=true`, classifier returns:
+    - `node_type = facing_allin_unknown_amount`
+  - This classification happens before ordinary raise-level / current-aggressor fallback logic.
+
+- `solver_preflop/range_engine.py`
+  - `facing_allin_unknown_amount` is included in all-in guarded fallback prefixes.
+
+- `tests/fixtures/v2_45_allin_taxonomy/cases.json`
+  - `ALLIN_FLAG_NO_AMOUNT_SAVED_AS_ACTIVE` is now upgraded to:
+    - `ALLIN_UNKNOWN_AMOUNT_MARKED`
+
+- `tools/run_v2_45_allin_taxonomy_audit.py`
+  - Added assertions for `all_in_unknown_amount`.
+
+Added:
+- `tools/run_v2_48_unknown_amount_allin_audit.py`
+- `tests/test_v2_48_unknown_amount_allin_audit.py`
+
+Validation:
+- `tools/run_v2_45_allin_taxonomy_audit.py`
+  - `V2.45_ALLIN_TAXONOMY_AUDIT_OK = True`
+- `tools/run_v2_48_unknown_amount_allin_audit.py`
+  - `V2.48_UNKNOWN_AMOUNT_ALLIN_AUDIT_OK = True`
+- `pytest tests/test_v2_45_allin_taxonomy_audit.py tests/test_v2_48_unknown_amount_allin_audit.py -q`
+  - `2 passed`
+
+Proof:
+- Missing-amount all-in is preserved:
+  - `Clear_JSON.players.CO.all_in_unknown_amount=true`
+  - Clear_JSON validation OK
+
+- Solver classification:
+  - `node_type=facing_allin_unknown_amount`
+  - `raw_action=safe_fallback`
+
+- Premium hand behavior:
+  - KK + unknown-amount all-in
+  - premium guard active
+  - target sequence `Bet/Raise`
+  - physical `FOLD` is not selected
+
+- Weak hand behavior:
+  - 72o + unknown-amount all-in
+  - premium guard inactive
+  - target sequence `FOLD`
+
+Notes:
+- V2.48 completes the all-in taxonomy closure started in V2.45.
+- Numeric all-in is handled by V2.46/V2.47.
+- Unknown-amount all-in is now explicit and no longer silently degrades into ordinary active-player state.
+- Full pytest is intentionally not claimed as closed in this checkpoint.

@@ -21,6 +21,7 @@ class NormalizedPlayer:
     folded: bool = False
     sitout: bool = False
     all_in: bool = False
+    all_in_unknown_amount: bool = False
     active_in_hand: bool = True
     raw: dict[str, Any] = field(default_factory=dict)
 

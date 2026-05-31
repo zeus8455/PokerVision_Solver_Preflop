@@ -233,6 +233,10 @@ def _build_clear_player(player: Dict[str, Any], previous_player: Optional[Dict[s
         # only when all_in is reliable and committed chips are numeric.
         if clear_player.get("stack") is None:
             clear_player["stack"] = 0.0
+    elif all_in_value and chips_value is False:
+        # V2.48: do not invent an all-in amount, but do not silently lose the
+        # state either. Solver will classify this as facing_allin_unknown_amount.
+        clear_player["all_in_unknown_amount"] = True
 
     cards = _candidate_cards(player)
     is_hero = _as_bool(player.get("hero"), default=False) or len(cards) == 2
@@ -447,7 +451,7 @@ def validate_clear_json_contract(clear_state: Dict[str, Any]) -> Dict[str, Any]:
             if not isinstance(player, dict):
                 errors.append(f"Clear_JSON.players.{position} must be an object.")
                 continue
-            allowed_player_keys = {"hero", "cards", "stack", "fold", "chips", "all_in"}
+            allowed_player_keys = {"hero", "cards", "stack", "fold", "chips", "all_in", "all_in_unknown_amount"}
             extra_player_keys = sorted(set(player.keys()) - allowed_player_keys)
             if extra_player_keys:
                 errors.append(f"Clear_JSON.players.{position} has forbidden keys: {extra_player_keys}")
@@ -463,6 +467,14 @@ def validate_clear_json_contract(clear_state: Dict[str, Any]) -> Dict[str, Any]:
                 errors.append(f"Clear_JSON.players.{position}.all_in must be boolean when present.")
             if all_in is True and chips is False:
                 errors.append(f"Clear_JSON.players.{position}.all_in requires numeric chips.")
+
+            all_in_unknown_amount = player.get("all_in_unknown_amount")
+            if all_in_unknown_amount is not None and not isinstance(all_in_unknown_amount, bool):
+                errors.append(f"Clear_JSON.players.{position}.all_in_unknown_amount must be boolean when present.")
+            if all_in_unknown_amount is True and chips is not False:
+                errors.append(f"Clear_JSON.players.{position}.all_in_unknown_amount requires chips=false.")
+            if all_in_unknown_amount is True and all_in is True:
+                errors.append(f"Clear_JSON.players.{position} cannot have both all_in and all_in_unknown_amount.")
 
             if bool(player.get("hero")):
                 cards = player.get("cards")

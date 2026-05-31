@@ -216,6 +216,15 @@ def run_case(case: dict[str, Any]) -> dict[str, Any]:
             checks[key] = bool(player.get("all_in")) is bool(expected[key])
 
     for key, pos in [
+        ("clear_btn_all_in_unknown_amount", "BTN"),
+        ("clear_utg_all_in_unknown_amount", "UTG"),
+        ("clear_co_all_in_unknown_amount", "CO"),
+    ]:
+        if key in expected:
+            player = _player(clear_json, pos) or {}
+            checks[key] = bool(player.get("all_in_unknown_amount")) is bool(expected[key])
+
+    for key, pos in [
         ("clear_btn_stack", "BTN"),
         ("clear_utg_stack", "UTG"),
         ("clear_co_stack", "CO"),

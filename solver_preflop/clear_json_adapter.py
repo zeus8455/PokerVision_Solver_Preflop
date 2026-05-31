@@ -70,6 +70,7 @@ def parse_clear_json_preflop(data: dict[str, Any]) -> NormalizedPreflopFrame:
         folded = bool(raw.get("fold", False))
         sitout = bool(raw.get("sitout", False))
         all_in = bool(raw.get("all_in", False))
+        all_in_unknown_amount = bool(raw.get("all_in_unknown_amount", False))
         hero = bool(raw.get("hero", False))
         committed = _chips_to_committed_bb(raw.get("chips", False), position=position)
         stack = _stack_to_bb(raw.get("stack", 0.0), position=position)
@@ -96,6 +97,7 @@ def parse_clear_json_preflop(data: dict[str, Any]) -> NormalizedPreflopFrame:
             folded=folded,
             sitout=sitout,
             all_in=all_in,
+            all_in_unknown_amount=all_in_unknown_amount,
             active_in_hand=active_in_hand,
             raw=raw,
         )
