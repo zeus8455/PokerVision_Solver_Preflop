@@ -109,7 +109,7 @@
         "validation_error_contains": "stack must be a number",
         "clear_has_btn": true,
         "clear_btn_chips": 23.5,
-        "clear_btn_all_in": false
+        "clear_btn_all_in": true
       },
       "notes": [
         "Chips amount is detected; current Clear_JSON validation rejects stack=None before all_in propagation is fixed."
@@ -117,7 +117,7 @@
     },
     {
       "case_id": "allin_amount_detected_but_allin_flag_dropped",
-      "category": "ALLIN_AMOUNT_DETECTED_BUT_ALLIN_FLAG_DROPPED",
+      "category": "ALLIN_AMOUNT_DETECTED_AND_FLAG_PROPAGATED",
       "dark_state": {
         "frame_id": "allin_amount_detected_but_allin_flag_dropped",
         "table_id": "table_01",
@@ -165,11 +165,12 @@
         "clear_validation_ok": true,
         "clear_has_btn": true,
         "clear_btn_chips": 8.5,
-        "clear_btn_all_in": false,
+        "clear_btn_all_in": true,
         "solver_should_run": true
       },
       "notes": [
-        "Current builder keeps numeric chips but drops all_in flag; V2.46 should change this."
+        "Current builder keeps numeric chips but drops all_in flag; V2.46 should change this.",
+        "V2.46 propagates all_in=true when chips are numeric and player is not sitout."
       ]
     },
     {
@@ -223,7 +224,7 @@
         "validation_error_contains": "stack must be a number",
         "clear_has_utg": true,
         "clear_utg_chips": 21.0,
-        "clear_utg_all_in": false
+        "clear_utg_all_in": true
       },
       "notes": [
         "Represents live pending-only all-in amount cases blocked by validation before final publication."
@@ -402,7 +403,8 @@
         "expected_raw_action": "safe_fallback",
         "expected_click_sequence": [
           "FOLD"
-        ]
+        ],
+        "clear_btn_all_in": true
       },
       "notes": [
         "Postflop all-in is outside Solver_Preflop and should be rejected/skipped by this line.",

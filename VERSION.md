@@ -1193,3 +1193,72 @@ Notes:
 - V2.45 intentionally does not fix the middle layer yet.
 - It documents current behavior so V2.46+ can safely change all-in propagation and validation policy.
 - Full pytest is intentionally not claimed as closed in this checkpoint.
+
+## V2.46.0 вЂ” Clear_JSON all-in propagation
+
+Date: 2026-05-31
+
+Status: targeted proof passed.
+
+Goal:
+- Preserve reliable all-in semantic state in Clear_JSON when the player is not sitout and committed chips are numeric.
+- Keep sitout all-in false positives ignored/excluded.
+- Keep missing-amount all-in unpropagated for a later explicit unknown-amount node.
+- Leave stack=None validation policy unchanged for V2.47.
+
+Changed:
+- `external/PokerVisionFinalVersionNoSolver_snapshot/PokerVision V1_2/logic/clear_json_builder.py`
+  - `_build_clear_player(...)` now propagates `all_in=true` only when:
+    - source `all_in` / `allin` is true
+    - normalized `chips` is numeric
+    - player survives normal participation filtering
+  - Clear_JSON player contract now allows `all_in`.
+  - Validation now checks:
+    - `all_in` must be boolean when present
+    - `all_in=true` requires numeric chips
+
+- `tests/fixtures/v2_45_allin_taxonomy/cases.json`
+  - Updated taxonomy expectations after all-in propagation.
+  - Numeric all-in with chips is now categorized as propagated, not dropped.
+
+- `tests/test_v2_45_allin_taxonomy_audit.py`
+  - Allows the V2.46 propagated category.
+
+Added:
+- `tools/run_v2_46_clear_json_allin_propagation_audit.py`
+- `tests/test_v2_46_clear_json_allin_propagation_audit.py`
+
+Validation:
+- `tools/run_v2_45_allin_taxonomy_audit.py`
+  - `V2.45_ALLIN_TAXONOMY_AUDIT_OK = True`
+- `tools/run_v2_46_clear_json_allin_propagation_audit.py`
+  - `V2.46_CLEAR_JSON_ALLIN_PROPAGATION_AUDIT_OK = True`
+- `pytest tests/test_v2_45_allin_taxonomy_audit.py tests/test_v2_46_clear_json_allin_propagation_audit.py -q`
+  - `2 passed`
+
+Proof:
+- Numeric all-in propagates:
+  - `all_in=true`
+  - `chips=8.5`
+  - `validation OK`
+
+- Stack-none all-in behavior is intentionally unchanged:
+  - `all_in=true`
+  - `chips=23.5`
+  - validation still fails with `stack must be a number`
+  - reserved for V2.47
+
+- Sitout all-in false positive remains excluded:
+  - no all-in pressure is created
+
+- Missing-amount all-in remains unpropagated:
+  - `all_in=true`
+  - `chips=false`
+  - no `all_in` in Clear_JSON yet
+  - reserved for V2.48 facing-allin-unknown-amount semantics
+
+Notes:
+- V2.46 fixes reliable numeric all-in propagation only.
+- V2.47 will normalize/accept `all_in=true + chips numeric + stack=None`.
+- V2.48 will add explicit unknown-amount all-in semantics.
+- Full pytest is intentionally not claimed as closed in this checkpoint.

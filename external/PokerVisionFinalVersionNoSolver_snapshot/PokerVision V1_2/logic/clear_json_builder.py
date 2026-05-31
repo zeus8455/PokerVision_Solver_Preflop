@@ -220,6 +220,15 @@ def _build_clear_player(player: Dict[str, Any], previous_player: Optional[Dict[s
     chips_value = _normalize_chips(player, previous_player)
     fold_value = _as_bool(player.get("fold"), default=False)
     clear_player: Dict[str, Any] = {"stack": stack_value, "fold": fold_value, "chips": chips_value}
+
+    # V2.46: preserve reliable all-in semantic state in Clear_JSON.
+    # Only propagate all_in when the source all-in flag is true and the committed
+    # amount is numeric. Missing-amount all-in remains a later V2.48 diagnostic
+    # problem instead of pretending to know the amount.
+    all_in_value = _as_bool(player.get("all_in"), default=False) or _as_bool(player.get("allin"), default=False)
+    if all_in_value and chips_value is not False and _as_number_or_none(chips_value) is not None:
+        clear_player["all_in"] = True
+
     cards = _candidate_cards(player)
     is_hero = _as_bool(player.get("hero"), default=False) or len(cards) == 2
     if is_hero:
@@ -433,7 +442,7 @@ def validate_clear_json_contract(clear_state: Dict[str, Any]) -> Dict[str, Any]:
             if not isinstance(player, dict):
                 errors.append(f"Clear_JSON.players.{position} must be an object.")
                 continue
-            allowed_player_keys = {"hero", "cards", "stack", "fold", "chips"}
+            allowed_player_keys = {"hero", "cards", "stack", "fold", "chips", "all_in"}
             extra_player_keys = sorted(set(player.keys()) - allowed_player_keys)
             if extra_player_keys:
                 errors.append(f"Clear_JSON.players.{position} has forbidden keys: {extra_player_keys}")
@@ -444,6 +453,12 @@ def validate_clear_json_contract(clear_state: Dict[str, Any]) -> Dict[str, Any]:
             chips = player.get("chips")
             if chips is not False and _as_number_or_none(chips) is None:
                 errors.append(f"Clear_JSON.players.{position}.chips must be number or false.")
+            all_in = player.get("all_in")
+            if all_in is not None and not isinstance(all_in, bool):
+                errors.append(f"Clear_JSON.players.{position}.all_in must be boolean when present.")
+            if all_in is True and chips is False:
+                errors.append(f"Clear_JSON.players.{position}.all_in requires numeric chips.")
+
             if bool(player.get("hero")):
                 cards = player.get("cards")
                 if not isinstance(cards, list) or len(cards) != 2:
