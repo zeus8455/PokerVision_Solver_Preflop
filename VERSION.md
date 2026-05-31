@@ -1483,3 +1483,58 @@ Notes:
 - V2.49 closes the synthetic all-in/premium chain.
 - Next block should be live-main proof.
 - Legacy full regression remains a separate later task because it contains old safe_fallback expectations and missing snapshot runtime-output files.
+
+## V2.50.0 вЂ” Remove_Game service policy and Remove_Table hard-disable
+
+Date: 2026-05-31
+
+Status: targeted proof passed.
+
+Goal:
+- Fix top live service-button policy after V2.49 live-main proof.
+- Make `Remove_Table` a hard-disabled Trigger_UI service class.
+- Keep `Remove_Game` as the first actionable service-click class for returning/changing game state.
+- Prevent `Remove_Table` from blocking or consuming the service/action branch as a detected-only pseudo-action.
+
+Changed:
+- `external/PokerVisionFinalVersionNoSolver_snapshot/PokerVision V1_2/config.py`
+  - Removed `Remove_Table` from `V11_TRIGGER_UI_SERVICE_CLASSES`.
+  - `Remove_Game` remains present and service-click eligible.
+
+- `external/PokerVisionFinalVersionNoSolver_snapshot/PokerVision V1_2/runtime/trigger_ui_service_policy.py`
+  - Added `DISABLED_SERVICE_CLASSES = {"Remove_Table"}`.
+  - Removed `Remove_Table` from `DETECTED_ONLY_SERVICE_CLASSES`.
+  - Ensured `Remove_Table` cannot be returned by `first_detected_service_class`.
+  - Ensured `Remove_Table` cannot appear in detected-only service output.
+  - Kept `Remove_Game` first in `SERVICE_CLICK_PRIORITY`.
+  - Preserved `Remove_Game` as a simple service class.
+
+- `external/PokerVisionFinalVersionNoSolver_snapshot/PokerVision V1_2/logic/trigger_ui_policy.py`
+  - Marked `Remove_Table` as not future-click allowed in policy metadata.
+  - Updated policy text to reflect hard-disabled click/runtime behavior.
+
+Added:
+- `tools/run_v2_50_remove_game_service_policy_audit.py`
+- `tests/test_v2_50_remove_game_service_policy_audit.py`
+
+Validation:
+- `tools/run_v2_50_remove_game_service_policy_audit.py`
+  - `V2.50_REMOVE_GAME_SERVICE_POLICY_AUDIT_OK = True`
+- `pytest tests/test_v2_50_remove_game_service_policy_audit.py -q`
+  - `1 passed`
+
+Proof:
+- `Remove_Table` is not in runtime service config.
+- `Remove_Table` is not in service priority.
+- `Remove_Table` is in hard-disabled service set.
+- `Remove_Table` is not detected-only and not terminal.
+- `Remove_Table` alone creates no actionable service target.
+- `Remove_Table` alone creates no detected-only service output.
+- `Remove_Game` remains first service priority.
+- `Remove_Game` remains actionable.
+- If `Remove_Table` and `Remove_Game` are both detected, `Remove_Game` wins.
+
+Notes:
+- This does not change the YOLO model. If the model detects `Remove_Table` instead of `Remove_Game`, runtime now ignores `Remove_Table` instead of treating it as a passive branch result.
+- `Remove_Game` click reliability still depends on the detector actually producing `Remove_Game`.
+- Next live-main run should verify whether `Remove_Game` is detected and physically clicked in real table state.

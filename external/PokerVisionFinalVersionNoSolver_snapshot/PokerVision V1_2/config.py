@@ -840,7 +840,6 @@ V11_TRIGGER_UI_SERVICE_ANTI_REPEAT_SEC = 2.0
 # True_active_fold is terminal for the current frame.
 V11_TRIGGER_UI_SERVICE_CLASSES = [
     "True_active_fold",
-    "Remove_Table",
     "Remove_Game",
     "Exit_cashOut",
     "1_roll_board",

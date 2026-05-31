@@ -69,9 +69,9 @@ TRIGGER_UI_CLASS_ORDER: List[str] = [
 TRIGGER_UI_POLICY: Dict[str, TriggerUIClassPolicy] = {
     "Remove_Table": {
         "meaning": "Служебная кнопка смены/закрытия/удаления стола.",
-        "v03_action": "Записать detect/confirmed/confidence в JSON. Клик не выполнять.",
-        "future_click_allowed": True,
-        "future_click_action_hint": "future: safe click only inside slot_bbox after dedicated guard",
+        "v03_action": "Hard-disabled: ignore for click/runtime policy. Do not plan or execute clicks.",
+        "future_click_allowed": False,
+        "future_click_action_hint": None,
         "allow_structure_pipeline_in_v03": False,
         "next_stage_hint_if_confirmed": None,
     },
