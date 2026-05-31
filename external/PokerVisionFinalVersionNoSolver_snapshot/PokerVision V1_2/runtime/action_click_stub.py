@@ -44,6 +44,7 @@ from config import (
     get_v31_controlled_live_click_target_table_ids,
 )
 from logic.action_button_policy import build_fallback_button_sequences
+from logic.premium_fold_guard import evaluate_premium_fold_guard
 from logic.action_button_slot_roi_guard import (
     ActionButtonSlotRoiGuardRequest,
     validate_action_button_slot_roi_guard,
@@ -408,6 +409,12 @@ def build_and_maybe_execute_click_plan(
         "solver_fingerprint": solver_decision.get("solver_fingerprint"),
         "source_frame_id": solver_decision.get("source_frame_id"),
         "solver_click_sequence": list(solver_decision.get("click_sequence") or []),
+        # V2.44: expose premium fold guard context in every click_result.
+        "hero_hand": list(solver_decision.get("hero_hand") or []),
+        "hand_class": solver_decision.get("hand_class"),
+        "node_type": solver_decision.get("node_type"),
+        "safe_fallback_used": bool(solver_decision.get("safe_fallback_used")),
+        "premium_fold_guard": None,
         "target_sequence": [],
         "click_points": [],
         "guard_passed": False,
@@ -512,16 +519,34 @@ def build_and_maybe_execute_click_plan(
     if V11_CLICK_REQUIRE_BUTTON_DETECTION and not best_by_class:
         return finish("blocked", "No action button detections available.")
 
-    try:
-        sequences = build_fallback_button_sequences(
-            solver_decision.get("action"),
-            solver_decision.get("size_pct"),
-        )
-    except Exception as exc:
-        return finish("error", f"Invalid solver decision: {exc}")
+    # V2.44: top-layer safety override before any FOLD click is selected.
+    premium_fold_guard = evaluate_premium_fold_guard(
+        solver_decision=solver_decision,
+        available_buttons=best_by_class.keys(),
+    )
+    report["premium_fold_guard"] = premium_fold_guard
+
+    if bool(premium_fold_guard.get("active")):
+        sequences = [list(seq) for seq in (premium_fold_guard.get("target_sequences") or [])]
+    else:
+        try:
+            sequences = build_fallback_button_sequences(
+                solver_decision.get("action"),
+                solver_decision.get("size_pct"),
+            )
+        except Exception as exc:
+            return finish("error", f"Invalid solver decision: {exc}")
 
     selected_sequence = _find_first_available_sequence(sequences, best_by_class)
     if not selected_sequence:
+        if bool(premium_fold_guard.get("active")):
+            return finish(
+                "blocked",
+                str(
+                    premium_fold_guard.get("message")
+                    or "Premium fold guard blocked suspicious premium fold; no Raise/Call sequence available."
+                ),
+            )
         return finish("blocked", f"Required action button sequence not found. Tried: {sequences}")
 
     report["target_sequence"] = selected_sequence

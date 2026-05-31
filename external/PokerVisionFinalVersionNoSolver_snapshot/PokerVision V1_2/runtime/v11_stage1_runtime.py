@@ -233,6 +233,11 @@ def _extract_solver_preflop_decision_from_state(
         "raw_action": original_solver_raw_action,
         "engine_action": action_decision.get("engine_action") or contract.get("engine_action"),
         "size_pct": size_pct,
+        # V2.44: premium fold guard metadata propagated into runtime click layer.
+        "hero_hand": list(action_decision.get("hero_hand") or []),
+        "hand_class": action_decision.get("hand_class"),
+        "node_type": action_decision.get("node_type"),
+        "safe_fallback_used": bool(action_decision.get("safe_fallback_used")),
         "reason": str(action_decision.get("reason") or "solver_preflop_bridge_live_runtime_source"),
         "json_path": str(solver_payload_path),
         "source_frame_id": action_decision.get("source_frame_id") or contract.get("source_frame_id"),

@@ -1083,3 +1083,65 @@ Notes:
 - All-in/high-order nodes still use guarded fallback where ranges are not wired.
 - Runtime behavior remains safe: unsupported all-in ranges plan `fold` through V2.41 fallback compatibility.
 - Full pytest is intentionally not claimed as closed in this checkpoint.
+
+## V2.44.0 вЂ” premium fold safety guard
+
+Date: 2026-05-31
+
+Status: targeted proof passed.
+
+Goal:
+- Prevent physical FOLD clicks with premium hands AA / KK / QQ when the solver/runtime decision is ambiguous, fallback-based, or unsafe.
+- Keep normal weak-hand fallback behavior unchanged.
+- Implement the top-layer protection before fixing middle-layer all-in propagation.
+
+Changed:
+- `external/PokerVisionFinalVersionNoSolver_snapshot/PokerVision V1_2/logic/premium_fold_guard.py`
+  - Added pure premium fold guard module.
+  - Detects premium hands AA / KK / QQ from `hand_class` or `hero_hand`.
+  - Activates only when action is fold and the decision is suspicious/fallback/unknown/all-in ambiguous.
+  - Override order:
+    1. `Bet/Raise`
+    2. `Raise`
+    3. `Call`
+    4. `CALL`
+  - If no Raise/Call button exists, blocks the physical FOLD.
+
+- `external/PokerVisionFinalVersionNoSolver_snapshot/PokerVision V1_2/runtime/v11_stage1_runtime.py`
+  - Propagates metadata needed by the guard into runtime click layer:
+    - `hero_hand`
+    - `hand_class`
+    - `node_type`
+    - `safe_fallback_used`
+    - `reason`
+
+- `external/PokerVisionFinalVersionNoSolver_snapshot/PokerVision V1_2/runtime/action_click_stub.py`
+  - Applies premium fold guard before selecting normal fallback button sequence.
+  - Adds `premium_fold_guard` diagnostics into click_result.
+  - If guard is active, never selects `FOLD`.
+  - If guard is active and no Raise/Call exists, returns blocked instead of clicking FOLD.
+
+Added:
+- `tools/run_v2_44_premium_fold_guard_e2e.py`
+- `tests/test_v2_44_premium_fold_guard_e2e.py`
+
+Validation:
+- `tools/run_v2_44_premium_fold_guard_e2e.py`
+  - `V2.44_PREMIUM_FOLD_GUARD_E2E_OK = True`
+- `pytest tests/test_v2_44_premium_fold_guard_e2e.py -q`
+  - `1 passed`
+
+Proof cases:
+- `KK + safe_fallback fold + Bet/Raise visible -> Bet/Raise`
+- `KK + safe_fallback fold + only Call visible -> Call`
+- `KK + safe_fallback fold + only FOLD visible -> blocked`
+- `AA + unknown/no-decision fold + Bet/Raise visible -> Bet/Raise`
+- `QQ + fallback fold + only Call visible -> Call`
+- `72o + safe_fallback fold -> FOLD`
+- `KK + clean raise decision -> guard not active`
+
+Notes:
+- This does not fix Dark_JSON -> Clear_JSON all-in propagation yet.
+- This deliberately protects the most expensive failure mode first:
+  premium hand + ambiguous/fallback state must not physically click FOLD.
+- Full pytest is intentionally not claimed as closed in this checkpoint.
