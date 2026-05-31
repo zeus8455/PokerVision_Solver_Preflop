@@ -1417,3 +1417,69 @@ Notes:
 - Numeric all-in is handled by V2.46/V2.47.
 - Unknown-amount all-in is now explicit and no longer silently degrades into ordinary active-player state.
 - Full pytest is intentionally not claimed as closed in this checkpoint.
+
+## V2.49.0 вЂ” Dark Clear Solver Runtime chain proof
+
+Date: 2026-05-31
+
+Status: targeted proof passed.
+
+Goal:
+- Close the V2.44-V2.48 all-in / premium safety block with one synthetic end-to-end file-contract proof.
+- Prove the Dark-like state -> Clear_JSON -> Solver_Preflop -> runtime click-plan chain without YOLO, monitor, or live poker room.
+- Keep old legacy full-regression tests out of this gate because they contain outdated expectations and missing runtime-output fixtures.
+
+Added:
+- `tools/run_v2_49_dark_clear_solver_runtime_chain.py`
+- `tests/test_v2_49_dark_clear_solver_runtime_chain.py`
+
+Validation:
+- `tools/run_v2_49_dark_clear_solver_runtime_chain.py`
+  - `V2.49_DARK_CLEAR_SOLVER_RUNTIME_CHAIN_OK = True`
+- Targeted all-in/premium regression group:
+  - `tests/test_v2_42_full_preflop_spot_matrix_e2e.py`
+  - `tests/test_v2_43_allin_semantic_cleanup_audit.py`
+  - `tests/test_v2_44_premium_fold_guard_e2e.py`
+  - `tests/test_v2_45_allin_taxonomy_audit.py`
+  - `tests/test_v2_46_clear_json_allin_propagation_audit.py`
+  - `tests/test_v2_47_allin_stack_policy_audit.py`
+  - `tests/test_v2_48_unknown_amount_allin_audit.py`
+  - `tests/test_v2_49_dark_clear_solver_runtime_chain.py`
+  - `8 passed`
+
+Proof cases:
+- KK + opponent `all_in=true` + `chips=false`
+  - Clear_JSON has `all_in_unknown_amount=true`
+  - Solver node is `facing_allin_unknown_amount`
+  - Solver raw action is `safe_fallback`
+  - Premium fold guard is active
+  - Physical FOLD is not selected
+
+- 72o + opponent `all_in=true` + `chips=false`
+  - Solver node is `facing_allin_unknown_amount`
+  - Premium fold guard is inactive
+  - Runtime target sequence is `FOLD`
+
+- Numeric all-in with missing stack
+  - `all_in=true`
+  - `chips=23.5`
+  - `stack=0.0`
+  - Clear_JSON validation OK
+
+- Sitout false-positive all-in
+  - sitout player is excluded
+  - no all-in pressure remains in Clear_JSON
+
+- Already-clicked Clear_JSON
+  - rejected into `solver_input_error`
+  - uses safe fallback runtime path
+
+- Premium fallback with only FOLD visible
+  - premium guard activates
+  - runtime blocks
+  - physical FOLD is not selected
+
+Notes:
+- V2.49 closes the synthetic all-in/premium chain.
+- Next block should be live-main proof.
+- Legacy full regression remains a separate later task because it contains old safe_fallback expectations and missing snapshot runtime-output files.
