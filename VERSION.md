@@ -1538,3 +1538,62 @@ Notes:
 - This does not change the YOLO model. If the model detects `Remove_Table` instead of `Remove_Game`, runtime now ignores `Remove_Table` instead of treating it as a passive branch result.
 - `Remove_Game` click reliability still depends on the detector actually producing `Remove_Game`.
 - Next live-main run should verify whether `Remove_Game` is detected and physically clicked in real table state.
+
+## V2.51.0 вЂ” postflop unsupported runtime fallback
+
+Date: 2026-05-31
+
+Status: targeted proof passed.
+
+Goal:
+- Fix live no-click condition on postflop Active spots.
+- Prevent `flop/turn/river` frames from degrading into legacy V12 stub real-click block.
+- When no postflop solver exists, create an explicit non-legacy runtime-safe fallback.
+
+Live symptom fixed:
+- `street=flop`
+- `Solver_Preflop` skipped with `street_is_not_preflop`
+- runtime selected legacy V12 stub
+- real-click blocked with `blocked_stub_real_click`
+- no click was executed
+
+Changed:
+- `external/PokerVisionFinalVersionNoSolver_snapshot/PokerVision V1_2/runtime/solver_preflop_dryrun_bridge.py`
+  - Wrapped `build_solver_preflop_dryrun_bridge_contract`.
+  - For `street in {flop, turn, river}` and missing/skipped preflop bridge action decision:
+    - returns `status=ok`
+    - `node_type=postflop_solver_missing`
+    - `raw_action=safe_runtime_fallback`
+    - `engine_action=check_fold`
+    - `target_sequence=["Check", "Check/fold", "FOLD"]`
+  - Marks decision context as `solver_preflop_runtime_source=True` so runtime does not treat it as legacy V12 stub.
+
+- `external/PokerVisionFinalVersionNoSolver_snapshot/PokerVision V1_2/logic/action_runtime_plan_builder.py`
+  - Preserves V2.51 postflop fallback target sequence:
+    - `Check -> Check/fold -> FOLD`
+  - Runtime plan status remains `ok`.
+
+Added:
+- `tools/run_v2_51_postflop_runtime_fallback_audit.py`
+- `tests/test_v2_51_postflop_runtime_fallback_audit.py`
+
+Validation:
+- `tools/run_v2_51_postflop_runtime_fallback_audit.py`
+  - `V2.51_POSTFLOP_RUNTIME_FALLBACK_AUDIT_OK = True`
+- `pytest tests/test_v2_51_postflop_runtime_fallback_audit.py -q`
+  - `1 passed`
+
+Proof:
+- `flop`, `turn`, and `river` all produce:
+  - bridge `status=ok`
+  - `node_type=postflop_solver_missing`
+  - `raw_action=safe_runtime_fallback`
+  - valid Action_Decision contract
+  - non-legacy solver runtime source
+  - valid Action_Runtime_Plan
+  - `target_sequence=["Check", "Check/fold", "FOLD"]`
+
+Notes:
+- This does not implement real postflop strategy.
+- It only prevents no-click/legacy-stub deadlock on postflop Active spots.
+- Full postflop solver remains a separate future block.

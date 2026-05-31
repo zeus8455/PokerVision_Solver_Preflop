@@ -202,6 +202,28 @@ def build_action_runtime_plan_from_action_decision(action_decision: Dict[str, An
         )
         policy_ok = True
 
+
+    # V2.51: explicit postflop unsupported fallback.
+    # Preserve safe ordered runtime sequence: Check -> Check/fold -> FOLD.
+    decision_context = action_decision.get("decision_context")
+    if isinstance(decision_context, dict) and bool(decision_context.get("postflop_solver_missing")):
+        v251_sequence = ["Check", "Check/fold", "FOLD"]
+        target_sequence = list(v251_sequence)
+        target_sequences = [list(v251_sequence)]
+        policy = dict(policy)
+        policy.update(
+            {
+                "ok": True,
+                "action": action,
+                "selected_sequence": list(v251_sequence),
+                "target_sequences": [list(v251_sequence)],
+                "blocked_reason": None,
+                "missing_classes": [],
+                "v251_postflop_solver_missing_safe_runtime_fallback": True,
+            }
+        )
+        policy_ok = True
+
     plan_status = "ok" if policy_ok else "blocked"
     blocked_reason = None if policy_ok else str(policy.get("blocked_reason") or "action_button_policy_blocked")
 

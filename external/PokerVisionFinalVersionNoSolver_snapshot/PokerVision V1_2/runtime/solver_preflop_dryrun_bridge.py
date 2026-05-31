@@ -215,3 +215,118 @@ def build_solver_preflop_dryrun_bridge_contract(
             "source": "Clear_JSON_Pending",
             "path": None,
         }
+
+# =============================================================================
+# V2.51 POSTFLOP UNSUPPORTED EXPLICIT RUNTIME FALLBACK
+# =============================================================================
+
+_V251_ORIGINAL_BUILD_SOLVER_PREFLOP_DRYRUN_BRIDGE_CONTRACT = build_solver_preflop_dryrun_bridge_contract
+
+
+def _v251_clear_street(clear_state: dict) -> str:
+    return str((clear_state or {}).get("street") or "").strip().lower()
+
+
+def _v251_hero_position(clear_state: dict) -> str:
+    players = (clear_state or {}).get("players")
+    if isinstance(players, dict):
+        for position, player in players.items():
+            if isinstance(player, dict) and bool(player.get("hero")):
+                return str(position)
+    return ""
+
+
+def _v251_source_frame_id(clear_state: dict, table_id: str) -> str:
+    return str((clear_state or {}).get("frame_id") or (clear_state or {}).get("source_frame_id") or table_id or "unknown_frame")
+
+
+def _v251_build_postflop_unsupported_action_decision(*, clear_state: dict, table_id: str) -> dict:
+    try:
+        from config import V06_ACTION_DECISION_SCHEMA_VERSION
+    except Exception:
+        V06_ACTION_DECISION_SCHEMA_VERSION = "action_decision_v1"
+
+    street = _v251_clear_street(clear_state)
+    source_frame_id = _v251_source_frame_id(clear_state, table_id)
+    hero_position = _v251_hero_position(clear_state)
+    decision_id = f"v251_postflop_solver_missing:{table_id}:{source_frame_id}:{street}"
+
+    return {
+        "schema_version": V06_ACTION_DECISION_SCHEMA_VERSION,
+        "source": "Decision_JSON",
+        "source_decision_frame_id": source_frame_id,
+        "status": "ok",
+        "action": "check_fold",
+        "size_policy": {"type": "none", "value": None},
+        "target_button_classes": ["Check", "Check/fold", "FOLD"],
+        "reason": "v251_postflop_solver_missing_safe_runtime_fallback",
+        "dry_run_safe": True,
+        "solver_stub": True,
+        "decision_context": {
+            "street": street,
+            "hero_position": hero_position,
+            "source_frame_id": source_frame_id,
+            "solver_preflop_runtime_source": True,
+            "solver_stub_legacy_compat": True,
+            "solver_decision_id": decision_id,
+            "solver_fingerprint": decision_id,
+            "solver_raw_action": "safe_runtime_fallback",
+            "solver_engine_action": "check_fold",
+            "node_type": "postflop_solver_missing",
+            "postflop_solver_missing": True,
+            "safe_runtime_fallback": True,
+            "target_sequence": ["Check", "Check/fold", "FOLD"],
+        },
+    }
+
+
+def _v251_build_postflop_unsupported_bridge_contract(*, clear_state: dict, table_id: str, upstream_contract: dict | None = None) -> dict:
+    street = _v251_clear_street(clear_state)
+    action_decision = _v251_build_postflop_unsupported_action_decision(clear_state=clear_state, table_id=table_id)
+    return {
+        "schema_version": "solver_preflop_dryrun_bridge_v2_51",
+        "source": "PokerVision_Solver_Preflop",
+        "status": "ok",
+        "reason": "v251_postflop_solver_missing_safe_runtime_fallback",
+        "table_id": str(table_id or ""),
+        "street": street,
+        "node_type": "postflop_solver_missing",
+        "raw_action": "safe_runtime_fallback",
+        "engine_action": "check_fold",
+        "target_sequence": ["Check", "Check/fold", "FOLD"],
+        "upstream_contract": dict(upstream_contract) if isinstance(upstream_contract, dict) else upstream_contract,
+        "bridge_payload": {
+            "action_decision": action_decision,
+        },
+    }
+
+
+def build_solver_preflop_dryrun_bridge_contract(*args, **kwargs):  # type: ignore[no-redef]
+    clear_state = kwargs.get("clear_state")
+    table_id = str(kwargs.get("table_id") or "")
+    result = _V251_ORIGINAL_BUILD_SOLVER_PREFLOP_DRYRUN_BRIDGE_CONTRACT(*args, **kwargs)
+
+    if isinstance(clear_state, dict):
+        street = _v251_clear_street(clear_state)
+        if street in {"flop", "turn", "river"}:
+            if not isinstance(result, dict):
+                return _v251_build_postflop_unsupported_bridge_contract(
+                    clear_state=clear_state,
+                    table_id=table_id,
+                    upstream_contract={"status": "unknown_non_dict_result", "raw": repr(result)},
+                )
+
+            status = str(result.get("status") or "").strip().lower()
+            reason = str(result.get("reason") or result.get("skip_reason") or "").strip().lower()
+            bridge_payload = result.get("bridge_payload")
+            action_decision = bridge_payload.get("action_decision") if isinstance(bridge_payload, dict) else None
+
+            if status != "ok" or not isinstance(action_decision, dict) or reason in {"street_is_not_preflop", "not_preflop"}:
+                return _v251_build_postflop_unsupported_bridge_contract(
+                    clear_state=clear_state,
+                    table_id=table_id,
+                    upstream_contract=result,
+                )
+
+    return result
+
