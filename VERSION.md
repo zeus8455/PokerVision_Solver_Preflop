@@ -1145,3 +1145,51 @@ Notes:
 - This deliberately protects the most expensive failure mode first:
   premium hand + ambiguous/fallback state must not physically click FOLD.
 - Full pytest is intentionally not claimed as closed in this checkpoint.
+
+## V2.45.0 вЂ” all-in taxonomy fixture audit
+
+Date: 2026-05-31
+
+Status: targeted proof passed.
+
+Goal:
+- Freeze the live-discovered all-in categories as file-only synthetic fixtures.
+- Validate current Dark-like state -> Clear_JSON -> Solver_Preflop -> runtime click behavior without screenshots or YOLO.
+- Provide a stable baseline before fixing the middle layer all-in propagation.
+
+Added:
+- `tests/fixtures/v2_45_allin_taxonomy/cases.json`
+- `tools/run_v2_45_allin_taxonomy_audit.py`
+- `tests/test_v2_45_allin_taxonomy_audit.py`
+
+Validation:
+- `tools/run_v2_45_allin_taxonomy_audit.py`
+  - `V2.45_ALLIN_TAXONOMY_AUDIT_OK = True`
+- `pytest tests/test_v2_45_allin_taxonomy_audit.py -q`
+  - `1 passed`
+
+Proof:
+- `cases_total = 7`
+- `cases_ok = 7`
+- `cases_failed = 0`
+
+Covered categories:
+- `SITOUT_FALSE_POSITIVE_ALLIN_BADGE`
+- `ALLIN_AMOUNT_DETECTED_BUT_VALIDATION_REJECTED`
+- `ALLIN_AMOUNT_DETECTED_BUT_ALLIN_FLAG_DROPPED`
+- `ALLIN_AMOUNT_PENDING_ONLY_NO_FINAL`
+- `ALLIN_FLAG_NO_AMOUNT_SAVED_AS_ACTIVE`
+- `ALLIN_FLAG_NO_AMOUNT_NO_CLEAR`
+- `POSTFLOP_IGNORED`
+
+Important proof case:
+- `ALLIN_FLAG_NO_AMOUNT_SAVED_AS_ACTIVE`
+  - Reproduces the KK danger class.
+  - Dark-like state has active opponent with `all_in=true` and missing amount.
+  - Current Clear_JSON/Solver path can reach `safe_fallback`.
+  - V2.44 premium guard activates and redirects away from FOLD to `Bet/Raise`.
+
+Notes:
+- V2.45 intentionally does not fix the middle layer yet.
+- It documents current behavior so V2.46+ can safely change all-in propagation and validation policy.
+- Full pytest is intentionally not claimed as closed in this checkpoint.

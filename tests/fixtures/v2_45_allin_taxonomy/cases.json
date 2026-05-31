@@ -1,0 +1,413 @@
+{
+  "schema_version": "v2_45_allin_taxonomy_cases_v1",
+  "cases": [
+    {
+      "case_id": "sitout_false_positive_allin_badge",
+      "category": "SITOUT_FALSE_POSITIVE_ALLIN_BADGE",
+      "dark_state": {
+        "frame_id": "sitout_false_positive_allin_badge",
+        "table_id": "table_01",
+        "frame_name": "sitout_false_positive_allin_badge",
+        "board": {
+          "street": "preflop",
+          "cards": []
+        },
+        "Total_pot": 1.5,
+        "players": {
+          "CO": {
+            "hero": false,
+            "cards": [],
+            "stack": 100,
+            "chips": false,
+            "fold": false,
+            "sitout": true,
+            "position": "CO",
+            "all_in": true
+          },
+          "SB": {
+            "hero": false,
+            "cards": [],
+            "stack": 99.5,
+            "chips": 0.5,
+            "fold": false,
+            "sitout": false,
+            "position": "SB"
+          },
+          "BB": {
+            "hero": true,
+            "cards": [
+              "A_spades",
+              "K_diamonds"
+            ],
+            "stack": 99,
+            "chips": 1,
+            "fold": false,
+            "sitout": false,
+            "position": "BB"
+          }
+        }
+      },
+      "expected": {
+        "clear_validation_ok": true,
+        "clear_has_co": false,
+        "clear_co_all_in": false,
+        "audit_exclusion_reason": "sitout_true",
+        "solver_should_run": true
+      },
+      "notes": [
+        "All-in flag belongs to sitout player and must not be treated as live all-in pressure."
+      ]
+    },
+    {
+      "case_id": "allin_amount_detected_but_validation_rejected_stack_none",
+      "category": "ALLIN_AMOUNT_DETECTED_BUT_VALIDATION_REJECTED",
+      "dark_state": {
+        "frame_id": "allin_amount_detected_but_validation_rejected_stack_none",
+        "table_id": "table_01",
+        "frame_name": "allin_amount_detected_but_validation_rejected_stack_none",
+        "board": {
+          "street": "preflop",
+          "cards": []
+        },
+        "Total_pot": 25.0,
+        "players": {
+          "BTN": {
+            "hero": false,
+            "cards": [],
+            "stack": null,
+            "chips": 23.5,
+            "fold": false,
+            "sitout": false,
+            "position": "BTN",
+            "all_in": true
+          },
+          "SB": {
+            "hero": false,
+            "cards": [],
+            "stack": 99.5,
+            "chips": 0.5,
+            "fold": true,
+            "sitout": false,
+            "position": "SB"
+          },
+          "BB": {
+            "hero": true,
+            "cards": [
+              "A_spades",
+              "Q_spades"
+            ],
+            "stack": 99,
+            "chips": 1,
+            "fold": false,
+            "sitout": false,
+            "position": "BB"
+          }
+        }
+      },
+      "expected": {
+        "clear_validation_ok": false,
+        "validation_error_contains": "stack must be a number",
+        "clear_has_btn": true,
+        "clear_btn_chips": 23.5,
+        "clear_btn_all_in": false
+      },
+      "notes": [
+        "Chips amount is detected; current Clear_JSON validation rejects stack=None before all_in propagation is fixed."
+      ]
+    },
+    {
+      "case_id": "allin_amount_detected_but_allin_flag_dropped",
+      "category": "ALLIN_AMOUNT_DETECTED_BUT_ALLIN_FLAG_DROPPED",
+      "dark_state": {
+        "frame_id": "allin_amount_detected_but_allin_flag_dropped",
+        "table_id": "table_01",
+        "frame_name": "allin_amount_detected_but_allin_flag_dropped",
+        "board": {
+          "street": "preflop",
+          "cards": []
+        },
+        "Total_pot": 10.0,
+        "players": {
+          "BTN": {
+            "hero": false,
+            "cards": [],
+            "stack": 0.0,
+            "chips": 8.5,
+            "fold": false,
+            "sitout": false,
+            "position": "BTN",
+            "all_in": true
+          },
+          "SB": {
+            "hero": false,
+            "cards": [],
+            "stack": 99.5,
+            "chips": 0.5,
+            "fold": true,
+            "sitout": false,
+            "position": "SB"
+          },
+          "BB": {
+            "hero": true,
+            "cards": [
+              "9_spades",
+              "9_hearts"
+            ],
+            "stack": 91.5,
+            "chips": 1,
+            "fold": false,
+            "sitout": false,
+            "position": "BB"
+          }
+        }
+      },
+      "expected": {
+        "clear_validation_ok": true,
+        "clear_has_btn": true,
+        "clear_btn_chips": 8.5,
+        "clear_btn_all_in": false,
+        "solver_should_run": true
+      },
+      "notes": [
+        "Current builder keeps numeric chips but drops all_in flag; V2.46 should change this."
+      ]
+    },
+    {
+      "case_id": "allin_amount_pending_only_no_final",
+      "category": "ALLIN_AMOUNT_PENDING_ONLY_NO_FINAL",
+      "dark_state": {
+        "frame_id": "allin_amount_pending_only_no_final",
+        "table_id": "table_01",
+        "frame_name": "allin_amount_pending_only_no_final",
+        "board": {
+          "street": "preflop",
+          "cards": []
+        },
+        "Total_pot": 22.0,
+        "players": {
+          "UTG": {
+            "hero": false,
+            "cards": [],
+            "stack": null,
+            "chips": 21.0,
+            "fold": false,
+            "sitout": false,
+            "position": "UTG",
+            "all_in": true
+          },
+          "SB": {
+            "hero": true,
+            "cards": [
+              "Q_hearts",
+              "Q_clubs"
+            ],
+            "stack": 79.0,
+            "chips": 0.5,
+            "fold": false,
+            "sitout": false,
+            "position": "SB"
+          },
+          "BB": {
+            "hero": false,
+            "cards": [],
+            "stack": 99.0,
+            "chips": 1,
+            "fold": false,
+            "sitout": false,
+            "position": "BB"
+          }
+        }
+      },
+      "expected": {
+        "clear_validation_ok": false,
+        "validation_error_contains": "stack must be a number",
+        "clear_has_utg": true,
+        "clear_utg_chips": 21.0,
+        "clear_utg_all_in": false
+      },
+      "notes": [
+        "Represents live pending-only all-in amount cases blocked by validation before final publication."
+      ]
+    },
+    {
+      "case_id": "allin_flag_no_amount_saved_as_active",
+      "category": "ALLIN_FLAG_NO_AMOUNT_SAVED_AS_ACTIVE",
+      "dark_state": {
+        "frame_id": "allin_flag_no_amount_saved_as_active",
+        "table_id": "table_01",
+        "frame_name": "allin_flag_no_amount_saved_as_active",
+        "board": {
+          "street": "preflop",
+          "cards": []
+        },
+        "Total_pot": 26.0,
+        "players": {
+          "CO": {
+            "hero": false,
+            "cards": [],
+            "stack": 20.0,
+            "chips": false,
+            "fold": false,
+            "sitout": false,
+            "position": "CO",
+            "all_in": true
+          },
+          "SB": {
+            "hero": true,
+            "cards": [
+              "K_spades",
+              "K_diamonds"
+            ],
+            "stack": 96.0,
+            "chips": 4.0,
+            "fold": false,
+            "sitout": false,
+            "position": "SB"
+          },
+          "BB": {
+            "hero": false,
+            "cards": [],
+            "stack": 99.0,
+            "chips": 1.0,
+            "fold": true,
+            "sitout": false,
+            "position": "BB"
+          }
+        }
+      },
+      "expected": {
+        "clear_validation_ok": true,
+        "clear_has_co": true,
+        "clear_co_chips": false,
+        "clear_co_all_in": false,
+        "solver_should_run": true,
+        "premium_guard_should_activate": true,
+        "expected_click_sequence": [
+          "Bet/Raise"
+        ]
+      },
+      "notes": [
+        "Hand_1414-like KK danger class: all_in flag exists in dark, amount missing, active opponent survives with chips=false."
+      ]
+    },
+    {
+      "case_id": "allin_flag_no_amount_no_clear",
+      "category": "ALLIN_FLAG_NO_AMOUNT_NO_CLEAR",
+      "dark_state": {
+        "frame_id": "allin_flag_no_amount_no_clear",
+        "table_id": "table_01",
+        "frame_name": "allin_flag_no_amount_no_clear",
+        "board": {
+          "street": "preflop",
+          "cards": []
+        },
+        "Total_pot": 1.5,
+        "players": {
+          "seat_04": {
+            "hero": false,
+            "cards": [],
+            "stack": null,
+            "chips": false,
+            "fold": false,
+            "sitout": false,
+            "all_in": true
+          },
+          "SB": {
+            "hero": false,
+            "cards": [],
+            "stack": 99.5,
+            "chips": 0.5,
+            "fold": false,
+            "sitout": false,
+            "position": "SB"
+          },
+          "BB": {
+            "hero": true,
+            "cards": [
+              "A_hearts",
+              "K_hearts"
+            ],
+            "stack": 99.0,
+            "chips": 1.0,
+            "fold": false,
+            "sitout": false,
+            "position": "BB"
+          }
+        }
+      },
+      "expected": {
+        "clear_validation_ok": true,
+        "clear_has_seat_04": false,
+        "audit_exclusion_reason": "missing_or_invalid_position",
+        "solver_should_run": true
+      },
+      "notes": [
+        "All-in flag cannot be used because seat has no resolved poker position."
+      ]
+    },
+    {
+      "case_id": "postflop_allin_ignored",
+      "category": "POSTFLOP_IGNORED",
+      "dark_state": {
+        "frame_id": "postflop_allin_ignored",
+        "table_id": "table_01",
+        "frame_name": "postflop_allin_ignored",
+        "board": {
+          "street": "flop",
+          "cards": [
+            "2_clubs",
+            "7_diamonds",
+            "K_hearts"
+          ]
+        },
+        "Total_pot": 34.0,
+        "players": {
+          "BTN": {
+            "hero": false,
+            "cards": [],
+            "stack": 0.0,
+            "chips": 15.0,
+            "fold": false,
+            "sitout": false,
+            "position": "BTN",
+            "all_in": true
+          },
+          "SB": {
+            "hero": true,
+            "cards": [
+              "A_spades",
+              "A_diamonds"
+            ],
+            "stack": 85.0,
+            "chips": 10.0,
+            "fold": false,
+            "sitout": false,
+            "position": "SB"
+          },
+          "BB": {
+            "hero": false,
+            "cards": [],
+            "stack": 90.0,
+            "chips": false,
+            "fold": true,
+            "sitout": false,
+            "position": "BB"
+          }
+        }
+      },
+      "expected": {
+        "clear_validation_ok": true,
+        "solver_should_run": true,
+        "expected_node_type": "solver_input_error",
+        "expected_raw_action": "safe_fallback",
+        "expected_click_sequence": [
+          "FOLD"
+        ]
+      },
+      "notes": [
+        "Postflop all-in is outside Solver_Preflop and should be rejected/skipped by this line.",
+        "Current solve_clear_json converts non-preflop input into solver_input_error/safe_fallback instead of raising."
+      ]
+    }
+  ]
+}
