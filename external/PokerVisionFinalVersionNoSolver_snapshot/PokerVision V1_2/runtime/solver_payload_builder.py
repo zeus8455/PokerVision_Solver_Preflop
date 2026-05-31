@@ -49,6 +49,25 @@ def _stack_payload(stack_block: Dict[str, Any]) -> Any:
     return stack_block.get("value")
 
 
+def _as_bool(value: Any, *, default: bool = False) -> bool:
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return default
+    if isinstance(value, (int, float)):
+        return bool(value)
+    text = str(value).strip().lower()
+    if text in {"1", "true", "yes", "y", "РґР°"}:
+        return True
+    if text in {"0", "false", "no", "n", "РЅРµС‚"}:
+        return False
+    return default
+
+
+def _is_numeric_chips(value: Any) -> bool:
+    return value is not False and value is not None and not isinstance(value, bool)
+
+
 def _ordered_players_by_position(players_by_position: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
     ordered: Dict[str, Dict[str, Any]] = {}
     seen = set()
@@ -131,6 +150,15 @@ def build_solver_payload(full_state: Dict[str, Any]) -> Dict[str, Any]:
             "fold": bool(seat.get("fold", False)),
             "chips": _chips_payload(seat.get("chips") or {}),
         }
+
+        # V2.47: carry reliable all-in semantic state into solver payload.
+        # Numeric committed chips + all_in=true can have no remaining stack;
+        # normalize stack to 0.0 for downstream solver compatibility.
+        seat_all_in = _as_bool(seat.get("all_in"), default=False) or _as_bool(seat.get("allin"), default=False)
+        if seat_all_in and _is_numeric_chips(player_payload.get("chips")):
+            player_payload["all_in"] = True
+            if player_payload.get("stack") is None:
+                player_payload["stack"] = 0.0
 
         if seat_name == CARD_HERO_SEAT_NAME:
             player_payload = {

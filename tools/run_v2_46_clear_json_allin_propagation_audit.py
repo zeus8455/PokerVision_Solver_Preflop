@@ -61,8 +61,11 @@ def main() -> int:
     clear_json, validation = _build(case)
     btn = _player(clear_json, "BTN")
     checks["stack_none_allin_propagates_flag"] = btn.get("all_in") is True
-    checks["stack_none_allin_still_validation_failed_for_v247"] = validation.get("ok") is False and any(
-        "stack must be a number" in str(err) for err in validation.get("errors", [])
+    # V2.47 changed this from "still validation failed" to normalized/valid.
+    checks["stack_none_allin_normalized_for_v247"] = (
+        validation.get("ok") is True
+        and btn.get("stack") == 0.0
+        and btn.get("chips") == 23.5
     )
     details["stack_none_allin"] = {"clear_json": clear_json, "validation": validation}
 

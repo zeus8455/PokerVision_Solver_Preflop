@@ -60,7 +60,7 @@
     },
     {
       "case_id": "allin_amount_detected_but_validation_rejected_stack_none",
-      "category": "ALLIN_AMOUNT_DETECTED_BUT_VALIDATION_REJECTED",
+      "category": "ALLIN_AMOUNT_DETECTED_STACK_NONE_NORMALIZED",
       "dark_state": {
         "frame_id": "allin_amount_detected_but_validation_rejected_stack_none",
         "table_id": "table_01",
@@ -105,14 +105,16 @@
         }
       },
       "expected": {
-        "clear_validation_ok": false,
-        "validation_error_contains": "stack must be a number",
+        "clear_validation_ok": true,
         "clear_has_btn": true,
         "clear_btn_chips": 23.5,
-        "clear_btn_all_in": true
+        "clear_btn_all_in": true,
+        "clear_btn_stack": 0.0,
+        "solver_should_run": true
       },
       "notes": [
-        "Chips amount is detected; current Clear_JSON validation rejects stack=None before all_in propagation is fixed."
+        "Chips amount is detected; current Clear_JSON validation rejects stack=None before all_in propagation is fixed.",
+        "V2.47 normalizes all_in=true + numeric chips + stack=None to stack=0.0."
       ]
     },
     {
@@ -175,7 +177,7 @@
     },
     {
       "case_id": "allin_amount_pending_only_no_final",
-      "category": "ALLIN_AMOUNT_PENDING_ONLY_NO_FINAL",
+      "category": "ALLIN_AMOUNT_PENDING_STACK_NONE_NORMALIZED",
       "dark_state": {
         "frame_id": "allin_amount_pending_only_no_final",
         "table_id": "table_01",
@@ -220,14 +222,16 @@
         }
       },
       "expected": {
-        "clear_validation_ok": false,
-        "validation_error_contains": "stack must be a number",
+        "clear_validation_ok": true,
         "clear_has_utg": true,
         "clear_utg_chips": 21.0,
-        "clear_utg_all_in": true
+        "clear_utg_all_in": true,
+        "clear_utg_stack": 0.0,
+        "solver_should_run": true
       },
       "notes": [
-        "Represents live pending-only all-in amount cases blocked by validation before final publication."
+        "Represents live pending-only all-in amount cases blocked by validation before final publication.",
+        "V2.47 makes pending numeric all-in with stack=None validate as stack=0.0."
       ]
     },
     {

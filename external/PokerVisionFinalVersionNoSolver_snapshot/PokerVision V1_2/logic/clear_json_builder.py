@@ -228,6 +228,11 @@ def _build_clear_player(player: Dict[str, Any], previous_player: Optional[Dict[s
     all_in_value = _as_bool(player.get("all_in"), default=False) or _as_bool(player.get("allin"), default=False)
     if all_in_value and chips_value is not False and _as_number_or_none(chips_value) is not None:
         clear_player["all_in"] = True
+        # V2.47: all-in players can legitimately have no remaining stack value.
+        # Downstream layers expect numeric stack, so normalize stack=None to 0.0
+        # only when all_in is reliable and committed chips are numeric.
+        if clear_player.get("stack") is None:
+            clear_player["stack"] = 0.0
 
     cards = _candidate_cards(player)
     is_hero = _as_bool(player.get("hero"), default=False) or len(cards) == 2

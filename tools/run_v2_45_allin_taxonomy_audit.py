@@ -215,6 +215,15 @@ def run_case(case: dict[str, Any]) -> dict[str, Any]:
             player = _player(clear_json, pos) or {}
             checks[key] = bool(player.get("all_in")) is bool(expected[key])
 
+    for key, pos in [
+        ("clear_btn_stack", "BTN"),
+        ("clear_utg_stack", "UTG"),
+        ("clear_co_stack", "CO"),
+    ]:
+        if key in expected:
+            player = _player(clear_json, pos) or {}
+            checks[key] = player.get("stack") == expected[key]
+
     if "audit_exclusion_reason" in expected:
         checks["audit_exclusion_reason"] = result["audit_exclusion_reason"] == expected["audit_exclusion_reason"]
 

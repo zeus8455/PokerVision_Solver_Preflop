@@ -1262,3 +1262,75 @@ Notes:
 - V2.47 will normalize/accept `all_in=true + chips numeric + stack=None`.
 - V2.48 will add explicit unknown-amount all-in semantics.
 - Full pytest is intentionally not claimed as closed in this checkpoint.
+
+## V2.47.0 вЂ” all-in stack None validation policy
+
+Date: 2026-05-31
+
+Status: targeted proof passed.
+
+Goal:
+- Accept reliable all-in states where committed chips are numeric but remaining stack is missing.
+- Normalize `all_in=true + chips numeric + stack=None` to `stack=0.0`.
+- Propagate reliable all-in state into the solver payload.
+- Keep missing-amount all-in reserved for V2.48 explicit unknown-amount semantics.
+
+Changed:
+- `external/PokerVisionFinalVersionNoSolver_snapshot/PokerVision V1_2/logic/clear_json_builder.py`
+  - If `all_in=true`, chips are numeric, and stack is None:
+    - set `stack=0.0`
+    - keep `all_in=true`
+    - keep numeric `chips`
+  - Clear_JSON validation now passes for reliable all-in with missing stack.
+
+- `external/PokerVisionFinalVersionNoSolver_snapshot/PokerVision V1_2/runtime/solver_payload_builder.py`
+  - Carries reliable all-in state into solver payload.
+  - If solver payload sees all-in + numeric chips + missing stack:
+    - exports `all_in=true`
+    - exports `stack=0.0`
+
+- `tests/fixtures/v2_45_allin_taxonomy/cases.json`
+  - Updated stack=None all-in categories to normalized behavior.
+
+- `tools/run_v2_45_allin_taxonomy_audit.py`
+  - Added stack assertions for taxonomy cases.
+
+- `tools/run_v2_46_clear_json_allin_propagation_audit.py`
+  - Updated expected behavior after V2.47 normalization.
+
+Added:
+- `tools/run_v2_47_allin_stack_policy_audit.py`
+- `tests/test_v2_47_allin_stack_policy_audit.py`
+
+Validation:
+- `tools/run_v2_45_allin_taxonomy_audit.py`
+  - `V2.45_ALLIN_TAXONOMY_AUDIT_OK = True`
+- `tools/run_v2_46_clear_json_allin_propagation_audit.py`
+  - `V2.46_CLEAR_JSON_ALLIN_PROPAGATION_AUDIT_OK = True`
+- `tools/run_v2_47_allin_stack_policy_audit.py`
+  - `V2.47_ALLIN_STACK_POLICY_AUDIT_OK = True`
+- `pytest tests/test_v2_45_allin_taxonomy_audit.py tests/test_v2_46_clear_json_allin_propagation_audit.py tests/test_v2_47_allin_stack_policy_audit.py -q`
+  - `3 passed`
+
+Proof:
+- BTN all-in numeric chips stack=None:
+  - `stack=0.0`
+  - `all_in=true`
+  - `chips=23.5`
+  - validation OK
+
+- UTG pending all-in numeric chips stack=None:
+  - `stack=0.0`
+  - `all_in=true`
+  - `chips=21.0`
+  - validation OK
+
+- Solver payload:
+  - `BTN.all_in=true`
+  - `BTN.stack=0.0`
+  - `BTN.chips=23.5`
+
+Notes:
+- V2.47 does not handle all-in with missing amount.
+- Missing-amount all-in remains reserved for V2.48 `facing_allin_unknown_amount` semantics.
+- Full pytest is intentionally not claimed as closed in this checkpoint.

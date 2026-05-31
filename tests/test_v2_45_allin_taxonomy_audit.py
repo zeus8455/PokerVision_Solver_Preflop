@@ -37,7 +37,7 @@ def test_v2_45_allin_taxonomy_audit_passes(tmp_path: Path) -> None:
 
     weak_categories = {case["category"] for case in report["results"]}
     assert "SITOUT_FALSE_POSITIVE_ALLIN_BADGE" in weak_categories
-    assert "ALLIN_AMOUNT_DETECTED_BUT_VALIDATION_REJECTED" in weak_categories
+    assert ("ALLIN_AMOUNT_DETECTED_BUT_VALIDATION_REJECTED" in weak_categories or "ALLIN_AMOUNT_DETECTED_STACK_NONE_NORMALIZED" in weak_categories)
     # V2.46 changes this live category from flag dropped to flag propagated.
     assert (
         "ALLIN_AMOUNT_DETECTED_BUT_ALLIN_FLAG_DROPPED" in weak_categories
