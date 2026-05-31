@@ -330,3 +330,170 @@ def build_solver_preflop_dryrun_bridge_contract(*args, **kwargs):  # type: ignor
 
     return result
 
+# =============================================================================
+# V2.52 ACTIVE INVALID HERO EXPLICIT RUNTIME FALLBACK
+# =============================================================================
+
+_V252_ORIGINAL_BUILD_SOLVER_PREFLOP_DRYRUN_BRIDGE_CONTRACT = build_solver_preflop_dryrun_bridge_contract
+
+
+def _v252_validate_clear_state(clear_state: dict) -> dict:
+    try:
+        from logic.clear_json_builder import validate_clear_json_contract
+        validation = validate_clear_json_contract(clear_state)
+        return validation if isinstance(validation, dict) else {"ok": False, "errors": ["validation_not_dict"], "warnings": []}
+    except Exception as exc:
+        return {"ok": False, "errors": [str(exc)], "warnings": []}
+
+
+def _v252_hero_entries(clear_state: dict) -> list:
+    players = (clear_state or {}).get("players")
+    if not isinstance(players, dict):
+        return []
+    return [
+        (position, player)
+        for position, player in players.items()
+        if isinstance(player, dict) and bool(player.get("hero"))
+    ]
+
+
+def _v252_is_invalid_hero_clear_state(clear_state: dict) -> tuple[bool, str, dict]:
+    if not isinstance(clear_state, dict):
+        return False, "not_clear_state_dict", {"ok": False, "errors": ["not_clear_state_dict"], "warnings": []}
+
+    validation = _v252_validate_clear_state(clear_state)
+    errors = [str(item) for item in validation.get("errors", []) if str(item).strip()]
+    joined = " | ".join(errors).lower()
+
+    hero_entries = _v252_hero_entries(clear_state)
+    hero_count_bad = len(hero_entries) != 1
+
+    hero_cards_bad = False
+    if len(hero_entries) == 1:
+        _, hero_player = hero_entries[0]
+        cards = hero_player.get("cards")
+        clean_cards = [str(card).strip() for card in cards if str(card).strip()] if isinstance(cards, list) else []
+        hero_cards_bad = len(clean_cards) != 2 or len(set(clean_cards)) != 2
+
+    message_says_hero_bad = (
+        "exactly one hero" in joined
+        or "hero cards" in joined
+        or "exactly 2 hero cards" in joined
+        or "exactly two hero cards" in joined
+    )
+
+    if hero_count_bad:
+        return True, f"invalid_hero_count_{len(hero_entries)}", validation
+    if hero_cards_bad:
+        return True, "invalid_hero_card_count", validation
+    if message_says_hero_bad:
+        return True, "invalid_hero_validation_error", validation
+    return False, "hero_valid_or_unrelated_validation_error", validation
+
+
+def _v252_clear_street(clear_state: dict) -> str:
+    board = (clear_state or {}).get("board")
+    if isinstance(board, dict):
+        street = board.get("street")
+    else:
+        street = (clear_state or {}).get("street")
+    return str(street or "unknown").strip().lower()
+
+
+def _v252_source_frame_id(clear_state: dict, table_id: str) -> str:
+    return str((clear_state or {}).get("frame_id") or (clear_state or {}).get("source_frame_id") or table_id or "unknown_frame")
+
+
+def _v252_build_invalid_hero_action_decision(*, clear_state: dict, table_id: str, reason: str, validation: dict) -> dict:
+    try:
+        from config import V06_ACTION_DECISION_SCHEMA_VERSION
+    except Exception:
+        V06_ACTION_DECISION_SCHEMA_VERSION = "action_decision_v1"
+
+    source_frame_id = _v252_source_frame_id(clear_state, table_id)
+    street = _v252_clear_street(clear_state)
+    decision_id = f"v252_active_invalid_hero_cards:{table_id}:{source_frame_id}:{street}:{reason}"
+
+    return {
+        "schema_version": V06_ACTION_DECISION_SCHEMA_VERSION,
+        "source": "Decision_JSON",
+        "source_decision_frame_id": source_frame_id,
+        "status": "ok",
+        "action": "fold",
+        "size_policy": {"type": "none", "value": None},
+        "target_button_classes": ["FOLD"],
+        "reason": f"v252_active_invalid_hero_cards_safe_runtime_fallback:{reason}",
+        "dry_run_safe": True,
+        "solver_stub": True,
+        "decision_context": {
+            "street": street,
+            "hero_position": "",
+            "source_frame_id": source_frame_id,
+            "solver_preflop_runtime_source": True,
+            "solver_stub_legacy_compat": True,
+            "solver_decision_id": decision_id,
+            "solver_fingerprint": decision_id,
+            "solver_raw_action": "safe_runtime_fallback",
+            "solver_engine_action": "fold",
+            "node_type": "active_invalid_hero_cards",
+            "active_invalid_hero_cards": True,
+            "safe_runtime_fallback": True,
+            "target_sequence": ["FOLD"],
+            "clear_json_validation": dict(validation) if isinstance(validation, dict) else validation,
+            "fallback_reason": reason,
+        },
+    }
+
+
+def _v252_build_invalid_hero_bridge_contract(*, clear_state: dict, table_id: str, reason: str, validation: dict) -> dict:
+    action_decision = _v252_build_invalid_hero_action_decision(
+        clear_state=clear_state,
+        table_id=table_id,
+        reason=reason,
+        validation=validation,
+    )
+    return {
+        "schema_version": "solver_preflop_dryrun_bridge_v2_52",
+        "source": "PokerVision_Solver_Preflop",
+        "status": "ok",
+        "reason": "v252_active_invalid_hero_cards_safe_runtime_fallback",
+        "fallback_reason": reason,
+        "table_id": str(table_id or ""),
+        "street": _v252_clear_street(clear_state),
+        "node_type": "active_invalid_hero_cards",
+        "raw_action": "safe_runtime_fallback",
+        "engine_action": "fold",
+        "target_sequence": ["FOLD"],
+        "clear_json_validation": dict(validation) if isinstance(validation, dict) else validation,
+        "bridge_payload": {
+            "action_decision": action_decision,
+        },
+    }
+
+
+def build_solver_preflop_dryrun_bridge_contract(*args, **kwargs):  # type: ignore[no-redef]
+    clear_state = kwargs.get("clear_state")
+    table_id = str(kwargs.get("table_id") or "")
+
+    invalid_hero, reason, validation = _v252_is_invalid_hero_clear_state(clear_state)
+    if invalid_hero:
+        return _v252_build_invalid_hero_bridge_contract(
+            clear_state=clear_state,
+            table_id=table_id,
+            reason=reason,
+            validation=validation,
+        )
+
+    try:
+        return _V252_ORIGINAL_BUILD_SOLVER_PREFLOP_DRYRUN_BRIDGE_CONTRACT(*args, **kwargs)
+    except Exception:
+        invalid_hero_after_error, fallback_reason, fallback_validation = _v252_is_invalid_hero_clear_state(clear_state)
+        if invalid_hero_after_error:
+            return _v252_build_invalid_hero_bridge_contract(
+                clear_state=clear_state,
+                table_id=table_id,
+                reason=f"{fallback_reason}_after_bridge_exception",
+                validation=fallback_validation,
+            )
+        raise
+

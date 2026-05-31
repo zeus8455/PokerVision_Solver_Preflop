@@ -1597,3 +1597,70 @@ Notes:
 - This does not implement real postflop strategy.
 - It only prevents no-click/legacy-stub deadlock on postflop Active spots.
 - Full postflop solver remains a separate future block.
+
+## V2.52.0 вЂ” Active invalid HERO runtime fallback
+
+Date: 2026-05-31
+
+Status: targeted proof passed.
+
+Goal:
+- Fix live no-click condition when Active is detected but HERO card extraction / HERO ownership is invalid.
+- Prevent invalid HERO Clear_JSON from stopping before runtime click planning.
+- Convert Active invalid-HERO cases into explicit non-legacy safe runtime fallback.
+
+Live symptom fixed:
+- Active detected.
+- HERO cards invalid, HERO count is 0/2, or HERO cards count is not exactly 2.
+- Clear_JSON validation fails.
+- Decision_JSON / solver payload / Solver_Preflop bridge is not created.
+- Runtime has no click path.
+
+Changed:
+- `external/PokerVisionFinalVersionNoSolver_snapshot/PokerVision V1_2/runtime/solver_preflop_dryrun_bridge.py`
+  - Wrapped `build_solver_preflop_dryrun_bridge_contract`.
+  - Detects invalid HERO Clear_JSON before normal Solver_Preflop bridge execution.
+  - Invalid HERO categories:
+    - no HERO
+    - one HERO with one card
+    - one HERO with duplicate cards
+    - two HERO players
+  - Returns explicit bridge:
+    - `status=ok`
+    - `node_type=active_invalid_hero_cards`
+    - `raw_action=safe_runtime_fallback`
+    - `engine_action=fold`
+    - `target_sequence=["FOLD"]`
+  - Marks decision context as `solver_preflop_runtime_source=True` so runtime does not treat it as legacy V12 stub.
+  - Embeds Clear_JSON validation details into decision context for diagnostics.
+
+Added:
+- `tools/run_v2_52_invalid_hero_runtime_fallback_audit.py`
+- `tests/test_v2_52_invalid_hero_runtime_fallback_audit.py`
+
+Validation:
+- `tools/run_v2_52_invalid_hero_runtime_fallback_audit.py`
+  - `V2.52_INVALID_HERO_RUNTIME_FALLBACK_AUDIT_OK = True`
+- `pytest tests/test_v2_52_invalid_hero_runtime_fallback_audit.py -q`
+  - `1 passed`
+
+Proof:
+- `no_hero`
+- `one_hero_one_card`
+- `duplicate_hero_cards`
+- `two_heroes`
+
+All cases produce:
+- bridge `status=ok`
+- `node_type=active_invalid_hero_cards`
+- `raw_action=safe_runtime_fallback`
+- `engine_action=fold`
+- valid Action_Decision contract
+- valid Action_Runtime_Plan
+- non-legacy solver runtime source
+- `target_sequence=["FOLD"]`
+
+Notes:
+- This does not repair bad card detection.
+- It prevents Active invalid-HERO states from causing a no-click/dead runtime branch.
+- Detection/model quality remains a separate training/calibration task.
